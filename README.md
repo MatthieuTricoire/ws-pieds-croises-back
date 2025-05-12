@@ -1,5 +1,6 @@
 # 🏋️‍♀️ pieds-croises
 
+test
 Ce projet est une application Spring Boot initialisée avec [Spring Initializr](https://start.spring.io/) et utilisant Maven comme outil de build.  
 Il sert de base pour développer une API REST.
 
