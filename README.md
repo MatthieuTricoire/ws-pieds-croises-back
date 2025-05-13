@@ -50,3 +50,13 @@ Le projet a été généré à l’aide de [Spring Initializr](https://start.spr
 ```bash
 git clone https://github.com/MatthieuTricoire/ws-pieds-croises-back.git
 cd ws-pieds-croises-back
+```
+
+2. **Configurer la base de données**
+
+   - Créer une base de données MySQL nommée `pieds_croises`
+   - Mettre à jour le fichier `src/main/resources/application.properties` avec vos informations de connexion à la base de données. Il est possible de définir les variables d'environnement directement dans la configuration du backend.
+
+   ![img.png](img.png)
+   ![img_1.png](img_1.png)
+
