@@ -1,0 +1,24 @@
+name: Enforce branch naming
+
+on:
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  check-branch-name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name format
+        run: |
+          echo "🔎 Vérification du nom de la branche source..."
+
+          BRANCH_NAME="${{ github.head_ref }}"
+
+          if [[ "$BRANCH_NAME" =~ ^(feature|fix)/.+$ ]]; then
+            echo "✅ Nom de branche valide : $BRANCH_NAME"
+          else
+            echo "❌ Le nom de la branche '$BRANCH_NAME' est invalide."
+            echo "➡️ Utilise un nom de branche qui commence par 'feature/' ou 'fix/'"
+            exit 1
+          fi
