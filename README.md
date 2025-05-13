@@ -8,7 +8,7 @@ Il sert de base pour développer une API REST.
 ## 🚀 Stack technique
 
 - Java 21
-- Spring Boot 3.3.1 
+- Spring Boot 3.3.1
 - Maven
 - Spring Web
 - Spring Data JPA
@@ -50,3 +50,14 @@ Le projet a été généré à l’aide de [Spring Initializr](https://start.spr
 ```bash
 git clone https://github.com/MatthieuTricoire/ws-pieds-croises-back.git
 cd ws-pieds-croises-back
+```
+
+---
+
+## 📦️ Workflow Git
+
+Les nouvelles branches de features ou de corrections doivent toujours être créées depuis la branche `dev`
+
+### Création d'une pull request
+
+Pour passer les tests mis en place sur github, une PR doit toujours être préfixée par 'feature/ ' ou 'fix/ '
