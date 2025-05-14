@@ -18,7 +18,7 @@ public class TypicalCourse {
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 100)
+    @Column(length = 100, nullable = false)
     private String title;
 
     @Column(columnDefinition = "TEXT")
@@ -29,13 +29,13 @@ public class TypicalCourse {
     private DayOfWeek day;
 
     @Column()
-    LocalTime hour;
+    private LocalTime hour;
 
     @Column(nullable = false)
-    short duration;
+    private short duration;
 
     @Column(name = "person_limit", nullable = false)
-    byte personLimit;
+    private byte personLimit;
 
     public enum DayOfWeek {
         LUNDI,
