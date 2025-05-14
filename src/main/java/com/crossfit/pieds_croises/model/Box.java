@@ -1,12 +1,10 @@
 package com.crossfit.pieds_croises.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -35,12 +33,14 @@ public class Box {
     @Column(columnDefinition = "TEXT")
     private String schedule;
 
-    @Column(nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @OneToMany(mappedBy = "box")
+    private List<Subscription> subscriptions;
 
 }
 
