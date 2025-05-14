@@ -6,6 +6,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-
+import java.util.List;
 
 
 @Entity
@@ -61,6 +62,9 @@ public class User {
 
     @Column(name = "suspension_end_date")
     private LocalDateTime suspensionEndDate;
+
+    @OneToMany(mappedBy = "user")
+    private List<WeightHistory> weightHistory;
 
     public enum SuspensionType {
         HOLIDAY,
