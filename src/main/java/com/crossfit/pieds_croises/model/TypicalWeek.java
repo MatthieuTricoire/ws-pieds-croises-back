@@ -27,7 +27,7 @@ public class TypicalWeek {
     @Column(nullable = false, unique = true, length = 100)
     private String name;
 
-    @Column()
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "date-start-validity")
