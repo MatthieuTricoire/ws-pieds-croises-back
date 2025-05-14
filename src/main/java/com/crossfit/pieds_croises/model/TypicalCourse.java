@@ -1,0 +1,49 @@
+package com.crossfit.pieds_croises.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.DayOfWeek;
+import java.time.LocalTime;
+
+@Entity
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class TypicalCourse {
+
+    @Id
+    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(length = 100)
+    private String title;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "day")
+    private DayOfWeek day;
+
+    @Column()
+    LocalTime hour;
+
+    @Column(nullable = false)
+    short duration;
+
+    @Column(name = "person_limit", nullable = false)
+    byte personLimit;
+
+    public enum DayOfWeek {
+        LUNDI,
+        MARDI,
+        MERCREDI,
+        JEUDI,
+        VENDREDI,
+        SAMEDI,
+        DIMANCHE
+    }
+}
