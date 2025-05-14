@@ -25,8 +25,8 @@ public class Message {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "message_type", columnDefinition = "ENUM('INFORMATION', 'ALERT', 'EVENT', 'REMINDER')", nullable = false)
-    private Message.MessageType messageType;
+    @Column(name = "message_type", nullable = false)
+    private MessageType messageType;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -43,7 +43,7 @@ public class Message {
     public enum MessageType{
         INFORMATION,
         ALERT,
-        EVENT,
-        REMINDER
+        EVENEMENT,
+        RAPPEL
     }
 }
