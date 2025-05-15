@@ -3,6 +3,8 @@ package com.crossfit.pieds_croises.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -33,4 +35,7 @@ public class Subscription {
     @ManyToOne
     @JoinColumn(name = "box_id")
     private Box box;
+
+    @OneToMany(mappedBy = "subscription")
+    private List<UserSubscription> userSubscriptions;
 }
