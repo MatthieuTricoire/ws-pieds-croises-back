@@ -76,6 +76,10 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<WeightHistory> weightHistory;
 
+
+    @OneToMany(mappedBy = "user")
+    private List<PerformanceHistory> performanceHistoryList;
+
     @ManyToMany
     @JoinTable(
             name =  "user_course",
@@ -83,6 +87,7 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "course_id")
     )
     private List<Course> courses;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

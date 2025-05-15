@@ -1,16 +1,13 @@
 package com.crossfit.pieds_croises.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -29,6 +26,9 @@ public class Exercice {
     @Enumerated(EnumType.STRING)
     @Column(name = "measure_type")
     private MeasureType measureType;
+
+    @OneToMany(mappedBy = "exercice")
+    private List<PerformanceHistory> performanceHistoryList;
 
     public enum MeasureType{
         REPETITION,
