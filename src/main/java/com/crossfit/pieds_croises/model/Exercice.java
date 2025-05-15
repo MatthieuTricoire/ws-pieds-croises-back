@@ -27,7 +27,7 @@ public class Exercice {
     @Column(name = "measure_type")
     private MeasureType measureType;
 
-    @OneToMany(mappedBy = "exercice")
+    @OneToMany(mappedBy = "exerciceID")
     private List<PerformanceHistory> performanceHistoryList;
 
     public enum MeasureType{

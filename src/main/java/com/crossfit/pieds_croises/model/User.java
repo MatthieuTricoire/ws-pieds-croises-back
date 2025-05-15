@@ -84,7 +84,7 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<WeightHistory> weightHistory;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "userID")
     private List<PerformanceHistory> performanceHistoryList;
 
     @Override
