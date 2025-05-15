@@ -1,14 +1,6 @@
 package com.crossfit.pieds_croises.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -84,8 +76,18 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<WeightHistory> weightHistory;
 
+
     @OneToMany(mappedBy = "user")
     private List<PerformanceHistory> performanceHistoryList;
+
+    @ManyToMany
+    @JoinTable(
+            name =  "user_course",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "course_id")
+    )
+    private List<Course> courses;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
