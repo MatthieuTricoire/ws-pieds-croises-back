@@ -3,8 +3,8 @@ package com.crossfit.pieds_croises.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -36,6 +36,9 @@ public class TypicalCourse {
 
     @Column(name = "person_limit", nullable = false)
     private byte personLimit;
+
+    @ManyToMany(mappedBy = "typicalCourses")
+    private List<TypicalWeek> typicalWeeks;
 
     public enum DayOfWeek {
         LUNDI,
