@@ -81,9 +81,11 @@ public class User implements UserDetails {
     @Column(name = "suspension_end_date")
     private LocalDateTime suspensionEndDate;
 
-
     @OneToMany(mappedBy = "user")
     private List<WeightHistory> weightHistory;
+
+    @OneToMany(mappedBy = "user")
+    private List<PerformanceHistory> performanceHistoryList;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
