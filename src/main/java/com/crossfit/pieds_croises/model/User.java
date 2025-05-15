@@ -1,13 +1,6 @@
 package com.crossfit.pieds_croises.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -77,6 +71,9 @@ public class User implements UserDetails {
 
     @Column(name = "suspension_end_date")
     private LocalDateTime suspensionEndDate;
+
+    @OneToMany(mappedBy = "user")
+    private List<UserSubscription> userSubscriptions;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
