@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -52,15 +51,17 @@ public class BoxController {
 
     @PostMapping
     public ResponseEntity<BoxDto> createBox(@Valid @RequestBody BoxDto box){
-        BoxDto boxDto = boxService.createBox(box);
-        if (boxDto == null) {
-            return ResponseEntity.notFound().build();
+        try {
+            BoxDto boxDto = boxService.createBox(box);
+            return ResponseEntity.ok(boxDto);
+        } catch (Exception e) {
+            System.err.println("Error in controller when creating box: " + e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(boxDto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BoxDto> updateBox(@PathVariable Long id, @RequestParam BoxDto box){
+    public ResponseEntity<BoxDto> updateBox(@PathVariable Long id, @RequestBody BoxDto box){
         BoxDto boxDto = boxService.updateBox(id, box);
         if (boxDto == null) {
             return ResponseEntity.notFound().build();

@@ -5,16 +5,14 @@ import com.crossfit.pieds_croises.model.Box;
 import com.crossfit.pieds_croises.model.dto.BoxDto;
 import com.crossfit.pieds_croises.repository.BoxRepository;
 import com.crossfit.pieds_croises.util.DTOConverter;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @AllArgsConstructor
 @Service
-@Validated
 public class BoxService {
   private final DTOConverter dtoConverter;
   private final BoxRepository boxRepository;
@@ -45,10 +43,17 @@ public class BoxService {
         return dtoConverter.convertToDTO(box);
     }
 
-    public BoxDto createBox(@Valid BoxDto boxDto){
-        Box box = dtoConverter.convertToEntity(boxDto);
-        Box createdBox = boxRepository.save(box);
-        return dtoConverter.convertToDTO(createdBox);
+    public BoxDto createBox(BoxDto boxDto){
+        try {
+            Box box = dtoConverter.convertToEntity(boxDto);
+            box.setCreatedAt(LocalDateTime.now());
+            box.setUpdatedAt(LocalDateTime.now());
+            Box createdBox = boxRepository.save(box);
+            return dtoConverter.convertToDTO(createdBox);
+        } catch (Exception e) {
+            System.err.println("Error creating box: " + e.getMessage());
+            throw e;
+        }
     }
 
     public BoxDto updateBox(Long id, BoxDto boxDto){
