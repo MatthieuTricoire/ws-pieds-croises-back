@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 
 @Entity
 @Getter
@@ -67,4 +68,7 @@ public class Course {
 
     @Column(nullable = false)
     private LocalDateTime updated_at;
+
+    @ManyToMany(mappedBy = "courses")
+    private List<User> users;
 }

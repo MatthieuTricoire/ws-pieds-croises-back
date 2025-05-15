@@ -69,3 +69,7 @@ Les nouvelles branches de features ou de corrections doivent toujours être cré
 ### Création d'une pull request
 
 Pour passer les tests mis en place sur github, une PR doit toujours être préfixée par 'feature/ ' ou 'fix/ '
+
+
+#### Rebase pour se se mettre à jour par rapport à la dev
+![img_3.png](img_3.png)
