@@ -26,9 +26,9 @@ public class PerformanceHistory {
 
     @ManyToOne
     @JoinColumn(name = "exercice_id")
-    private Exercice exerciceID;
+    private Exercice exercice;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User userID;
+    private User user;
 }
