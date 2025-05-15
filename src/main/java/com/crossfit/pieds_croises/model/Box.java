@@ -40,7 +40,6 @@ public class Box {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "box")
-    private List<Subscription> subscriptions;
+    private List<Subscription> subscriptions = new java.util.ArrayList<>();
 
 }
-
