@@ -27,7 +27,7 @@ public class Box {
     @Column(length = 100)
     private String city;
 
-    @Column()
+    @Column(length = 5, nullable = false)
     private String zipcode;
 
     @Column(columnDefinition = "TEXT")

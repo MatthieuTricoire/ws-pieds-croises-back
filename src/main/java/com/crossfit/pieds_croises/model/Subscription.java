@@ -21,11 +21,11 @@ public class Subscription {
     @Column(nullable = false, unique = true)
     private int price;
 
-    @Column()
+    @Column(name = "session_per_week")
     private int sessionPerWeek;
 
     @Column(nullable = false)
-    private int duration;
+    private short duration;
 
     @Column(columnDefinition = "TEXT")
     private String terminationConditions;
