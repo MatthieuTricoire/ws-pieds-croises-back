@@ -1,0 +1,21 @@
+meta {
+  name: Create Message
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/messages
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "title":"Test1",
+    "content":"Youpiiii",
+    "messageType":"INFORMATION",
+    "startDate": "2025-05-17",
+    "expirationDate": "2025-06-01"
+  }
+}
