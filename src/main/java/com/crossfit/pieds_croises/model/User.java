@@ -1,6 +1,5 @@
 package com.crossfit.pieds_croises.model;
 
-import jakarta.persistence.*;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -9,8 +8,10 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,10 +21,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -68,17 +70,17 @@ public class User implements UserDetails {
     private LocalDateTime updatedAt;
 
     @Column
-    private Integer penalty;
+    private Byte strikeCount;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "suspension_type")
     private SuspensionType suspensionType;
 
     @Column(name = "suspension_start_date")
-    private LocalDateTime suspensionStartDate;
+    private LocalDate suspensionStartDate;
 
     @Column(name = "suspension_end_date")
-    private LocalDateTime suspensionEndDate;
+    private LocalDate suspensionEndDate;
 
     @OneToMany(mappedBy = "user")
     private List<UserSubscription> userSubscriptions;
@@ -91,9 +93,9 @@ public class User implements UserDetails {
 
     @ManyToMany
     @JoinTable(
-            name =  "user_course",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "course_id")
+        name = "user_course",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "course_id")
     )
     private List<Course> courses;
 
@@ -135,6 +137,58 @@ public class User implements UserDetails {
         return true;
     }
 
+    public void incrementStrikeCount() {
+        if (this.suspensionType == SuspensionType.PENALTY) {
+            return;
+        }
+        if (this.strikeCount == null) {
+            this.strikeCount = 1;
+        } else if (this.strikeCount < Byte.MAX_VALUE) {
+            this.strikeCount++;
+        } else {
+            throw new IllegalStateException("Maximum penalty strikes reached");
+        }
+    }
+
+    public void decrementStrikeCount() {
+        if (this.suspensionType == SuspensionType.PENALTY) {
+            return;
+        }
+        if (this.strikeCount > 0) {
+            this.strikeCount--;
+        } else {
+            throw new IllegalStateException("No penalty strikes to decrement");
+        }
+    }
+
+    public void applyHolidaySuspension(int days) {
+        this.suspensionType = SuspensionType.HOLIDAY;
+        this.setSuspensionStartDate(LocalDate.now());
+        this.setSuspensionEndDate(LocalDate.now().plusDays(days));
+    }
+
+    public void applyPenaltySuspension(int days) {
+        this.suspensionType = SuspensionType.PENALTY;
+        this.setSuspensionStartDate(LocalDate.now());
+        this.setSuspensionEndDate(LocalDate.now().plusDays(days));
+    }
+
+    public boolean isSuspended() {
+        if (this.suspensionEndDate == null) {
+            return false;
+        }
+        return LocalDate.now().isAfter(this.suspensionEndDate);
+    }
+
+    public void resetStrikeCount() {
+        this.strikeCount = null;
+    }
+
+    public void resetSuspensionTypeAndDates() {
+        this.suspensionStartDate = null;
+        this.suspensionEndDate = null;
+        this.suspensionType = null;
+    }
 
     public enum SuspensionType {
         HOLIDAY,
