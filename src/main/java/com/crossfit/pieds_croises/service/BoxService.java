@@ -2,7 +2,7 @@ package com.crossfit.pieds_croises.service;
 
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.model.Box;
-import com.crossfit.pieds_croises.model.dto.BoxDto;
+import com.crossfit.pieds_croises.dto.BoxDto;
 import com.crossfit.pieds_croises.repository.BoxRepository;
 import com.crossfit.pieds_croises.util.DTOConverter;
 import lombok.AllArgsConstructor;
