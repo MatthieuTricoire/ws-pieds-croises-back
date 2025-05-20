@@ -1,11 +1,19 @@
 meta {
   name: All boxes
   type: http
-  seq: 1
+  seq: 2
 }
 
 get {
   url: http://localhost:8080/boxes
   body: none
   auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+  res.body: length 2
+  res.body[0]: isJson
+  res.body[0].name: eq Pieds croisés Paris
 }

@@ -20,57 +20,58 @@ import java.util.List;
 @RestController
 @RequestMapping("/boxes")
 public class BoxController {
-    private BoxService boxService;
+  private BoxService boxService;
 
-    @GetMapping
-    public ResponseEntity<List<BoxDto>> getAllBox(){
-        List<BoxDto> boxDto = boxService.getAllBox();
-        if (boxDto == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(boxDto);
+  @GetMapping
+  public ResponseEntity<List<BoxDto>> getAllBox() {
+    List<BoxDto> boxDto = boxService.getAllBox();
+    if (boxDto == null) {
+      return ResponseEntity.notFound().build();
     }
+    return ResponseEntity.ok(boxDto);
+  }
 
-    @GetMapping("/first")
-    public ResponseEntity<BoxDto> getFirstBox(){
-        BoxDto boxDto = boxService.getFirstBox();
-        if (boxDto == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(boxDto);
+  @GetMapping("/first")
+  public ResponseEntity<BoxDto> getFirstBox() {
+    BoxDto boxDto = boxService.getFirstBox();
+    if (boxDto == null) {
+      return ResponseEntity.notFound().build();
     }
+    return ResponseEntity.ok(boxDto);
+  }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<BoxDto> getBoxById(@PathVariable Long id){
-        BoxDto boxDto = boxService.getBoxById(id);
-        if (boxDto == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(boxDto);
+  @GetMapping("/{id}")
+  public ResponseEntity<BoxDto> getBoxById(@PathVariable Long id) {
+    BoxDto boxDto = boxService.getBoxById(id);
+    if (boxDto == null) {
+      return ResponseEntity.notFound().build();
     }
+    return ResponseEntity.ok(boxDto);
+  }
 
-    @PostMapping
-    public ResponseEntity<BoxDto> createBox(@Valid @RequestBody BoxDto box){
-        try {
-            BoxDto boxDto = boxService.createBox(box);
-            return ResponseEntity.ok(boxDto);
-        } catch (Exception e) {
-            System.err.println("Error in controller when creating box: " + e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+  @PostMapping
+  public ResponseEntity<BoxDto> createBox(@Valid @RequestBody BoxDto box) {
+    try {
+      BoxDto boxDto = boxService.createBox(box);
+      return ResponseEntity.ok(boxDto);
+    } catch (Exception e) {
+      System.err.println("Error in controller when creating box: " + e.getMessage());
+      return ResponseEntity.badRequest().build();
     }
+  }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<BoxDto> updateBox(@PathVariable Long id, @RequestBody BoxDto box){
-        BoxDto boxDto = boxService.updateBox(id, box);
-        if (boxDto == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(boxDto);
+  @PutMapping("/{id}")
+  public ResponseEntity<BoxDto> updateBox(@PathVariable Long id, @RequestBody BoxDto box) {
+    BoxDto boxDto = boxService.updateBox(id, box);
+    if (boxDto == null) {
+      return ResponseEntity.notFound().build();
     }
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBox(@PathVariable Long id){
-        boxService.deleteBox(id);
-        return ResponseEntity.noContent().build();
-    }
+    return ResponseEntity.ok(boxDto);
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deleteBox(@PathVariable Long id) {
+    boxService.deleteBox(id);
+    return ResponseEntity.noContent().build();
+  }
 }
