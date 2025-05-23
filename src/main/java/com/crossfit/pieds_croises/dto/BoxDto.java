@@ -1,4 +1,4 @@
-package com.crossfit.pieds_croises.model.dto;
+package com.crossfit.pieds_croises.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

@@ -1,0 +1,22 @@
+meta {
+  name: Create subscription
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/subscriptions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name":"Premiumff",
+    "price": 12,
+    "sessionPerWeek": 4,
+    "duration":3,
+    "terminationConditions":"blablabla",
+    "boxId": 8
+  }
+}

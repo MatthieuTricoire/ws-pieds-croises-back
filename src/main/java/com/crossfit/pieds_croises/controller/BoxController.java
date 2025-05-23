@@ -1,6 +1,6 @@
 package com.crossfit.pieds_croises.controller;
 
-import com.crossfit.pieds_croises.model.dto.BoxDto;
+import com.crossfit.pieds_croises.dto.BoxDto;
 import com.crossfit.pieds_croises.service.BoxService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
