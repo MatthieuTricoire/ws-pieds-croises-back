@@ -1,7 +1,7 @@
 meta {
   name: Create box
   type: http
-  seq: 3
+  seq: 1
 }
 
 post {
@@ -13,10 +13,14 @@ post {
 body:json {
   {
     "name": "Ma nouvelle box",
-    "zipcode": "6400",
-    "address": "blablabla",
+    "zipcode": "64000",
+    "address": "22 chemin du sport",
     "city": "Pau",
     "schedule": "blablabla"
   }
     
+}
+
+script:post-response {
+  newBoxName = res.body.name
 }
