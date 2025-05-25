@@ -21,27 +21,10 @@ public class MessageController {
     private final MessageService messageService;
 
     @GetMapping
-    public ResponseEntity<List<MessageDTO>> getAllMessages(@RequestParam(name = "status", required = false) String status) {
-        List<MessageDTO> messages;
-
-        if (status == null) {
-            // Aucun filtre : on retourne tous les messages
-            messages = messageService.getMessages();
-        } else {
-            // Avec filtre : on sélectionne selon le statut
-            switch (status.toLowerCase()) {
-                case "expired":
-                    messages = messageService.getExpiredMessages();
-                    break;
-                case "current":
-                    messages = messageService.getCurrentMessages();
-                    break;
-                case "future":
-                    messages = messageService.getFutureMessages();
-                    break;
-                default:
-                    return ResponseEntity.badRequest().build(); // statut inconnu
-            }
+    public ResponseEntity<List<MessageDTO>> getAllMessage() {
+        List<MessageDTO> messages = messageService.getAllMessages();
+        if (messages.isEmpty()) {
+            return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok(messages);
@@ -88,6 +71,26 @@ public class MessageController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/expired")
+    public ResponseEntity<List<MessageDTO>> getExpiredMessages() {
+        List<MessageDTO> messages = messageService.getExpiredMessages();
+        if (messages.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(messages);
+    }
+
+    @GetMapping("/coming")
+    public ResponseEntity<List<MessageDTO>> getComingMessages() {
+        List<MessageDTO> messages = messageService.getComingMessages();
+        if (messages.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(messages);
     }
 
 }
