@@ -10,9 +10,5 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     List<Message> findByExpirationDateBefore(LocalDate date);
 
-    List<Message> findByStartDateLessThanEqualAndExpirationDateGreaterThanEqual(LocalDate date1, LocalDate date2);
-
     List<Message> findByStartDateAfter(LocalDate date);
-
-    List<Message> findBy
 }
