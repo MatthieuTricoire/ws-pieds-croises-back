@@ -27,7 +27,7 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final BoxRepository boxRepository;
 
-    public List<MessageDTO> getAllMessages() {
+    public List<MessageDTO> getMessages() {
         List<Message> messages = messageRepository.findAll();
         if (messages.isEmpty()) {
             throw new ResourceNotFoundException("There are no messages");
@@ -92,6 +92,30 @@ public class MessageService {
 
         messageRepository.delete(message);
         return true;
+    }
+
+    public List<MessageDTO> getExpiredMessages() {
+        LocalDate today = LocalDate.now();
+        return messageRepository.findByExpirationDateBefore(today)
+                .stream()
+                .map(messageMapper::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<MessageDTO> getCurrentMessages() {
+        LocalDate today = LocalDate.now();
+        return messageRepository.findByStartDateLessThanEqualAndExpirationDateGreaterThanEqual(today, today)
+                .stream()
+                .map(messageMapper::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<MessageDTO> getFutureMessages() {
+        LocalDate today = LocalDate.now();
+        return messageRepository.findByStartDateAfter(today)
+                .stream()
+                .map(messageMapper::convertToDto)
+                .collect(Collectors.toList());
     }
 
 }
