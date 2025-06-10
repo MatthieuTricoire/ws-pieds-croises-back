@@ -27,4 +27,7 @@ public class MessageCreateDTO {
 
     private LocalDate startDate;
     private LocalDate expirationDate;
+
+    @NotNull(message = "Le message doit être ratacher à une box")
+    private Long boxId;
 }

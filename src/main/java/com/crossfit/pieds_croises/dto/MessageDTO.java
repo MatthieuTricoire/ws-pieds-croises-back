@@ -21,5 +21,6 @@ public class MessageDTO {
     private LocalDateTime updatedAt;
     private LocalDate startDate;
     private LocalDate expirationDate;
+    private Long boxId;
 
 }
