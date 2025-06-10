@@ -4,7 +4,9 @@ import com.crossfit.pieds_croises.dto.MessageCreateDTO;
 import com.crossfit.pieds_croises.dto.MessageDTO;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.MessageMapper;
+import com.crossfit.pieds_croises.model.Box;
 import com.crossfit.pieds_croises.model.Message;
+import com.crossfit.pieds_croises.repository.BoxRepository;
 import com.crossfit.pieds_croises.repository.MessageRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,8 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final BoxRepository boxRepository;
 
+    private final LocalDate today = LocalDate.now();
+
     public List<MessageDTO> getAllMessages() {
         List<Message> messages = messageRepository.findAll();
         if (messages.isEmpty()) {
@@ -40,7 +44,6 @@ public class MessageService {
     }
 
     public List<MessageDTO> getCurrentMessagesByBoxID(Long boxId) {
-        LocalDate today = LocalDate.now();
         List<Message> messages = messageRepository.findCurrentMessagesASCByBoxId(boxId, today);
 
         if (messages.isEmpty()) {
@@ -48,6 +51,27 @@ public class MessageService {
         }
         return messages.stream().map(messageMapper::convertToDto).collect(Collectors.toList());
     }
+
+    public List<MessageDTO> getExpiredMessages(Long boxId) {
+        List<Message> messages = messageRepository.findExpirationMessagesDESCByBoxId(boxId, today);
+
+        if (messages.isEmpty()) {
+            throw new ResourceNotFoundException("There are no expired messages");
+        }
+
+        return messages.stream().map(messageMapper::convertToDto).collect(Collectors.toList());
+    }
+
+    public List<MessageDTO> getComingMessages(Long boxId) {
+        List<Message> messages = messageRepository.findComingMessagesASCByBoxId(boxId, today);
+
+        if (messages.isEmpty()) {
+            throw new ResourceNotFoundException("There are no coming messages");
+        }
+
+        return messages.stream().map(messageMapper::convertToDto).collect(Collectors.toList());
+    }
+
 
     public MessageDTO createMessage(MessageCreateDTO messageCreateDTO) {
 
@@ -66,17 +90,16 @@ public class MessageService {
         } else {
             throw new IllegalArgumentException("Box id is required");
         }
+
     }
 
     public MessageDTO updateMessage(Long id, @Valid MessageCreateDTO messageCreateDTO) {
 
-//       TODO changer le orElse par une exception
         Message existingMessage = messageRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Message not found with id: " + id));
 
         messageMapper.updateFromDto(messageCreateDTO, existingMessage);
 
-        //       TODO changer le orElse par une exception pour enlever l'alert
         Message savedMessage = messageRepository.save(existingMessage);
         return messageMapper.convertToDto(savedMessage);
     }
@@ -91,30 +114,6 @@ public class MessageService {
 
         messageRepository.delete(message);
         return true;
-    }
-
-    public List<MessageDTO> getExpiredMessages() {
-        LocalDate today = LocalDate.now();
-        return messageRepository.findByExpirationDateBefore(today)
-                .stream()
-                .map(messageMapper::convertToDto)
-                .collect(Collectors.toList());
-    }
-
-    public List<MessageDTO> getCurrentMessages() {
-        LocalDate today = LocalDate.now();
-        return messageRepository.findByStartDateLessThanEqualAndExpirationDateGreaterThanEqual(today, today)
-                .stream()
-                .map(messageMapper::convertToDto)
-                .collect(Collectors.toList());
-    }
-
-    public List<MessageDTO> getFutureMessages() {
-        LocalDate today = LocalDate.now();
-        return messageRepository.findByStartDateAfter(today)
-                .stream()
-                .map(messageMapper::convertToDto)
-                .collect(Collectors.toList());
     }
 
 }
