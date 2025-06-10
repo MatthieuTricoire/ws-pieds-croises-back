@@ -30,6 +30,7 @@ public class MessageController {
         return ResponseEntity.ok(messages);
     }
 
+
     @GetMapping("/{id}")
     public ResponseEntity<MessageDTO> getMessageById(@PathVariable Long id) {
         MessageDTO messageDTO = messageService.getMessageById(id);
@@ -39,9 +40,18 @@ public class MessageController {
         return ResponseEntity.ok(messageDTO);
     }
 
+    @GetMapping("/{boxId}/current")
+    public ResponseEntity<List<MessageDTO>> getCurrentMessagesByBoxID(@PathVariable Long boxId) {
+        List<MessageDTO> messages = messageService.getCurrentMessagesByBoxID(boxId);
+        if (messages.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(messages);
+    }
+
 //     TODO methodes get en fonction de la date
 //    - message en cour
-//      -message expirer
+//    - message expirer
 //    - message future
 
     @PostMapping

@@ -40,7 +40,9 @@ public class Message {
     @Column(name = "expiration_date")
     private LocalDate expirationDate;
 
-//    TODO Ajout ID box
+    @ManyToOne
+    @JoinColumn(name = "box_id", nullable = false)
+    private Box box;
 
     public enum MessageType {
         INFORMATION,

@@ -4,13 +4,16 @@ import com.crossfit.pieds_croises.dto.MessageCreateDTO;
 import com.crossfit.pieds_croises.dto.MessageDTO;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.MessageMapper;
+import com.crossfit.pieds_croises.model.Box;
 import com.crossfit.pieds_croises.model.Message;
+import com.crossfit.pieds_croises.repository.BoxRepository;
 import com.crossfit.pieds_croises.repository.MessageRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,9 +25,13 @@ public class MessageService {
     private final MessageMapper messageMapper;
 
     private final MessageRepository messageRepository;
+    private final BoxRepository boxRepository;
 
     public List<MessageDTO> getAllMessages() {
         List<Message> messages = messageRepository.findAll();
+        if (messages.isEmpty()) {
+            throw new ResourceNotFoundException("There are no messages");
+        }
         return messages.stream().map(messageMapper::convertToDto).collect(Collectors.toList());
     }
 
@@ -34,37 +41,50 @@ public class MessageService {
         return messageMapper.convertToDto(message);
     }
 
+    public List<MessageDTO> getCurrentMessagesByBoxID(Long boxId) {
+        LocalDate today = LocalDate.now();
+        List<Message> messages = messageRepository.findCurrentMessagesASCByBoxId(boxId, today);
+
+        if (messages.isEmpty()) {
+            throw new ResourceNotFoundException("There are no current messages");
+        }
+        return messages.stream().map(messageMapper::convertToDto).collect(Collectors.toList());
+    }
+
     public MessageDTO createMessage(MessageCreateDTO messageCreateDTO) {
 
-        try {
-            System.out.println("Message type reçu : " + messageCreateDTO.getMessageType());
+        if (messageCreateDTO.getBoxId() != null) {
+            Box box = boxRepository.findById(messageCreateDTO.getBoxId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Box non trouvée avec l'ID: " + messageCreateDTO.getBoxId()));
+
+            System.out.println("boxId reçu = " + box.getId());
+
             Message message = messageMapper.convertToEntity(messageCreateDTO);
+            message.setBox(box);
 
+            System.out.println("ID du message avant save = " + message.getId());
             Message savedMessage = messageRepository.save(message);
-
             return messageMapper.convertToDto(savedMessage);
-        } catch (Exception e) {
-            System.err.println("Error creating message: " + e.getMessage());
-            throw e;
+        } else {
+            throw new IllegalArgumentException("Box id is required");
         }
+
     }
 
     public MessageDTO updateMessage(Long id, @Valid MessageCreateDTO messageCreateDTO) {
 
-//       TODO changer le orElse par une exception
         Message existingMessage = messageRepository.findById(id)
-                .orElse(null);
+                .orElseThrow(() -> new ResourceNotFoundException("Message not found with id: " + id));
 
         messageMapper.updateFromDto(messageCreateDTO, existingMessage);
 
-        //       TODO changer le orElse par une exception pour enlever l'alert
         Message savedMessage = messageRepository.save(existingMessage);
         return messageMapper.convertToDto(savedMessage);
     }
 
     public boolean deleteMessage(Long id) {
-        //       TODO changer le orElse par une exception
-        Message message = messageRepository.findById(id).orElse(null);
+        Message message = messageRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Message not found with id: " + id));
 
         if (message == null) {
             return false;
