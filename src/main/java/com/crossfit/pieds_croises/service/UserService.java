@@ -38,7 +38,6 @@ public class UserService {
             User user = userMapper.convertToEntity(userDto);
             user.setCreatedAt(LocalDateTime.now());
             user.setUpdatedAt(LocalDateTime.now());
-            user.setStrikeCount((byte) 0);
             User createdUser = userRepository.save(user);
             return userMapper.convertToDto(createdUser);
         } catch (Exception e) {
@@ -48,6 +47,10 @@ public class UserService {
     }
 
     public UserDto updateUser(Long id, UserDto userDto) {
+        if (userDto.getId() != null && !userDto.getId().equals(id)) {
+            throw new IllegalArgumentException("ID mismatch between path variable and request body");
+        }
+
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
