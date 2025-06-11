@@ -79,12 +79,9 @@ public class MessageService {
             Box box = boxRepository.findById(messageCreateDTO.getBoxId())
                     .orElseThrow(() -> new ResourceNotFoundException("Box non trouvée avec l'ID: " + messageCreateDTO.getBoxId()));
 
-            System.out.println("boxId reçu = " + box.getId());
-
             Message message = messageMapper.convertToEntity(messageCreateDTO);
             message.setBox(box);
 
-            System.out.println("ID du message avant save = " + message.getId());
             Message savedMessage = messageRepository.save(message);
             return messageMapper.convertToDto(savedMessage);
         } else {
