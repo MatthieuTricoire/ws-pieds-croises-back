@@ -71,13 +71,8 @@ public class MessageController {
 
     @PostMapping
     public ResponseEntity<MessageDTO> createMessage(@Valid @RequestBody MessageCreateDTO messageCreateDTO) {
-        try {
-            MessageDTO savedMessage = messageService.createMessage(messageCreateDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedMessage);
-        } catch (Exception e) {
-            System.err.println("Error in controller when creating Message: " + e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        MessageDTO savedMessage = messageService.createMessage(messageCreateDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedMessage);
     }
 
     @PutMapping("/{id}")

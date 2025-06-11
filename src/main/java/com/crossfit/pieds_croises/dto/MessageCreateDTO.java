@@ -19,7 +19,6 @@ public class MessageCreateDTO {
     private String title;
 
     @NotBlank(message = "Le contenu ne doit pas être vide")
-    @Size(min = 5, message = "Le contenu doit contenir au moins 10 caractères")
     private String content;
 
     @NotNull(message = "Le type de message est obligatoire")
