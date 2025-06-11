@@ -2,9 +2,9 @@ package com.crossfit.pieds_croises.service;
 
 import com.crossfit.pieds_croises.dto.BoxDto;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
+import com.crossfit.pieds_croises.mapper.BoxMapper;
 import com.crossfit.pieds_croises.model.Box;
 import com.crossfit.pieds_croises.repository.BoxRepository;
-import com.crossfit.pieds_croises.util.DTOConverter;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +14,8 @@ import java.util.List;
 @AllArgsConstructor
 @Service
 public class BoxService {
-    private final DTOConverter dtoConverter;
+
+    private final BoxMapper boxMapper;
     private final BoxRepository boxRepository;
 
     public List<BoxDto> getAllBox() {
@@ -23,8 +24,8 @@ public class BoxService {
             throw new ResourceNotFoundException("No boxes found");
         }
         return boxes.stream()
-            .map(dtoConverter::convertToDTO)
-            .toList();
+                .map(boxMapper::convertToDTO)
+                .toList();
     }
 
     public BoxDto getFirstBox() {
@@ -33,21 +34,21 @@ public class BoxService {
             throw new ResourceNotFoundException("No boxes found");
         }
         Box firstBox = boxes.getFirst();
-        return dtoConverter.convertToDTO(firstBox);
+        return boxMapper.convertToDTO(firstBox);
     }
 
     public BoxDto getBoxById(Long id) {
         Box box = boxRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Box not found with id: " + id));
-        return dtoConverter.convertToDTO(box);
+        return boxMapper.convertToDTO(box);
     }
 
     public BoxDto createBox(BoxDto boxDto) {
         try {
-            Box box = dtoConverter.convertToEntity(boxDto);
+            Box box = boxMapper.convertToEntity(boxDto);
             box.setCreatedAt(LocalDateTime.now());
             box.setUpdatedAt(LocalDateTime.now());
             Box createdBox = boxRepository.save(box);
-            return dtoConverter.convertToDTO(createdBox);
+            return boxMapper.convertToDTO(createdBox);
         } catch (Exception e) {
             System.err.println("Error creating box: " + e.getMessage());
             throw e;
@@ -56,7 +57,7 @@ public class BoxService {
 
     public BoxDto updateBox(Long id, BoxDto boxDto) {
         Box existingBox = boxRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Box not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Box not found with id: " + id));
         if (boxDto.getName() != null) {
             existingBox.setName(boxDto.getName());
         }
@@ -74,12 +75,12 @@ public class BoxService {
         }
 
         Box updatedBox = boxRepository.save(existingBox);
-        return dtoConverter.convertToDTO(updatedBox);
+        return boxMapper.convertToDTO(updatedBox);
     }
 
     public void deleteBox(Long id) {
         Box box = boxRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Box not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Box not found with id: " + id));
         boxRepository.delete(box);
     }
 

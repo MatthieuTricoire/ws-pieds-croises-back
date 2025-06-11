@@ -1,0 +1,21 @@
+meta {
+  name: Update
+  type: http
+  seq: 6
+}
+
+put {
+  url: http://localhost:8080/messages/1
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "title":"Test1",
+    "content":"Youpiiiiiiiiiiiiiiiii",
+    "messageType":"INFORMATION",
+    "startDate": "2025-04-15",
+    "expirationDate": "2025-07-01"
+  }
+}

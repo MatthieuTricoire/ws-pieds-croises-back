@@ -1,4 +1,4 @@
-package com.crossfit.pieds_croises.util;
+package com.crossfit.pieds_croises.mapper;
 
 import com.crossfit.pieds_croises.dto.BoxDto;
 import com.crossfit.pieds_croises.model.Box;
@@ -6,9 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
-public interface DTOConverter {
-
-
+public interface BoxMapper {
     BoxDto convertToDTO(Box box);
 
     @Mapping(target = "id", ignore = true)
