@@ -1,8 +1,7 @@
 -- Peupler la table Box
 INSERT INTO box (name, address, city, zipcode, schedule, created_at, updated_at)
 VALUES ('Pieds croisés Paris', '12 Champs-Élysée', 'Paris', '72000', 'Lun-Ven 08h-18h', NOW(), NOW());
-INSERT INTO box (name, address, city, zipcode,
-                 schedule, created_at, updated_at)
+INSERT INTO box (name, address, city, zipcode, schedule, created_at, updated_at)
 VALUES ('Pieds croisés Pau', '1 rue des Pyrénées', 'Pau', '64000', 'Lun-Ven 08h-18h', NOW(), NOW());
 
 -- Peupler la table Message
@@ -21,12 +20,12 @@ VALUES ('Oyez Oyez rappel', 'Venez nombreux à notre super évent', 'RAPPEL', '2
 
 
 -- Peupler la table Subscription
-INSERT INTO subscription (name, price, duration, session_per_week, termination_conditions, box_id)
-VALUES ('Classique', 19.99, 1, 2, 'blablabla', 1);
-INSERT INTO subscription (name, price, duration, session_per_week, termination_conditions, box_id)
-VALUES ('Premium', 39.99, 1, 4, 'blablabla', 1);
-INSERT INTO subscription (name, price, duration, session_per_week, termination_conditions, box_id)
-VALUES ('Ultimate', 69.99, 1, 0, 'blablabla', 1);
+INSERT INTO subscription (name, price, duration, freeze_days_allowed, session_per_week, termination_conditions, box_id)
+VALUES ('Classique', 19.99, 31, 0, 2, 'blablabla', 1);
+INSERT INTO subscription (name, price, duration, freeze_days_allowed, session_per_week, termination_conditions, box_id)
+VALUES ('Premium', 39.99, 31, 1, 4, 'blablabla', 1);
+INSERT INTO subscription (name, price, duration, freeze_days_allowed, session_per_week, termination_conditions, box_id)
+VALUES ('Ultimate', 69.99, 31, 2, 0, 'blablabla', 1);
 
 -- Peupler la table Exercice
 INSERT INTO exercice (name, measure_type)
@@ -47,6 +46,15 @@ VALUES ('Jean', 'Dupont', '{noop}user123', 'jean.dupont@example.com', '060102030
 INSERT INTO user_roles (user_id, roles)
 VALUES (1, 'ROLE_USER'),
        (2, 'ROLE_ADMIN');
+
+-- UserSubscription
+INSERT INTO user_subscription (start_date, end_date, freeze_days_remaining, user_id, subscription_id)
+VALUES (NOW(),
+        DATE_ADD(NOW(), INTERVAL 1 MONTH),
+        5,
+        1,
+        1);
+
 
 -- Peupler la table weight_history
 INSERT INTO weight_history(weight, date, user_id)

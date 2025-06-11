@@ -1,0 +1,18 @@
+meta {
+  name: Create UserSubscription
+  type: http
+  seq: 2
+}
+
+put {
+  url: http://localhost:8080/user-subscriptions/1
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "userId": 1,
+    "subscriptionId": 3
+  }
+}
