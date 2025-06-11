@@ -18,32 +18,37 @@ public class Message {
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
 
-    @Column( length = 100,nullable = false)
+    @Column(length = 100, nullable = false)
     private String title;
 
-    @Column(columnDefinition = "TEXT",nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "message_type", nullable = false)
     private MessageType messageType;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     @Column(name = "start_date")
-    LocalDate startDate;
+    private LocalDate startDate;
 
     @Column(name = "expiration_date")
-    LocalDate expirationDate;
+    private LocalDate expirationDate;
 
-    public enum MessageType{
+    @ManyToOne
+    @JoinColumn(name = "box_id", nullable = false)
+    private Box box;
+
+    public enum MessageType {
         INFORMATION,
         ALERT,
         EVENEMENT,
         RAPPEL
     }
+
 }
