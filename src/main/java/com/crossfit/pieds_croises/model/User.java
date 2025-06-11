@@ -1,22 +1,7 @@
 package com.crossfit.pieds_croises.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -69,33 +54,35 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column
+    @Column(nullable = false)
     private Byte strikeCount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "suspension_type")
+    @Column(name = "suspension_type", nullable = false)
     private SuspensionType suspensionType;
 
-    @Column(name = "suspension_start_date")
+    @Column(name = "suspension_start_date", nullable = false)
     private LocalDate suspensionStartDate;
 
-    @Column(name = "suspension_end_date")
+    @Column(name = "suspension_end_date", nullable = false)
     private LocalDate suspensionEndDate;
 
     @OneToMany(mappedBy = "user")
     private List<UserSubscription> userSubscriptions;
 
+    @Column(nullable = false)
     @OneToMany(mappedBy = "user")
     private List<WeightHistory> weightHistory;
 
+    @Column(nullable = false)
     @OneToMany(mappedBy = "user")
     private List<PerformanceHistory> performanceHistoryList;
 
     @ManyToMany
     @JoinTable(
-        name = "user_course",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "course_id")
+            name = "user_course",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "course_id")
     )
     private List<Course> courses;
 
@@ -103,8 +90,8 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
-            .map(SimpleGrantedAuthority::new)
-            .collect(Collectors.toSet());
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toSet());
     }
 
     @Override

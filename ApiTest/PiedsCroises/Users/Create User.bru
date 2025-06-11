@@ -1,0 +1,23 @@
+meta {
+  name: Create User
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:8080/users
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "firstname": "Bernard",
+    "lastname": "Patrick",
+    "password": "MotDePasseSecurise123!",
+    "email": "bernard.patrick@example.com",
+    "phone": "0612345600",
+    "roles": ["USER"],
+    "profilePicture": "https://example.com/images/jean.jpg"
+  }
+}
