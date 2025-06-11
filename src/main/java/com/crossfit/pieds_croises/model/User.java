@@ -67,8 +67,8 @@ public class User implements UserDetails {
     @Column(name = "suspension_end_date", nullable = true)
     private LocalDate suspensionEndDate;
 
-    @OneToMany(mappedBy = "user")
-    private List<UserSubscription> userSubscriptions;
+    @OneToOne(mappedBy = "user", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+    private UserSubscription userSubscriptions;
 
     @Column(nullable = true)
     @OneToMany(mappedBy = "user")
@@ -78,14 +78,12 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<PerformanceHistory> performanceHistoryList;
 
-    @ManyToMany
-    @JoinTable(
-            name = "user_course",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "course_id")
-    )
-    private List<Course> courses;
+    @ManyToOne
+    private Box box;
 
+    @ManyToMany
+    @JoinTable(name = "user_course", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "course_id"))
+    private List<Course> courses;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -161,10 +159,11 @@ public class User implements UserDetails {
     }
 
     public boolean isSuspended() {
-        if (this.suspensionEndDate == null) {
+        if (this.suspensionStartDate == null || this.suspensionEndDate == null) {
             return false;
         }
-        return LocalDate.now().isAfter(this.suspensionEndDate);
+        LocalDate today = LocalDate.now();
+        return !today.isBefore(this.suspensionStartDate) && !today.isAfter(this.suspensionEndDate);
     }
 
     public void resetStrikeCount() {
@@ -172,14 +171,9 @@ public class User implements UserDetails {
     }
 
     public void resetSuspensionTypeAndDates() {
+        this.suspensionType = null;
         this.suspensionStartDate = null;
         this.suspensionEndDate = null;
-        this.suspensionType = null;
-    }
-
-    public enum SuspensionType {
-        HOLIDAY,
-        PENALTY,
     }
 
 }

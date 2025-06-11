@@ -20,32 +20,23 @@ import java.util.List;
 @RestController
 @RequestMapping("/boxes")
 public class BoxController {
-  private BoxService boxService;
+  private final BoxService boxService;
 
   @GetMapping
   public ResponseEntity<List<BoxDto>> getAllBox() {
-    List<BoxDto> boxDto = boxService.getAllBox();
-    if (boxDto == null) {
-      return ResponseEntity.notFound().build();
-    }
+    List<BoxDto> boxDto = boxService.getAllBoxes();
     return ResponseEntity.ok(boxDto);
   }
 
   @GetMapping("/first")
   public ResponseEntity<BoxDto> getFirstBox() {
     BoxDto boxDto = boxService.getFirstBox();
-    if (boxDto == null) {
-      return ResponseEntity.notFound().build();
-    }
     return ResponseEntity.ok(boxDto);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<BoxDto> getBoxById(@PathVariable Long id) {
     BoxDto boxDto = boxService.getBoxById(id);
-    if (boxDto == null) {
-      return ResponseEntity.notFound().build();
-    }
     return ResponseEntity.ok(boxDto);
   }
 
@@ -63,9 +54,6 @@ public class BoxController {
   @PutMapping("/{id}")
   public ResponseEntity<BoxDto> updateBox(@PathVariable Long id, @RequestBody BoxDto box) {
     BoxDto boxDto = boxService.updateBox(id, box);
-    if (boxDto == null) {
-      return ResponseEntity.notFound().build();
-    }
     return ResponseEntity.ok(boxDto);
   }
 
