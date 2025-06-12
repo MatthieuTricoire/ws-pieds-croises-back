@@ -54,27 +54,27 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Byte strikeCount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "suspension_type", nullable = false)
+    @Column(name = "suspension_type", nullable = true)
     private SuspensionType suspensionType;
 
-    @Column(name = "suspension_start_date", nullable = false)
+    @Column(name = "suspension_start_date", nullable = true)
     private LocalDate suspensionStartDate;
 
-    @Column(name = "suspension_end_date", nullable = false)
+    @Column(name = "suspension_end_date", nullable = true)
     private LocalDate suspensionEndDate;
 
     @OneToMany(mappedBy = "user")
     private List<UserSubscription> userSubscriptions;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     @OneToMany(mappedBy = "user")
     private List<WeightHistory> weightHistory;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     @OneToMany(mappedBy = "user")
     private List<PerformanceHistory> performanceHistoryList;
 
