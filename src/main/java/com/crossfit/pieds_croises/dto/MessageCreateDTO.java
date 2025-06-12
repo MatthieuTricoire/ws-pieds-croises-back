@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @Builder
 public class MessageCreateDTO {
     @NotBlank(message = "Le titre ne doit pas être vide")
-    @Size(min = 2, max = 100, message = "Le titre doit contenir entre 2 et 50 caractères")
+    @Size(min = 2, max = 100, message = "Le titre doit contenir entre 2 et 100 caractères")
     private String title;
 
     @NotBlank(message = "Le contenu ne doit pas être vide")

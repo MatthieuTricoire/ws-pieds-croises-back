@@ -1,0 +1,15 @@
+meta {
+  name: Get Courses by day
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:8080/courses/by-day?date=2025-07-07
+  body: none
+  auth: inherit
+}
+
+params:query {
+  date: 2025-07-07
+}
