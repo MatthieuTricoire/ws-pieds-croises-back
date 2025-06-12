@@ -10,6 +10,16 @@ public interface UserMapper {
     UserDto convertToDto(User user);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "phone", ignore = true)
+    @Mapping(target = "strikeCount", ignore = true)
+    @Mapping(target = "userSubscriptions", ignore = true)
+    @Mapping(target = "weightHistory", ignore = true)
+    @Mapping(target = "performanceHistoryList", ignore = true)
+    UserDto convertToLoginDto(User user);
+
+    @Mapping(target = "id", ignore = true)
     UserDto convertToDtoForAdmin(User user);
 
     @Mapping(target = "id", ignore = true)

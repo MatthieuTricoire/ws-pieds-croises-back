@@ -31,9 +31,19 @@ VALUES ('Ultimate', 69.99, 1, 0, 'blablabla', 1);
 -- Peupler la table Exercice
 INSERT INTO exercice (name, measure_type)
 VALUES ('Pompes', 'REPETITION');
-
 INSERT INTO exercice (name, measure_type)
 VALUES ('Front squat', 'WEIGHT');
-
 INSERT INTO exercice (name, measure_type)
 VALUES ('Back squat', 'WEIGHT');
+
+-- Peupler la table user
+INSERT INTO user (firstname, lastname, password, email, phone, profile_picture, created_at, updated_at)
+VALUES ('Jean', 'Dupont', '{noop}user123', 'jean.dupont@example.com', '0601020304', NULL,
+        NOW(), NOW()),
+       ('Admin', 'User', '{noop}admin123', 'admin@example.com', '0602030405', NULL,
+        NOW(), NOW());
+
+-- Peupler la table user_roles (si @ElementCollection utilise une table "user_roles" avec user_id et roles)
+INSERT INTO user_roles (user_id, roles)
+VALUES (1, 'ROLE_USER'),
+       (2, 'ROLE_ADMIN');
