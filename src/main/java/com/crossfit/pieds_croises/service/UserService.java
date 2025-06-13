@@ -71,4 +71,27 @@ public class UserService {
         userRepository.delete(user);
         return true;
     }
+
+    public UserDto getMyProfile(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        return userMapper.convertToDtoForUser(user);
+    }
+
+    public UserDto updateProfile(String username, UserDto userDto) {
+        User existingUser = userRepository.findByEmail(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + username));
+
+        userMapper.updateUserFromDto(userDto, existingUser);
+        existingUser.setUpdatedAt(LocalDateTime.now());
+
+        try {
+            User updatedUser = userRepository.save(existingUser);
+            return userMapper.convertToDtoForUser(updatedUser);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update user: " + username, e);
+        }
+    }
+
+
 }
