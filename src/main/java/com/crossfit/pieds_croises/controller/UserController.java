@@ -5,6 +5,7 @@ import com.crossfit.pieds_croises.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class UserController {
     private UserService userService;
 
     // 🔹 READ ALL
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<UserDto>> getAllUsers() {
         List<UserDto> userDtos = userService.getAllUsers();
@@ -27,6 +29,7 @@ public class UserController {
     }
 
     // 🔹 READ ONE
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         UserDto userDto = userService.getUserById(id);
@@ -37,6 +40,7 @@ public class UserController {
     }
 
     // 🔹 CREATE
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto user) {
         try {
@@ -49,6 +53,7 @@ public class UserController {
     }
 
     // 🔹 UPDATE
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto userDetails) {
         UserDto userDto = userService.updateUser(id, userDetails);
@@ -59,6 +64,7 @@ public class UserController {
     }
 
     // 🔹 DELETE
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         if (userService.deleteUser(id)) {
