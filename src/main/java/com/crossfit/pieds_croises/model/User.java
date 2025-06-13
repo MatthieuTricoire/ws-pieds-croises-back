@@ -52,27 +52,27 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(nullable = true)
+
     private Byte strikeCount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "suspension_type", nullable = true)
+    @Column(name = "suspension_type")
     private SuspensionType suspensionType;
 
-    @Column(name = "suspension_start_date", nullable = true)
+    @Column(name = "suspension_start_date")
     private LocalDate suspensionStartDate;
 
-    @Column(name = "suspension_end_date", nullable = true)
+    @Column(name = "suspension_end_date")
     private LocalDate suspensionEndDate;
 
     @OneToMany(mappedBy = "user", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
     private List<UserSubscription> userSubscriptions = new ArrayList<>();
 
-    @Column(nullable = true)
+    @Column()
     @OneToMany(mappedBy = "user")
     private List<WeightHistory> weightHistory;
 
-    @Column(nullable = true)
+    @Column()
     @OneToMany(mappedBy = "user")
     private List<PerformanceHistory> performanceHistoryList;
 
