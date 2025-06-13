@@ -15,6 +15,7 @@ public class UserSubscriptionDto {
 
     private Long id;
 
+    @NotNull
     private LocalDateTime startDate;
 
     private LocalDateTime endDate;
