@@ -4,8 +4,8 @@ meta {
   seq: 2
 }
 
-put {
-  url: http://localhost:8080/user-subscriptions/1
+post {
+  url: http://localhost:8080/user-subscriptions
   body: json
   auth: inherit
 }
@@ -13,6 +13,7 @@ put {
 body:json {
   {
     "userId": 1,
-    "subscriptionId": 3
+    "subscriptionId": 3,
+    "startDate":"2025-06-15T14:30:45"
   }
 }

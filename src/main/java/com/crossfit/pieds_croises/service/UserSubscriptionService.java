@@ -1,7 +1,6 @@
 package com.crossfit.pieds_croises.service;
 
 import com.crossfit.pieds_croises.dto.UserSubscriptionDto;
-import com.crossfit.pieds_croises.exception.DuplicateResourceException;
 import com.crossfit.pieds_croises.exception.ForbiddenException;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.UserSubscriptionMapper;
@@ -15,7 +14,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -28,82 +29,86 @@ public class UserSubscriptionService {
 
     public UserSubscriptionDto createUserSubscription(UserSubscriptionDto userSubscriptionDto) {
         User user = userRepository.findById(userSubscriptionDto.getUserId())
-            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Subscription subscription = subscriptionRepository.findById(userSubscriptionDto.getSubscriptionId())
-            .orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
 
-        Optional<UserSubscription> existingSubscription = userSubscriptionRepository.findByUser(user);
-        if (existingSubscription.isPresent()) {
-            throw new DuplicateResourceException("User already has an subscription, you must update it instead of creating a new one");
+        LocalDateTime currentDate = LocalDateTime.now();
+        LocalDateTime startDate = userSubscriptionDto.getStartDate();
+
+        // check if startDate  are anterior to current date
+        if (startDate != null && startDate.isBefore(currentDate)) {
+            throw new ForbiddenException("Start date cannot be in the past");
+        }
+
+        // find the latest subscription for the user. Could be in the future.
+        Optional<UserSubscription> lastestUserSubscriptionOpt = userSubscriptionRepository.findTopByUserAndEndDateAfterOrderByEndDateDesc(user, currentDate);
+        if (lastestUserSubscriptionOpt.isPresent()) {
+            UserSubscription lastestUserSubscription = lastestUserSubscriptionOpt.get();
+
+            if (lastestUserSubscription.getEndDate() == null) {
+                throw new ForbiddenException("The latest user subscription has no end date");
+            }
+
+            if (startDate.isBefore(lastestUserSubscription.getEndDate())) {
+                startDate = lastestUserSubscription.getEndDate().plusDays(1);
+                userSubscriptionDto.setStartDate(startDate);
+            }
         }
 
         UserSubscription userSubscription = userSubscriptionMapper.convertToUserSubscriptionEntity(userSubscriptionDto);
         userSubscription.setFreezeDaysRemaining(subscription.getFreezeDaysAllowed());
-        userSubscription.setEndDate(LocalDateTime.now().plusDays(subscription.getDuration()));
+        userSubscription.setStartDate(startDate);
+        userSubscription.setEndDate(startDate.plusDays(subscription.getDuration()));
         UserSubscription savedUserSubscription = userSubscriptionRepository.save(userSubscription);
 
         return userSubscriptionMapper.convertToUserSubscriptionDto(savedUserSubscription);
     }
 
-    public UserSubscriptionDto getUserSubscription(Long userId) {
+    public List<UserSubscriptionDto> getAllUserSubscriptionsByUserId(Long userId) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        UserSubscription userSubscription = userSubscriptionRepository.findByUser(user)
-            .orElseThrow(() -> new ResourceNotFoundException("User subscription not found"));
+        List<UserSubscription> userSubscriptions = userSubscriptionRepository.findByUser(user);
+
+        if (userSubscriptions.isEmpty()) {
+            throw new ResourceNotFoundException("No subscriptions found for user with id: " + userId);
+        }
+
+        return userSubscriptions.stream()
+                .map(userSubscriptionMapper::convertToUserSubscriptionDto)
+                .collect(Collectors.toList());
+    }
+
+    public UserSubscriptionDto getUserSubscriptionById(Long userSubscriptionId) {
+        UserSubscription userSubscription = userSubscriptionRepository.findById(userSubscriptionId)
+                .orElseThrow(() -> new ResourceNotFoundException("User subscription not found"));
 
         return userSubscriptionMapper.convertToUserSubscriptionDto(userSubscription);
     }
 
-    public UserSubscriptionDto updateUserSubscription(Long userId, UserSubscriptionDto userSubscriptionDto) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        if (!user.getId().equals(userSubscriptionDto.getUserId())) {
-            throw new ForbiddenException("User ID in the DTO does not match the authenticated user ID");
-        }
-
-        UserSubscription currentUserSubscription = userSubscriptionRepository.findByUser(user)
-            .orElseThrow(() -> new ResourceNotFoundException("User subscription not found"));
-
-        Subscription newSubscription = subscriptionRepository.findById(userSubscriptionDto.getSubscriptionId())
-            .orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
-
-        if (currentUserSubscription.getEndDate().isAfter(LocalDateTime.now())) {
-            throw new ForbiddenException("Cannot update an active subscription");
-        }
-        LocalDateTime today = LocalDateTime.now();
-        currentUserSubscription.setSubscription(newSubscription);
-        currentUserSubscription.setStartDate(today);
-        currentUserSubscription.setEndDate(today.plusDays(newSubscription.getDuration()));
-        currentUserSubscription.setFreezeDaysRemaining(newSubscription.getFreezeDaysAllowed());
-
-
-        UserSubscription updatedUserSubscription = userSubscriptionRepository.save(currentUserSubscription);
-        return userSubscriptionMapper.convertToUserSubscriptionDto(updatedUserSubscription);
-    }
 
     public void freezeUserSubscription(Long userId, LocalDateTime freezeStartDate, LocalDateTime freezeEndDate) {
-        // TODO: À déterminer si on veut que l'utilisateur ne puisse pas geler son compte alors qu'il est suspendu ?
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        UserSubscription userSubscription = userSubscriptionRepository.findByUser(user)
-            .orElseThrow(() -> new ResourceNotFoundException("User subscription not found"));
+        LocalDateTime currentDate = LocalDateTime.now();
 
-        if (userSubscription.getEndDate().isBefore(LocalDateTime.now())) {
-            throw new ForbiddenException("Cannot freeze a subscription that has already ended");
-        }
+        UserSubscription currentUserSubscription = userSubscriptionRepository.findByUserAndStartDateBeforeAndEndDateAfter(user, currentDate, currentDate)
+                .orElseThrow(() -> new ResourceNotFoundException("No active subscription found for user"));
+
+
         int daysToFreeze = (int) freezeEndDate.toLocalDate().toEpochDay() - (int) freezeStartDate.toLocalDate().toEpochDay();
 
-        int remainingDays = userSubscription.getFreezeDaysRemaining();
+        int remainingDays = currentUserSubscription.getFreezeDaysRemaining();
         if (daysToFreeze > remainingDays) {
             throw new ForbiddenException("Cannot freeze more days than remaining");
         }
 
-        userSubscription.setEndDate(userSubscription.getEndDate().plusDays(daysToFreeze));
-        userSubscription.setFreezeDaysRemaining(remainingDays - daysToFreeze);
-        userSubscriptionRepository.save(userSubscription);
+        currentUserSubscription.setEndDate(currentUserSubscription.getEndDate().plusDays(daysToFreeze));
+        currentUserSubscription.setFreezeDaysRemaining(remainingDays - daysToFreeze);
+        userSubscriptionRepository.save(currentUserSubscription);
 
         user.setSuspensionStartDate(freezeStartDate.toLocalDate());
         user.setSuspensionEndDate(freezeEndDate.toLocalDate());
@@ -113,12 +118,12 @@ public class UserSubscriptionService {
 
     public void deleteUserSubscription(Long userSubscriptionId) {
         UserSubscription userSubscription = userSubscriptionRepository.findById(userSubscriptionId)
-            .orElseThrow(() -> new ResourceNotFoundException("User subscription not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User subscription not found"));
 
         User user = userSubscription.getUser();
-        user.setUserSubscriptions(null);
+        user.removeUserSubscription(userSubscription);
         user.resetSuspensionTypeAndDates();
-        userSubscriptionRepository.deleteById(userSubscription.getId());
+        userSubscriptionRepository.delete(userSubscription);
         userRepository.save(user);
 
     }

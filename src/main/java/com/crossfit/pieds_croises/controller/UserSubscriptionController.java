@@ -4,16 +4,10 @@ import com.crossfit.pieds_croises.dto.UserSubscriptionDto;
 import com.crossfit.pieds_croises.service.UserSubscriptionService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @AllArgsConstructor
@@ -25,21 +19,21 @@ public class UserSubscriptionController {
 
     @PostMapping()
     public ResponseEntity<UserSubscriptionDto> createUserSubscription(
-        @RequestBody UserSubscriptionDto userSubscriptionDto) {
+            @RequestBody UserSubscriptionDto userSubscriptionDto) {
         UserSubscriptionDto createdUserSubscription = userSubscriptionService.createUserSubscription(userSubscriptionDto);
         return ResponseEntity.ok(createdUserSubscription);
     }
 
-    @PutMapping("/{userSubscriptionId}")
-    public ResponseEntity<UserSubscriptionDto> updateUserSubscription(
-        @PathVariable Long userSubscriptionId, @RequestBody UserSubscriptionDto userSubscriptionDto) {
-        UserSubscriptionDto updatedUserSubscription = userSubscriptionService.updateUserSubscription(userSubscriptionId, userSubscriptionDto);
-        return ResponseEntity.ok(updatedUserSubscription);
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<UserSubscriptionDto>> getUserSubscription(@PathVariable Long userId) {
+        List<UserSubscriptionDto> userSubscriptionDto = userSubscriptionService.getAllUserSubscriptionsByUserId(userId);
+        return ResponseEntity.ok(userSubscriptionDto);
     }
 
     @GetMapping("/{userSubscriptionId}")
-    public ResponseEntity<UserSubscriptionDto> getUserSubscription(@PathVariable Long userSubscriptionId) {
-        UserSubscriptionDto userSubscriptionDto = userSubscriptionService.getUserSubscription(userSubscriptionId);
+    public ResponseEntity<UserSubscriptionDto> getUserSubscriptionById(@PathVariable Long userSubscriptionId) {
+        UserSubscriptionDto userSubscriptionDto = userSubscriptionService.getUserSubscriptionById(userSubscriptionId);
         return ResponseEntity.ok(userSubscriptionDto);
     }
 

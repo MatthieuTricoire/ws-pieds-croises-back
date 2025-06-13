@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.model;
 
+import com.crossfit.pieds_croises.enums.SuspensionType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -8,10 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -67,8 +65,8 @@ public class User implements UserDetails {
     @Column(name = "suspension_end_date", nullable = true)
     private LocalDate suspensionEndDate;
 
-    @OneToOne(mappedBy = "user", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
-    private UserSubscription userSubscriptions;
+    @OneToMany(mappedBy = "user", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+    private List<UserSubscription> userSubscriptions = new ArrayList<>();
 
     @Column(nullable = true)
     @OneToMany(mappedBy = "user")
@@ -78,8 +76,6 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<PerformanceHistory> performanceHistoryList;
 
-    @ManyToOne
-    private Box box;
 
     @ManyToMany
     @JoinTable(name = "user_course", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "course_id"))
@@ -174,6 +170,11 @@ public class User implements UserDetails {
         this.suspensionType = null;
         this.suspensionStartDate = null;
         this.suspensionEndDate = null;
+    }
+
+    public void removeUserSubscription(UserSubscription userSubscription) {
+        this.userSubscriptions.remove(userSubscription);
+        userSubscription.setUser(null);
     }
 
 }
