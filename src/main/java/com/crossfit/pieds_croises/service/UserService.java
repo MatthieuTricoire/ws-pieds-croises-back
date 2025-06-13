@@ -23,14 +23,14 @@ public class UserService {
             throw new ResourceNotFoundException("No users found");
         }
         return users.stream()
-                .map(userMapper::convertToDto)
+                .map(userMapper::convertToDtoForAdmin)
                 .toList();
     }
 
     public UserDto getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        return userMapper.convertToDto(user);
+        return userMapper.convertToDtoForAdmin(user);
     }
 
     public UserDto createUser(UserDto userDto) {
@@ -39,7 +39,7 @@ public class UserService {
             user.setCreatedAt(LocalDateTime.now());
             user.setUpdatedAt(LocalDateTime.now());
             User createdUser = userRepository.save(user);
-            return userMapper.convertToDto(createdUser);
+            return userMapper.convertToCreatedDto(createdUser);
         } catch (Exception e) {
             System.err.println("Error creating user: " + e.getMessage());
             throw e;
@@ -59,7 +59,7 @@ public class UserService {
 
         try {
             User updatedUser = userRepository.save(existingUser);
-            return userMapper.convertToDto(updatedUser);
+            return userMapper.convertToDtoForAdmin(updatedUser);
         } catch (Exception e) {
             throw new RuntimeException("Failed to update user with id: " + id, e);
         }

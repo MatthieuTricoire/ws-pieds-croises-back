@@ -46,4 +46,5 @@ VALUES ('Jean', 'Dupont', '{noop}user123', 'jean.dupont@example.com', '060102030
 -- Peupler la table user_roles (si @ElementCollection utilise une table "user_roles" avec user_id et roles)
 INSERT INTO user_roles (user_id, roles)
 VALUES (1, 'ROLE_USER'),
+       (2, 'ROLE_USER'),
        (2, 'ROLE_ADMIN');
