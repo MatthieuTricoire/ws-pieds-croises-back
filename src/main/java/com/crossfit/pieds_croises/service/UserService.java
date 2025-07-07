@@ -1,6 +1,7 @@
 package com.crossfit.pieds_croises.service;
 
 import com.crossfit.pieds_croises.dto.UserDto;
+import com.crossfit.pieds_croises.dto.UserUpdateDto;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.UserMapper;
 import com.crossfit.pieds_croises.model.User;
@@ -41,12 +42,11 @@ public class UserService {
             User createdUser = userRepository.save(user);
             return userMapper.convertToCreatedDto(createdUser);
         } catch (Exception e) {
-            System.err.println("Error creating user: " + e.getMessage());
-            throw e;
+            throw new RuntimeException("Error creating user", e);
         }
     }
 
-    public UserDto updateUser(Long id, UserDto userDto) {
+    public UserDto updateUser(Long id, UserUpdateDto userDto) {
         if (userDto.getId() != null && !userDto.getId().equals(id)) {
             throw new IllegalArgumentException("ID mismatch between path variable and request body");
         }
@@ -65,11 +65,10 @@ public class UserService {
         }
     }
 
-    public boolean deleteUser(Long id) {
+    public void deleteUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         userRepository.delete(user);
-        return true;
     }
 
     public UserDto getMyProfile(Long id) {
@@ -78,7 +77,7 @@ public class UserService {
         return userMapper.convertToDtoForUser(user);
     }
 
-    public UserDto updateProfile(String username, UserDto userDto) {
+    public UserDto updateProfile(String username, UserUpdateDto userDto) {
         User existingUser = userRepository.findByEmail(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + username));
 
@@ -92,6 +91,4 @@ public class UserService {
             throw new RuntimeException("Failed to update user: " + username, e);
         }
     }
-
-
 }
