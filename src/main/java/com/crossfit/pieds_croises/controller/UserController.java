@@ -1,6 +1,7 @@
 package com.crossfit.pieds_croises.controller;
 
 import com.crossfit.pieds_croises.dto.UserDto;
+import com.crossfit.pieds_croises.dto.UserUpdateDto;
 import com.crossfit.pieds_croises.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -55,7 +56,7 @@ public class UserController {
     // 🔹 UPDATE
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto userDetails) {
+    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateDto userDetails) {
         UserDto userDto = userService.updateUser(id, userDetails);
         if (userDto == null) {
             return ResponseEntity.notFound().build();
@@ -67,10 +68,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        if (userService.deleteUser(id)) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 }

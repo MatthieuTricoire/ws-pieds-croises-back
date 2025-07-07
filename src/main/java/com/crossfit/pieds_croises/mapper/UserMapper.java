@@ -1,6 +1,7 @@
 package com.crossfit.pieds_croises.mapper;
 
 import com.crossfit.pieds_croises.dto.UserDto;
+import com.crossfit.pieds_croises.dto.UserUpdateDto;
 import com.crossfit.pieds_croises.model.User;
 import org.mapstruct.*;
 
@@ -42,5 +43,5 @@ public interface UserMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    void updateUserFromDto(UserDto userDto, @MappingTarget User user);
+    void updateUserFromDto(UserUpdateDto userDto, @MappingTarget User user);
 }
