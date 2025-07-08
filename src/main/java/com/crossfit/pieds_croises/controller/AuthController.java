@@ -7,6 +7,7 @@ import com.crossfit.pieds_croises.security.AuthenticationService;
 import com.crossfit.pieds_croises.service.UserService;
 import org.springframework.http.HttpStatus;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

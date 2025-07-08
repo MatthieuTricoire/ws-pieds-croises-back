@@ -144,4 +144,39 @@ public class UserService {
 
         userRepository.save(user);
     }
+
+    public UserDto inviteUserByEmail(String email) {
+        User user = new User();
+        user.setEmail(email);
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
+        user.setFirstLoginComplete(false);
+        user.setRoles(Set.of("ROLE_USER"));
+
+        String token = UUID.randomUUID().toString();
+        user.setRegistrationToken(token);
+        user.setTokenExpiryDate(LocalDateTime.now().plusDays(2));
+
+        userRepository.save(user);
+
+        // TO DO : implémenter envoi d'email
+
+        return userMapper.convertToDtoForAdmin(user);
+    }
+
+    public void completeFirstLogin(FirstLoginDto dto) {
+        User user = userRepository.findByRegistrationToken(dto.getToken())
+                .orElseThrow(() -> new ResourceNotFoundException("Lien invalide"));
+
+        if (user.getTokenExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Lien expiré");
+        }
+
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setRegistrationToken(null); // Token à usage unique
+        user.setFirstLoginComplete(true);
+        user.setUpdatedAt(LocalDateTime.now());
+
+        userRepository.save(user);
+    }
 }
