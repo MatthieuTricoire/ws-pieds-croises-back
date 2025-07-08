@@ -41,8 +41,7 @@ public class UserService {
             User createdUser = userRepository.save(user);
             return userMapper.convertToCreatedDto(createdUser);
         } catch (Exception e) {
-            System.err.println("Error creating user: " + e.getMessage());
-            throw e;
+            throw new RuntimeException("Error creating user", e);
         }
     }
 
@@ -65,10 +64,9 @@ public class UserService {
         }
     }
 
-    public boolean deleteUser(Long id) {
+    public void deleteUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         userRepository.delete(user);
-        return true;
     }
 }
