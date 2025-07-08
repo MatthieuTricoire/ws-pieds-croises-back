@@ -46,5 +46,14 @@ VALUES ('Jean', 'Dupont', '{noop}user123', 'jean.dupont@example.com', '060102030
 -- Peupler la table user_roles (si @ElementCollection utilise une table "user_roles" avec user_id et roles)
 INSERT INTO user_roles (user_id, roles)
 VALUES (1, 'ROLE_USER'),
-       (2, 'ROLE_USER'),
        (2, 'ROLE_ADMIN');
+
+-- Peupler la table weight_history
+INSERT INTO weight_history(weight, date, user_id)
+VALUES (55, '2025-01-01', 2),
+       (57, '2025-02-01', 2),
+       (60, '2025-03-01', 2),
+       (62, '2025-04-01', 2),
+       (65, '2025-05-01', 2),
+       (64, '2025-06-01', 2),
+       (67, '2025-07-01', 2);
