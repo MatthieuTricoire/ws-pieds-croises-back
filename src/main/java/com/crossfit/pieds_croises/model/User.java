@@ -80,6 +80,9 @@ public class User implements UserDetails {
     @ManyToMany
     @JoinTable(name = "user_course", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "course_id"))
     private List<Course> courses;
+    private String registrationToken;
+    private LocalDateTime tokenExpiryDate;
+    private boolean isFirstLoginComplete;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
