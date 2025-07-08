@@ -48,3 +48,9 @@ INSERT INTO user_roles (user_id, roles)
 VALUES (1, 'ROLE_USER'),
        (2, 'ROLE_USER'),
        (2, 'ROLE_ADMIN');
+
+INSERT INTO performance_history(date, value, exercice_id, user_id)
+VALUES ('2025-02-01', 33, 2, 2),
+       ('2025-03-01', 36, 2, 2),
+       ('2025-04-01', 38, 2, 2),
+       ('2025-05-01', 41, 2, 2);
