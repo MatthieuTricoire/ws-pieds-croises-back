@@ -23,9 +23,6 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<UserDto>> getAllUsers() {
         List<UserDto> userDtos = userService.getAllUsers();
-        if (userDtos == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(userDtos);
     }
 
@@ -34,9 +31,6 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         UserDto userDto = userService.getUserById(id);
-        if (userDto == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(userDto);
     }
 
@@ -44,13 +38,8 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto user) {
-        try {
-            UserDto userDto = userService.createUser(user);
-            return ResponseEntity.ok(userDto);
-        } catch (Exception e) {
-            System.err.println("Error in controller when creating user: " + e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        UserDto userDto = userService.createUser(user);
+        return ResponseEntity.ok(userDto);
     }
 
     // 🔹 UPDATE
@@ -58,9 +47,6 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateDto userDetails) {
         UserDto userDto = userService.updateUser(id, userDetails);
-        if (userDto == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(userDto);
     }
 

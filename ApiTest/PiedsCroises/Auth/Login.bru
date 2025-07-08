@@ -16,3 +16,13 @@ body:json {
       "password": "admin123"
   }
 }
+
+tests {
+  if (res.status === 200) {
+    const token = res.body;
+  
+    if (token && token.split(".").length === 3) {
+      bru.setEnvVar("token", token);
+    }
+  }
+}

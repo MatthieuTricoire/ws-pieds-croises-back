@@ -1,0 +1,22 @@
+meta {
+  name: Create weight history
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/weight-histories
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "weight": "64",
+    "date": "2025-06-13"
+  }
+}

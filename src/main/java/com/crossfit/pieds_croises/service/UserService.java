@@ -90,5 +90,6 @@ public class UserService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to update user: " + username, e);
         }
+
     }
 }
