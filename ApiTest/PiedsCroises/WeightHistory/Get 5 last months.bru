@@ -5,7 +5,15 @@ meta {
 }
 
 get {
-  url: http://localhost:8080
+  url: http://localhost:8080/weight-histories?months=5
   body: none
-  auth: inherit
+  auth: bearer
+}
+
+params:query {
+  months: 5
+}
+
+auth:bearer {
+  token: {{token}}
 }

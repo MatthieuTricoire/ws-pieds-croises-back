@@ -40,9 +40,6 @@ public class WeightHistoryController {
             @AuthenticationPrincipal User user
     ) {
         WeightHistoryDTO savedWeightHistory = weightHistoryService.createWeightHistory(weightHistoryDTO, user.getId());
-        if (savedWeightHistory == null) {
-            return ResponseEntity.badRequest().build();
-        }
         return ResponseEntity.status(HttpStatus.CREATED).body(savedWeightHistory);
     }
 
@@ -53,9 +50,6 @@ public class WeightHistoryController {
             @AuthenticationPrincipal User user
     ) {
         WeightHistoryDTO updatedWeightHistory = weightHistoryService.updateWeightHistory(id, weightHistoryDTO, user.getId());
-        if (updatedWeightHistory == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(updatedWeightHistory);
     }
 
@@ -64,10 +58,7 @@ public class WeightHistoryController {
             @PathVariable Long id,
             @AuthenticationPrincipal User user
     ) {
-        if (weightHistoryService.deleteWeightHistory(id, user.getId())) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        weightHistoryService.deleteWeightHistory(id, user.getId());
+        return ResponseEntity.noContent().build();
     }
 }
