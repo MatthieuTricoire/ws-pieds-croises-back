@@ -31,7 +31,7 @@ public class WeightHistoryService {
     }
 
     public List<WeightHistoryDTO> getAllWeightHistoryForLastXMonths(Long userId, Integer months) {
-        LocalDate startDate = LocalDate.now().minusMonths(months);
+        LocalDate startDate = LocalDate.now().withDayOfMonth(1).minusMonths(months - 1);
         List<WeightHistory> weightHistoryList = weightHistoryRepository.findAllByUserIdForLastXMonths(userId, startDate);
         return weightHistoryList.stream()
                 .map(weightHistoryMapper::convertToDTO)
@@ -62,15 +62,12 @@ public class WeightHistoryService {
         return weightHistoryMapper.convertToDTO(updatedWeightHistory);
     }
 
-    public boolean deleteWeightHistory(Long id, Long userId) {
-        WeightHistory weightHistory = weightHistoryRepository.findById(id).orElse(null);
-        if (weightHistory == null) {
-            return false;
-        }
+    public void deleteWeightHistory(Long id, Long userId) {
+        WeightHistory weightHistory = weightHistoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("WeightHistory with id " + id + " not found."));
         if (!weightHistory.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("Not authorized to delete this weightHistory.");
         }
         weightHistoryRepository.delete(weightHistory);
-        return true;
     }
 }
