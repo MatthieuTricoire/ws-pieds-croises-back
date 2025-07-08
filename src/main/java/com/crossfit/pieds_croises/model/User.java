@@ -85,6 +85,9 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "course_id")
     )
     private List<Course> courses;
+    private String registrationToken;
+    private LocalDateTime tokenExpiryDate;
+    private boolean isFirstLoginComplete;
 
 
     @Override
