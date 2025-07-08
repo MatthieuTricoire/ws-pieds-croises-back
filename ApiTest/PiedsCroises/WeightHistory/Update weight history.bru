@@ -1,0 +1,23 @@
+meta {
+  name: Update weight history
+  type: http
+  seq: 2
+}
+
+put {
+  url: http://localhost:8080/weight-histories/1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "id": 1,
+    "weight": "56",
+    "date": "2025-06-13"
+  }
+}
