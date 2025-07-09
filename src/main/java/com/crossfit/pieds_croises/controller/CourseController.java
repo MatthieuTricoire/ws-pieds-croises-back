@@ -3,6 +3,7 @@ package com.crossfit.pieds_croises.controller;
 import com.crossfit.pieds_croises.dto.CourseCreateDTO;
 import com.crossfit.pieds_croises.dto.CourseDTO;
 import com.crossfit.pieds_croises.dto.CourseUpdateDTO;
+import com.crossfit.pieds_croises.dto.UserDto;
 import com.crossfit.pieds_croises.model.User;
 import com.crossfit.pieds_croises.service.CourseService;
 import jakarta.validation.Valid;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,13 +62,13 @@ public class CourseController {
     }
 
     @PutMapping("/{courseId}/register")
-    public ResponseEntity<CourseDTO> addUserToCourse(@PathVariable Long courseId, @AuthenticationPrincipal User user) {
+    public ResponseEntity<CourseDTO> registerToCourse(@PathVariable Long courseId, @AuthenticationPrincipal User user) {
         CourseDTO courseWithNewUser = courseService.addUserToCourse(courseId, user.getId());
         return ResponseEntity.ok(courseWithNewUser);
     }
 
     @DeleteMapping("/{courseId}/unsubscribe")
-    public ResponseEntity<CourseDTO> deleteUserFromCourse(@PathVariable Long courseId, @AuthenticationPrincipal User user) {
+    public ResponseEntity<CourseDTO> unsubscribeFromCourse(@PathVariable Long courseId, @AuthenticationPrincipal User user) {
         CourseDTO courseMinusOneUser = courseService.deleteUserFromCourse(courseId, user.getId());
         return ResponseEntity.ok(courseMinusOneUser);
     }
@@ -75,5 +77,26 @@ public class CourseController {
     public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
         courseService.deleteCourse(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/{id}/available-users")
+    public ResponseEntity<List<UserDto>> getAvailableUsers(@PathVariable Long id) {
+        List<UserDto> users = courseService.getUsersNotInCourse(id);
+        return ResponseEntity.ok(users);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{courseId}/users/{userId}")
+    public ResponseEntity<CourseDTO> addUserToCourse(@PathVariable Long courseId, @PathVariable Long userId) {
+        CourseDTO course =  courseService.addUserToCourse(courseId, userId);
+        return ResponseEntity.ok(course);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{courseId}/users/{userId}")
+    public ResponseEntity<CourseDTO> removeUserFromCourse(@PathVariable Long courseId, @PathVariable Long userId) {
+        CourseDTO course =  courseService.deleteUserFromCourse(courseId, userId);
+        return ResponseEntity.ok(course);
     }
 }
