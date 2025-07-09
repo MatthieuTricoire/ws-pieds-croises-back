@@ -38,15 +38,15 @@ public class MessageService {
         return messageMapper.convertToDto(message);
     }
 
-//    public List<MessageDTO> getCurrentMessagesByBoxID(Long boxId) {
-//        List<Message> messages = messageRepository.findCurrentMessagesASCByBoxId(boxId, today);
-//
-//        if (messages.isEmpty()) {
-//            throw new ResourceNotFoundException("There are no current messages");
-//        }
-//        return messages.stream().map(messageMapper::convertToDto).collect(Collectors.toList());
-//    }
-//
+    public List<MessageDTO> getActiveMessages() {
+        List<Message> messages = messageRepository.findActiveMessagesOrderByExpirationDateDesc(today);
+
+        if (messages.isEmpty()) {
+            throw new ResourceNotFoundException("There are no current messages");
+        }
+        return messages.stream().map(messageMapper::convertToDto).collect(Collectors.toList());
+    }
+
 //    public List<MessageDTO> getExpiredMessages(Long boxId) {
 //        List<Message> messages = messageRepository.findExpirationMessagesDESCByBoxId(boxId, today);
 //
@@ -56,7 +56,7 @@ public class MessageService {
 //
 //        return messages.stream().map(messageMapper::convertToDto).collect(Collectors.toList());
 //    }
-//
+
 //    public List<MessageDTO> getComingMessages(Long boxId) {
 //        List<Message> messages = messageRepository.findComingMessagesASCByBoxId(boxId, today);
 //
