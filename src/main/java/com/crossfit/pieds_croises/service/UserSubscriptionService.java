@@ -43,15 +43,15 @@ public class UserSubscriptionService {
         }
 
         // find the latest subscription for the user. Could be in the future.
-        Optional<UserSubscription> lastestUserSubscriptionOpt = userSubscriptionRepository.findTopByUserAndEndDateAfterOrderByEndDateDesc(user, currentDate);
-        if (lastestUserSubscriptionOpt.isPresent()) {
-            UserSubscription lastestUserSubscription = lastestUserSubscriptionOpt.get();
+        Optional<UserSubscription> latestUserSubscriptionOpt = userSubscriptionRepository.findTopByUserAndEndDateAfterOrderByEndDateDesc(user, currentDate);
+        if (latestUserSubscriptionOpt.isPresent()) {
+            UserSubscription lastestUserSubscription = latestUserSubscriptionOpt.get();
 
             if (lastestUserSubscription.getEndDate() == null) {
                 throw new ForbiddenException("The latest user subscription has no end date");
             }
 
-            if (startDate.isBefore(lastestUserSubscription.getEndDate())) {
+            if (startDate != null && startDate.isBefore(lastestUserSubscription.getEndDate())) {
                 startDate = lastestUserSubscription.getEndDate().plusDays(1);
                 userSubscriptionDto.setStartDate(startDate);
             }
@@ -98,10 +98,16 @@ public class UserSubscriptionService {
         UserSubscription currentUserSubscription = userSubscriptionRepository.findByUserAndStartDateBeforeAndEndDateAfter(user, currentDate, currentDate)
                 .orElseThrow(() -> new ResourceNotFoundException("No active subscription found for user"));
 
-
+        if (freezeStartDate.isBefore(currentDate) || freezeEndDate.isBefore(currentDate)) {
+            throw new ForbiddenException("Freeze dates cannot be in the past");
+        }
+        if (freezeStartDate.isAfter(freezeEndDate)) {
+            throw new ForbiddenException("Freeze start date cannot be after freeze end date");
+        }
         int daysToFreeze = (int) freezeEndDate.toLocalDate().toEpochDay() - (int) freezeStartDate.toLocalDate().toEpochDay();
 
         int remainingDays = currentUserSubscription.getFreezeDaysRemaining();
+
         if (daysToFreeze > remainingDays) {
             throw new ForbiddenException("Cannot freeze more days than remaining");
         }
