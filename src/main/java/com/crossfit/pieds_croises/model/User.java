@@ -71,7 +71,7 @@ public class User implements UserDetails {
     private List<UserSubscription> userSubscriptions;
 
     @Column(nullable = true)
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<WeightHistory> weightHistory;
 
     @Column(nullable = true)

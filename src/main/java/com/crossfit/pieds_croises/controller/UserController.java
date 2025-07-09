@@ -2,11 +2,13 @@ package com.crossfit.pieds_croises.controller;
 
 import com.crossfit.pieds_croises.dto.UserDto;
 import com.crossfit.pieds_croises.dto.UserUpdateDto;
+import com.crossfit.pieds_croises.model.User;
 import com.crossfit.pieds_croises.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,6 +36,13 @@ public class UserController {
         return ResponseEntity.ok(userDto);
     }
 
+    // 🔹 READ USER PROFILE
+    @GetMapping("/profile")
+    public ResponseEntity<UserDto> getMyProfile(@AuthenticationPrincipal User user) {
+        UserDto userDto = userService.getMyProfile(user.getId());
+        return ResponseEntity.ok(userDto);
+    }
+
     // 🔹 CREATE
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
@@ -50,6 +59,14 @@ public class UserController {
         return ResponseEntity.ok(userDto);
     }
 
+    // 🔹 UPDATE USER PROFILE
+    @PutMapping("/profile")
+    public ResponseEntity<UserDto> updateProfile(@AuthenticationPrincipal User user, @Valid @RequestBody UserUpdateDto userDetails) {
+        String username = user.getEmail();
+        UserDto userDto = userService.updateProfile(username, userDetails);
+        return ResponseEntity.ok(userDto);
+    }
+
     // 🔹 DELETE
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
@@ -57,4 +74,13 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
+
+    // 🔹 DELETE USER PROFILE
+    @DeleteMapping("/profile")
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal User user) {
+        userService.deleteUser(user.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+
 }
