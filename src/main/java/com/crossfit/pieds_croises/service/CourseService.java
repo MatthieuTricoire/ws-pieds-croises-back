@@ -3,9 +3,11 @@ package com.crossfit.pieds_croises.service;
 import com.crossfit.pieds_croises.dto.CourseCreateDTO;
 import com.crossfit.pieds_croises.dto.CourseDTO;
 import com.crossfit.pieds_croises.dto.CourseUpdateDTO;
+import com.crossfit.pieds_croises.dto.UserDto;
 import com.crossfit.pieds_croises.exception.BusinessException;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.CourseMapper;
+import com.crossfit.pieds_croises.mapper.UserMapper;
 import com.crossfit.pieds_croises.model.Course;
 import com.crossfit.pieds_croises.model.User;
 import com.crossfit.pieds_croises.repository.CourseRepository;
@@ -27,6 +29,7 @@ public class CourseService {
     private final UserRepository userRepository;
 
     private final LocalDateTime today = LocalDateTime.now();
+    private final UserMapper userMapper;
 
     public List<CourseDTO> getAllCourses() {
         List<Course> courses = courseRepository.findAll();
@@ -173,6 +176,17 @@ public class CourseService {
             courseRepository.save(existingCourse);
         }
         courseRepository.delete(existingCourse);
+    }
 
+    public List<UserDto> getUsersNotInCourse(Long id) {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
+        List<User> users = userRepository.findAll();
+
+        return users.stream()
+                .filter(user -> !course.getUsers().contains(user))
+                .filter(user -> !user.getId().equals(course.getCoach().getId()))
+                .map(userMapper::convertToDtoForAdmin)
+                .collect(Collectors.toList());
     }
 }
