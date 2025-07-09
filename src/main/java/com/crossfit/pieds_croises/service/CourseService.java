@@ -2,6 +2,7 @@ package com.crossfit.pieds_croises.service;
 
 import com.crossfit.pieds_croises.dto.CourseCreateDTO;
 import com.crossfit.pieds_croises.dto.CourseDTO;
+import com.crossfit.pieds_croises.dto.CourseUpdateDTO;
 import com.crossfit.pieds_croises.exception.BusinessException;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.CourseMapper;
@@ -29,17 +30,13 @@ public class CourseService {
 
     public List<CourseDTO> getAllCourses() {
         List<Course> courses = courseRepository.findAll();
-        if (courses.isEmpty()) {
-            throw new ResourceNotFoundException("The course list is empty");
-        }
+
         return courses.stream().map(courseMapper::convertToDto).collect(Collectors.toList());
     }
 
     public List<CourseDTO> getCoursesNextTwoWeeks() {
         List<Course> courses = courseRepository.findByStartDatetimeBetweenOrderByStartDatetimeAsc(today, today.plusWeeks(2));
-        if (courses.isEmpty()) {
-            throw new ResourceNotFoundException("The course list is empty");
-        }
+
         return courses.stream().map(courseMapper::convertToDto).collect(Collectors.toList());
     }
 
@@ -49,9 +46,7 @@ public class CourseService {
         LocalDateTime endOfDay = date.atTime(23, 59, 59);
 
         List<Course> courses = courseRepository.findByStartDatetimeBetweenOrderByStartDatetimeAsc(startOfDay, endOfDay);
-        if (courses.isEmpty()) {
-            throw new ResourceNotFoundException("There are no courses today");
-        }
+
         return courses.stream().map(courseMapper::convertToDto).collect(Collectors.toList());
     }
 
@@ -70,6 +65,7 @@ public class CourseService {
 
         Course course = courseMapper.convertToEntity(courseCreateDTO);
 
+
         User coach = userRepository.findById(courseCreateDTO.getCoachId())
                 .orElseThrow(() -> new ResourceNotFoundException("Coach not found with id : " + courseCreateDTO.getCoachId()));
 
@@ -77,30 +73,34 @@ public class CourseService {
             throw new ResourceNotFoundException("The selected user does not have the role of coach");
         }
 
+        course.setCreatedAt(LocalDateTime.now());
+        course.setUpdatedAt(LocalDateTime.now());
         course.setCoach(coach);
 
         course = courseRepository.save(course);
         return courseMapper.convertToDto(course);
     }
 
-    public CourseDTO updateCourse(Long id, @Valid CourseDTO courseDTO) {
+    public CourseDTO updateCourse(Long id, @Valid CourseUpdateDTO courseUpdateDTO) {
         Course existingCourse = courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
 
-        User coach = userRepository.findById(courseDTO.getCoachId())
-                .orElseThrow(() -> new ResourceNotFoundException("Coach not found with id : " + courseDTO.getCoachId()));
+        User coach = userRepository.findById(courseUpdateDTO.getCoachId())
+                .orElseThrow(() -> new ResourceNotFoundException("Coach not found with id : " + courseUpdateDTO.getCoachId()));
 
         if (!coach.isCoach()) {
             throw new ResourceNotFoundException("The selected user does not have the role of coach");
         }
 
-        courseMapper.updateFromDTO(courseDTO, existingCourse);
+        courseMapper.updateFromDTO(courseUpdateDTO, existingCourse);
+
+        existingCourse.setCoach(coach);
 
         Course savedCourse = courseRepository.save(existingCourse);
         return courseMapper.convertToDto(savedCourse);
     }
 
-    public void addUserToCourse(Long courseId, Long userId) {
+    public CourseDTO addUserToCourse(Long courseId, Long userId) {
 
         Course existingCourse = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
@@ -131,9 +131,10 @@ public class CourseService {
         userRepository.save(existingUser);
         courseRepository.save(existingCourse);
 
+        return courseMapper.convertToDto(existingCourse);
     }
 
-    public void deleteUserFromCourse(Long courseId, Long userId) {
+    public CourseDTO deleteUserFromCourse(Long courseId, Long userId) {
 
         Course existingCourse = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
@@ -153,6 +154,8 @@ public class CourseService {
 
         userRepository.save(existingUser);
         courseRepository.save(existingCourse);
+
+        return courseMapper.convertToDto(existingCourse);
     }
 
     public void deleteCourse(Long id) {

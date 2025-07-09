@@ -2,6 +2,7 @@ package com.crossfit.pieds_croises.controller;
 
 import com.crossfit.pieds_croises.dto.CourseCreateDTO;
 import com.crossfit.pieds_croises.dto.CourseDTO;
+import com.crossfit.pieds_croises.dto.CourseUpdateDTO;
 import com.crossfit.pieds_croises.model.User;
 import com.crossfit.pieds_croises.service.CourseService;
 import jakarta.validation.Valid;
@@ -53,21 +54,21 @@ public class CourseController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CourseDTO> updateCourse(@PathVariable Long id, @Valid @RequestBody CourseDTO courseDTO) {
-        CourseDTO updateCourse = courseService.updateCourse(id, courseDTO);
+    public ResponseEntity<CourseDTO> updateCourse(@PathVariable Long id, @Valid @RequestBody CourseUpdateDTO courseUpdateDTO) {
+        CourseDTO updateCourse = courseService.updateCourse(id, courseUpdateDTO);
         return ResponseEntity.ok(updateCourse);
     }
 
     @PutMapping("/{courseId}/register")
-    public ResponseEntity<String> addUserToCourse(@PathVariable Long courseId, @AuthenticationPrincipal User user) {
-        courseService.addUserToCourse(courseId, user.getId());
-        return ResponseEntity.ok("User added to course");
+    public ResponseEntity<CourseDTO> addUserToCourse(@PathVariable Long courseId, @AuthenticationPrincipal User user) {
+        CourseDTO courseWithNewUser = courseService.addUserToCourse(courseId, user.getId());
+        return ResponseEntity.ok(courseWithNewUser);
     }
 
     @DeleteMapping("/{courseId}/unsubscribe")
-    public ResponseEntity<String> deleteUserFromCourse(@PathVariable Long courseId, @AuthenticationPrincipal User user) {
-        courseService.deleteUserFromCourse(courseId, user.getId());
-        return ResponseEntity.ok("User deleted from the course");
+    public ResponseEntity<CourseDTO> deleteUserFromCourse(@PathVariable Long courseId, @AuthenticationPrincipal User user) {
+        CourseDTO courseMinusOneUser = courseService.deleteUserFromCourse(courseId, user.getId());
+        return ResponseEntity.ok(courseMinusOneUser);
     }
 
     @DeleteMapping("/{id}")

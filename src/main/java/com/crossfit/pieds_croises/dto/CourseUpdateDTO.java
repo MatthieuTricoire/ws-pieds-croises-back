@@ -13,7 +13,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CourseCreateDTO {
+public class CourseUpdateDTO {
+
+    @NotNull(message = "L'id doit être renseigner")
+    private Long id;
 
     @NotBlank(message = "Le titre ne doit pas être vide")
     @Size(min = 2, max = 100, message = "Le titre doit contenir entre 2 et 100 caractères")
