@@ -10,21 +10,24 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BoxDto {
-    @NotBlank(message = "Name is required")
-    @Size(max = 100, message = "Name must be less than 100 characters")
-    private String name;
 
-    @NotBlank(message = "Address is required")
-    private String address;
+  private Long id;
 
-    @NotBlank
-    @Size(max = 100, message = "City must be less than 100 characters")
-    private String city;
+  @NotBlank(message = "Name is required")
+  @Size(max = 100, message = "Name must be less than 100 characters")
+  private String name;
 
-    @NotBlank(message = "Zipcode is required")
-    @Size(max = 5, message = "Zipcode must be less than 5 characters")
-    private String zipcode;
+  @NotBlank(message = "Address is required")
+  private String address;
 
-    private String schedule;
+  @NotBlank
+  @Size(max = 100, message = "City must be less than 100 characters")
+  private String city;
+
+  @NotBlank(message = "Zipcode is required")
+  @Size(max = 5, message = "Zipcode must be less than 5 characters")
+  private String zipcode;
+
+  private String schedule;
 
 }

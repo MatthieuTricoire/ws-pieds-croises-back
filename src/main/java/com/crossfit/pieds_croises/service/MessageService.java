@@ -4,9 +4,7 @@ import com.crossfit.pieds_croises.dto.MessageCreateDTO;
 import com.crossfit.pieds_croises.dto.MessageDTO;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.MessageMapper;
-import com.crossfit.pieds_croises.model.Box;
 import com.crossfit.pieds_croises.model.Message;
-import com.crossfit.pieds_croises.repository.BoxRepository;
 import com.crossfit.pieds_croises.repository.MessageRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +23,6 @@ public class MessageService {
     private final MessageMapper messageMapper;
 
     private final MessageRepository messageRepository;
-    private final BoxRepository boxRepository;
 
     private final LocalDate today = LocalDate.now();
 
@@ -43,50 +40,43 @@ public class MessageService {
         return messageMapper.convertToDto(message);
     }
 
-    public List<MessageDTO> getCurrentMessagesByBoxID(Long boxId) {
-        List<Message> messages = messageRepository.findCurrentMessagesASCByBoxId(boxId, today);
-
-        if (messages.isEmpty()) {
-            throw new ResourceNotFoundException("There are no current messages");
-        }
-        return messages.stream().map(messageMapper::convertToDto).collect(Collectors.toList());
-    }
-
-    public List<MessageDTO> getExpiredMessages(Long boxId) {
-        List<Message> messages = messageRepository.findExpirationMessagesDESCByBoxId(boxId, today);
-
-        if (messages.isEmpty()) {
-            throw new ResourceNotFoundException("There are no expired messages");
-        }
-
-        return messages.stream().map(messageMapper::convertToDto).collect(Collectors.toList());
-    }
-
-    public List<MessageDTO> getComingMessages(Long boxId) {
-        List<Message> messages = messageRepository.findComingMessagesASCByBoxId(boxId, today);
-
-        if (messages.isEmpty()) {
-            throw new ResourceNotFoundException("There are no coming messages");
-        }
-
-        return messages.stream().map(messageMapper::convertToDto).collect(Collectors.toList());
-    }
+//    public List<MessageDTO> getCurrentMessagesByBoxID(Long boxId) {
+//        List<Message> messages = messageRepository.findCurrentMessagesASCByBoxId(boxId, today);
+//
+//        if (messages.isEmpty()) {
+//            throw new ResourceNotFoundException("There are no current messages");
+//        }
+//        return messages.stream().map(messageMapper::convertToDto).collect(Collectors.toList());
+//    }
+//
+//    public List<MessageDTO> getExpiredMessages(Long boxId) {
+//        List<Message> messages = messageRepository.findExpirationMessagesDESCByBoxId(boxId, today);
+//
+//        if (messages.isEmpty()) {
+//            throw new ResourceNotFoundException("There are no expired messages");
+//        }
+//
+//        return messages.stream().map(messageMapper::convertToDto).collect(Collectors.toList());
+//    }
+//
+//    public List<MessageDTO> getComingMessages(Long boxId) {
+//        List<Message> messages = messageRepository.findComingMessagesASCByBoxId(boxId, today);
+//
+//        if (messages.isEmpty()) {
+//            throw new ResourceNotFoundException("There are no coming messages");
+//        }
+//
+//        return messages.stream().map(messageMapper::convertToDto).collect(Collectors.toList());
+//    }
 
 
     public MessageDTO createMessage(MessageCreateDTO messageCreateDTO) {
 
-        if (messageCreateDTO.getBoxId() != null) {
-            Box box = boxRepository.findById(messageCreateDTO.getBoxId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Box non trouvée avec l'ID: " + messageCreateDTO.getBoxId()));
+        Message message = messageMapper.convertToEntity(messageCreateDTO);
 
-            Message message = messageMapper.convertToEntity(messageCreateDTO);
-            message.setBox(box);
+        Message savedMessage = messageRepository.save(message);
+        return messageMapper.convertToDto(savedMessage);
 
-            Message savedMessage = messageRepository.save(message);
-            return messageMapper.convertToDto(savedMessage);
-        } else {
-            throw new IllegalArgumentException("Box id is required");
-        }
 
     }
 
