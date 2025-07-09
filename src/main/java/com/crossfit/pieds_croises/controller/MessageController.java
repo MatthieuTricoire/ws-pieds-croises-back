@@ -40,34 +40,34 @@ public class MessageController {
         return ResponseEntity.ok(messageDTO);
     }
 
-    @GetMapping("/{boxId}/current")
-    public ResponseEntity<List<MessageDTO>> getCurrentMessagesByBoxID(@PathVariable Long boxId) {
-        List<MessageDTO> messages = messageService.getCurrentMessagesByBoxID(boxId);
-        if (messages.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(messages);
-    }
-
-    @GetMapping("/{boxId}/expired")
-    public ResponseEntity<List<MessageDTO>> getExpiredMessages(@PathVariable Long boxId) {
-        List<MessageDTO> messages = messageService.getExpiredMessages(boxId);
-        if (messages.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(messages);
-    }
-
-    @GetMapping("/{boxId}/coming")
-    public ResponseEntity<List<MessageDTO>> getComingMessages(@PathVariable Long boxId) {
-        List<MessageDTO> messages = messageService.getComingMessages(boxId);
-        if (messages.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(messages);
-    }
+//    @GetMapping("/{boxId}/current")
+//    public ResponseEntity<List<MessageDTO>> getCurrentMessagesByBoxID(@PathVariable Long boxId) {
+//        List<MessageDTO> messages = messageService.getCurrentMessagesByBoxID(boxId);
+//        if (messages.isEmpty()) {
+//            return ResponseEntity.noContent().build();
+//        }
+//        return ResponseEntity.ok(messages);
+//    }
+//
+//    @GetMapping("/{boxId}/expired")
+//    public ResponseEntity<List<MessageDTO>> getExpiredMessages(@PathVariable Long boxId) {
+//        List<MessageDTO> messages = messageService.getExpiredMessages(boxId);
+//        if (messages.isEmpty()) {
+//            return ResponseEntity.noContent().build();
+//        }
+//
+//        return ResponseEntity.ok(messages);
+//    }
+//
+//    @GetMapping("/{boxId}/coming")
+//    public ResponseEntity<List<MessageDTO>> getComingMessages(@PathVariable Long boxId) {
+//        List<MessageDTO> messages = messageService.getComingMessages(boxId);
+//        if (messages.isEmpty()) {
+//            return ResponseEntity.noContent().build();
+//        }
+//
+//        return ResponseEntity.ok(messages);
+//    }
 
     @PostMapping
     public ResponseEntity<MessageDTO> createMessage(@Valid @RequestBody MessageCreateDTO messageCreateDTO) {

@@ -13,29 +13,32 @@ import java.util.List;
 @AllArgsConstructor
 public class Subscription {
 
-    @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(length = 100, nullable = false, unique = true)
-    private String name;
+  @Column(length = 100, nullable = false, unique = true)
+  private String name;
 
-    @Column(nullable = false, unique = true)
-    private int price;
+  @Column(nullable = false, unique = true)
+  private int price;
 
-    @Column(name = "session_per_week")
-    private int sessionPerWeek;
+  @Column(name = "session_per_week")
+  private int sessionPerWeek;
 
-    @Column(nullable = false)
-    private short duration;
+  @Column(nullable = false)
+  private short duration; // number of days
 
-    @Column(columnDefinition = "TEXT")
-    private String terminationConditions;
+  @Column(name = "freeze_days_allowed", nullable = false)
+  private short freezeDaysAllowed; // days
 
-    @ManyToOne
-    @JoinColumn(name = "box_id")
-    private Box box;
+  @Column(name = "termination_conditions", columnDefinition = "TEXT")
+  private String terminationConditions;
 
-    @OneToMany(mappedBy = "subscription")
-    private List<UserSubscription> userSubscriptions;
+  @ManyToOne
+  @JoinColumn(name = "box_id")
+  private Box box;
+
+  @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<UserSubscription> userSubscriptions;
 }

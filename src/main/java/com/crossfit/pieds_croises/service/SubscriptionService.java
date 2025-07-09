@@ -22,60 +22,55 @@ public class SubscriptionService {
     private final SubscriptionMapper subscriptionMapper;
 
     public SubscriptionDto addSubscription(SubscriptionDto subscriptionDto) {
-        if (subscriptionDto.getBoxId() != null) {
-            Long boxId = subscriptionDto.getBoxId();
-            Box box = boxRepository.findById(boxId).orElseThrow(() -> new ResourceNotFoundException("Box not found"));
-            if (subscriptionRepository.existsByName(subscriptionDto.getName())) {
-                throw new DuplicateResourceException("A subscription with this name already exists");
-            }
-            if (subscriptionRepository.existsByPrice(subscriptionDto.getPrice())) {
-                throw new DuplicateResourceException("A subscription with this price already exists");
-            }
-            Subscription subscription = subscriptionMapper.convertToSubscriptionEntity(subscriptionDto);
-            subscription.setBox(box);
-            Subscription savedSubscription = subscriptionRepository.save(subscription);
-            return subscriptionMapper.convertToSubscriptionDto(savedSubscription);
-        } else {
+        if (subscriptionDto.getBoxId() == null) {
             throw new IllegalArgumentException("Box id is required");
         }
+        Long boxId = subscriptionDto.getBoxId();
+        Box box = boxRepository.findById(boxId).orElseThrow(() -> new ResourceNotFoundException("Box not found"));
+
+        if (subscriptionRepository.existsByName(subscriptionDto.getName())) {
+            throw new DuplicateResourceException("A subscription with this name already exists");
+        }
+
+        if (subscriptionRepository.existsByPrice(subscriptionDto.getPrice())) {
+            throw new DuplicateResourceException("A subscription with this price already exists");
+        }
+
+        Subscription subscription = subscriptionMapper.convertToSubscriptionEntity(subscriptionDto);
+        subscription.setBox(box);
+
+        Subscription savedSubscription = subscriptionRepository.save(subscription);
+        return subscriptionMapper.convertToSubscriptionDto(savedSubscription);
+
     }
 
     public SubscriptionDto getSubscriptionById(Long id) {
         Subscription subscription = subscriptionRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
         return subscriptionMapper.convertToSubscriptionDto(subscription);
     }
 
     public SubscriptionDto updateSubscription(Long id, SubscriptionDto subscriptionDto) {
         Subscription subscription = subscriptionRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
 
-        if (subscriptionRepository.existsByName(subscriptionDto.getName())) {
-            throw new DuplicateResourceException("A subscription with this name already exists");
-        }
-        if (subscriptionRepository.existsByPrice(subscriptionDto.getPrice())) {
-            throw new DuplicateResourceException("A subscription with this price already exists");
-        }
-
-        subscription.setName(subscriptionDto.getName());
-        subscription.setPrice(subscriptionDto.getPrice());
-
+        subscriptionMapper.updateSubscriptionFromDto(subscriptionDto, subscription);
         Subscription updatedSubscription = subscriptionRepository.save(subscription);
         return subscriptionMapper.convertToSubscriptionDto(updatedSubscription);
     }
 
     public void deleteSubscription(Long id) {
         Subscription subscription = subscriptionRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
         subscriptionRepository.delete(subscription);
     }
 
     public List<SubscriptionDto> getAllSubscriptionsByBoxId(Long boxId) {
         Box box = boxRepository.findById(boxId)
-            .orElseThrow(() -> new ResourceNotFoundException("Box not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Box not found"));
         List<Subscription> subscriptions = subscriptionRepository.findByBox(box);
         return subscriptions.stream()
-            .map(subscriptionMapper::convertToSubscriptionDto)
-            .collect(Collectors.toList());
+                .map(subscriptionMapper::convertToSubscriptionDto)
+                .collect(Collectors.toList());
     }
 }
