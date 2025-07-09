@@ -43,5 +43,6 @@ public class UserDto {
     private List<WeightHistory> weightHistory;
     private List<PerformanceHistory> performanceHistoryList;
 
+    private List<Long> coursesId;
 
 }
