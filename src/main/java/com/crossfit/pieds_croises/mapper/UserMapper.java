@@ -7,12 +7,9 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
+
     @Mapping(target = "id", ignore = true)
     UserDto convertToDtoForUser(User user);
-
-//    @Mapping(target = "id", ignore = true)
-//    @Mapping(target = "coursesId", expression = "java(user.getCourses() != null ? user.getCourses().stream().map(com.crossfit.pieds_croises.model.Course::getId).toList() : java.util.Collections.emptyList())")
-//    UserDto convertToDto(User user);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
@@ -28,6 +25,7 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "weightHistory", ignore = true)
     @Mapping(target = "performanceHistoryList", ignore = true)
+    @Mapping(target = "coursesId", expression = "java(user.getCourses() != null ? user.getCourses().stream().map(com.crossfit.pieds_croises.model.Course::getId).toList() : java.util.Collections.emptyList())")
     UserDto convertToDtoForAdmin(User user);
 
     @Mapping(target = "id", ignore = true)
