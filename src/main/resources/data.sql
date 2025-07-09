@@ -45,8 +45,15 @@ VALUES ('Jean', 'Dupont', '{noop}user123', 'jean.dupont@example.com', '060102030
 -- Peupler la table user_roles (si @ElementCollection utilise une table "user_roles" avec user_id et roles)
 INSERT INTO user_roles (user_id, roles)
 VALUES (1, 'ROLE_USER'),
+       (2, 'ROLE_USER'),
        (2, 'ROLE_ADMIN');
 
+INSERT INTO performance_history(date, value, exercice_id, user_id)
+VALUES ('2025-02-01', 33, 2, 2),
+       ('2025-03-01', 36, 2, 2),
+       ('2025-04-01', 38, 2, 2),
+       ('2025-05-01', 41, 2, 2);
+       
 -- UserSubscription
 INSERT INTO user_subscription (start_date, end_date, freeze_days_remaining, user_id, subscription_id)
 VALUES (NOW(),
