@@ -20,12 +20,13 @@ public class SubscriptionDto {
     @Min(value = 0, message = "Le nombre de séances par semaine doit être supérieur ou égal à 0")
     private int sessionPerWeek;
 
-    @Min(value = 1, message = "La durée de l'abonnement doit être supérieure ou égale à 1 mois")
+    @Min(value = 1, message = "La durée de l'abonnement doit être supérieure ou égale à 1 jour")
     private short duration;
 
     private String terminationConditions;
-    
+
     @NotNull(message = "L'ID de la box ne doit pas être nul")
     private Long boxId;
-}
 
+    private int freezeDaysAllowed;
+}

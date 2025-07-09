@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.model;
 
+import com.crossfit.pieds_croises.enums.SuspensionType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -8,10 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -54,38 +52,34 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(nullable = true)
+
     private Byte strikeCount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "suspension_type", nullable = true)
+    @Column(name = "suspension_type")
     private SuspensionType suspensionType;
 
-    @Column(name = "suspension_start_date", nullable = true)
+    @Column(name = "suspension_start_date")
     private LocalDate suspensionStartDate;
 
-    @Column(name = "suspension_end_date", nullable = true)
+    @Column(name = "suspension_end_date")
     private LocalDate suspensionEndDate;
 
-    @OneToMany(mappedBy = "user")
-    private List<UserSubscription> userSubscriptions;
+    @OneToMany(mappedBy = "user", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+    private List<UserSubscription> userSubscriptions = new ArrayList<>();
 
     @Column(nullable = true)
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<WeightHistory> weightHistory;
 
-    @Column(nullable = true)
+    @Column()
     @OneToMany(mappedBy = "user")
     private List<PerformanceHistory> performanceHistoryList;
 
-    @ManyToMany
-    @JoinTable(
-            name = "user_course",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "course_id")
-    )
-    private List<Course> courses;
 
+    @ManyToMany
+    @JoinTable(name = "user_course", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "course_id"))
+    private List<Course> courses;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -161,10 +155,11 @@ public class User implements UserDetails {
     }
 
     public boolean isSuspended() {
-        if (this.suspensionEndDate == null) {
+        if (this.suspensionStartDate == null || this.suspensionEndDate == null) {
             return false;
         }
-        return LocalDate.now().isAfter(this.suspensionEndDate);
+        LocalDate today = LocalDate.now();
+        return !today.isBefore(this.suspensionStartDate) && !today.isAfter(this.suspensionEndDate);
     }
 
     public void resetStrikeCount() {
@@ -172,14 +167,14 @@ public class User implements UserDetails {
     }
 
     public void resetSuspensionTypeAndDates() {
+        this.suspensionType = null;
         this.suspensionStartDate = null;
         this.suspensionEndDate = null;
-        this.suspensionType = null;
     }
 
-    public enum SuspensionType {
-        HOLIDAY,
-        PENALTY,
+    public void removeUserSubscription(UserSubscription userSubscription) {
+        this.userSubscriptions.remove(userSubscription);
+        userSubscription.setUser(null);
     }
 
 }

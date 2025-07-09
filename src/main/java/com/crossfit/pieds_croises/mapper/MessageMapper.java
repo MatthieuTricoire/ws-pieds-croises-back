@@ -10,7 +10,6 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface MessageMapper {
 
-    @Mapping(source = "box.id", target = "boxId")
     MessageDTO convertToDto(Message message);
 
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
