@@ -1,0 +1,15 @@
+meta {
+  name: Get all
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:8080/performance-histories
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
