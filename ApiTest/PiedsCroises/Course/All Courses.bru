@@ -7,5 +7,9 @@ meta {
 get {
   url: http://localhost:8080/courses
   body: none
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
 }

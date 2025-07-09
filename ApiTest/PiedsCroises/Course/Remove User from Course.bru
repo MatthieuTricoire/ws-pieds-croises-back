@@ -7,5 +7,9 @@ meta {
 delete {
   url: http://localhost:8080/courses/1/unsubscribe
   body: none
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
 }

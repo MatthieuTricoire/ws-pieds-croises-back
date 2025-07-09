@@ -7,9 +7,13 @@ meta {
 get {
   url: http://localhost:8080/courses/by-day?date=2025-07-07
   body: none
-  auth: inherit
+  auth: bearer
 }
 
 params:query {
   date: 2025-07-07
+}
+
+auth:bearer {
+  token: {{token}}
 }
