@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "user_subscription")
 public class UserSubscription {
 
     @Id
@@ -19,6 +20,12 @@ public class UserSubscription {
 
     @Column(name = "start_date", nullable = false)
     private LocalDateTime startDate;
+
+    @Column(name = "end_date", nullable = false)
+    private LocalDateTime endDate;
+
+    @Column(name = "freeze_days_remaining")
+    private int freezeDaysRemaining;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
