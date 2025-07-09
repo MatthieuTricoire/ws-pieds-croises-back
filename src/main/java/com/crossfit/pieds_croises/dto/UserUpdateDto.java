@@ -17,14 +17,14 @@ import java.util.List;
 @AllArgsConstructor
 public class UserUpdateDto {
     private Long id;
-    
+
     private String firstname;
     private String lastname;
 
-    @Email(message = "Please provide a valid email address")
+    @Email(message = "Veuillez fournir une adresse email valide")
     private String email;
 
-    @Pattern(regexp = "^[+]?[0-9\\s\\-\\(\\)]{8,20}$", message = "Please provide a valid phone number")
+    @Pattern(regexp = "^[+]?[0-9\\s\\-\\(\\)]{8,20}$", message = "Veuillez fournir un numéro de téléphone valide")
     private String phone;
 
     private String profilePicture;
