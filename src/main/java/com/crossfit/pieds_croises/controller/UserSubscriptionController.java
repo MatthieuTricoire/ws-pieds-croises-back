@@ -2,6 +2,7 @@ package com.crossfit.pieds_croises.controller;
 
 import com.crossfit.pieds_croises.dto.UserSubscriptionDto;
 import com.crossfit.pieds_croises.service.UserSubscriptionService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class UserSubscriptionController {
 
     @PostMapping()
     public ResponseEntity<UserSubscriptionDto> createUserSubscription(
-            @RequestBody UserSubscriptionDto userSubscriptionDto) {
+            @Valid @RequestBody UserSubscriptionDto userSubscriptionDto) {
         UserSubscriptionDto createdUserSubscription = userSubscriptionService.createUserSubscription(userSubscriptionDto);
         return ResponseEntity.ok(createdUserSubscription);
     }
