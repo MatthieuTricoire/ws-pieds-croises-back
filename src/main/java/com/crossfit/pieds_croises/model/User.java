@@ -170,9 +170,9 @@ public class User implements UserDetails {
     }
 
     public void resetSuspensionTypeAndDates() {
-        this.suspensionType = null;
         this.suspensionStartDate = null;
         this.suspensionEndDate = null;
+        this.suspensionType = null;
     }
 
     public void removeUserSubscription(UserSubscription userSubscription) {
