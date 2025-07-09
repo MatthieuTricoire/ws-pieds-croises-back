@@ -180,9 +180,4 @@ public class User implements UserDetails {
         userSubscription.setUser(null);
     }
 
-    public enum SuspensionType {
-        HOLIDAY,
-        PENALTY,
-    }
-
 }
