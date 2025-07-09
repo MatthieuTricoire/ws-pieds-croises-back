@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class User implements UserDetails {
 
     @Id
@@ -170,6 +169,10 @@ public class User implements UserDetails {
         this.suspensionType = null;
         this.suspensionStartDate = null;
         this.suspensionEndDate = null;
+    }
+
+    public boolean isCoach() {
+        return roles != null && roles.contains("ROLE_COACH");
     }
 
     public void removeUserSubscription(UserSubscription userSubscription) {

@@ -7,21 +7,25 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
+
     @Mapping(target = "id", ignore = true)
     UserDto convertToDtoForUser(User user);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "profilePicture", ignore = true)
     @Mapping(target = "strikeCount", ignore = true)
     @Mapping(target = "userSubscriptions", ignore = true)
     @Mapping(target = "weightHistory", ignore = true)
     @Mapping(target = "performanceHistoryList", ignore = true)
+    @Mapping(target = "coursesId", ignore = true)
     UserDto convertToCreatedDto(User user);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "weightHistory", ignore = true)
     @Mapping(target = "performanceHistoryList", ignore = true)
+    @Mapping(target = "coursesId", expression = "java(user.getCourses() != null ? user.getCourses().stream().map(com.crossfit.pieds_croises.model.Course::getId).toList() : java.util.Collections.emptyList())")
     UserDto convertToDtoForAdmin(User user);
 
     @Mapping(target = "id", ignore = true)
@@ -33,6 +37,7 @@ public interface UserMapper {
     @Mapping(target = "userSubscriptions", ignore = true)
     @Mapping(target = "weightHistory", ignore = true)
     @Mapping(target = "performanceHistoryList", ignore = true)
+    @Mapping(target = "coursesId", ignore = true)
     UserDto convertToDtoForAnyUser(User user);
 
     @Mapping(target = "id", ignore = true)

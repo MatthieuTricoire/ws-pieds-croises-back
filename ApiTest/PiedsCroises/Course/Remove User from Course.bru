@@ -1,0 +1,15 @@
+meta {
+  name: Remove User from Course
+  type: http
+  seq: 8
+}
+
+delete {
+  url: http://localhost:8080/courses/1/unsubscribe
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
