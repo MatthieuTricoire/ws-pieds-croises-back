@@ -1,7 +1,6 @@
 package com.crossfit.pieds_croises.dto;
 
 import com.crossfit.pieds_croises.model.PerformanceHistory;
-import com.crossfit.pieds_croises.model.UserSubscription;
 import com.crossfit.pieds_croises.model.WeightHistory;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.Email;
@@ -40,7 +39,7 @@ public class UserDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Byte strikeCount;
-    private List<UserSubscription> userSubscriptions;
+    private List<UserSubscriptionDto> userSubscriptions;
     private List<WeightHistory> weightHistory;
     private List<PerformanceHistory> performanceHistoryList;
 
