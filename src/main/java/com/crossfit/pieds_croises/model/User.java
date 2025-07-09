@@ -68,8 +68,8 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
     private List<UserSubscription> userSubscriptions = new ArrayList<>();
 
-    @Column()
-    @OneToMany(mappedBy = "user")
+    @Column(nullable = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<WeightHistory> weightHistory;
 
     @Column()

@@ -1,7 +1,6 @@
 package com.crossfit.pieds_croises.service;
 
 import com.crossfit.pieds_croises.dto.PerformanceHistoryDTO;
-import com.crossfit.pieds_croises.exception.AccessDeniedException;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.PerformanceHistoryMapper;
 import com.crossfit.pieds_croises.model.Exercice;
@@ -11,6 +10,7 @@ import com.crossfit.pieds_croises.repository.ExerciceRepository;
 import com.crossfit.pieds_croises.repository.PerformanceHistoryRepository;
 import com.crossfit.pieds_croises.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -56,7 +56,7 @@ public class PerformanceHistoryService {
         return performanceHistoryMapper.convertToDTO(performanceHistorySaved);
     }
 
-    public PerformanceHistoryDTO updatePerformanceHistory(Long id,  PerformanceHistoryDTO performanceHistoryDTO, Long userId) {
+    public PerformanceHistoryDTO updatePerformanceHistory(Long id, PerformanceHistoryDTO performanceHistoryDTO, Long userId) {
         PerformanceHistory performanceHistory = performanceHistoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("PerformanceHistory with id " + id + " not found."));
 
