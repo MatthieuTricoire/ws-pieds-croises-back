@@ -1,7 +1,6 @@
 package com.crossfit.pieds_croises.service;
 
 import com.crossfit.pieds_croises.dto.WeightHistoryDTO;
-import com.crossfit.pieds_croises.exception.AccessDeniedException;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.WeightHistoryMapper;
 import com.crossfit.pieds_croises.model.User;
@@ -9,6 +8,7 @@ import com.crossfit.pieds_croises.model.WeightHistory;
 import com.crossfit.pieds_croises.repository.UserRepository;
 import com.crossfit.pieds_croises.repository.WeightHistoryRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -49,7 +49,7 @@ public class WeightHistoryService {
         return weightHistoryMapper.convertToDTO(weightHistorySaved);
     }
 
-    public WeightHistoryDTO updateWeightHistory(Long id,  WeightHistoryDTO weightHistoryDTO, Long userId) {
+    public WeightHistoryDTO updateWeightHistory(Long id, WeightHistoryDTO weightHistoryDTO, Long userId) {
         WeightHistory weightHistory = weightHistoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("WeightHistory with id " + id + " not found."));
 
