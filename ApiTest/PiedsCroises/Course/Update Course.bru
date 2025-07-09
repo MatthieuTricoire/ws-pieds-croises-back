@@ -5,7 +5,7 @@ meta {
 }
 
 put {
-  url: http://localhost:8080/courses/2
+  url: http://localhost:8080/courses/1
   body: json
   auth: bearer
 }
@@ -16,14 +16,12 @@ auth:bearer {
 
 body:json {
   {
+    "id": 1,
     "title":"Cour1",
     "description":"change",
-    "startDatetime": "2025-06-01T10:00:00",
+    "startDatetime": "2025-10-01T10:00:00",
     "duration": 45,
     "personLimit":12,
-    "status":"FULL",
-    "usersId": [1,2],
-    "coachName": "Coco Rico",
     "coachId": 3
   }
 }

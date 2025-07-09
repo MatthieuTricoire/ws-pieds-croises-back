@@ -2,6 +2,7 @@ package com.crossfit.pieds_croises.mapper;
 
 import com.crossfit.pieds_croises.dto.CourseCreateDTO;
 import com.crossfit.pieds_croises.dto.CourseDTO;
+import com.crossfit.pieds_croises.dto.CourseUpdateDTO;
 import com.crossfit.pieds_croises.model.Course;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -23,8 +24,8 @@ public interface CourseMapper {
 
     @Mapping(target = "status", expression = "java(Course.Status.OPEN)")
     @Mapping(target = "users", ignore = true)
-    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
-    @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "coach", ignore = true)
     Course convertToEntity(CourseCreateDTO courseCreateDTO);
 
@@ -32,5 +33,7 @@ public interface CourseMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "coach", ignore = true)
-    void updateFromDTO(CourseDTO courseDTO, @MappingTarget Course course);
+    @Mapping(target = "users", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    void updateFromDTO(CourseUpdateDTO dto, @MappingTarget Course course);
 }
