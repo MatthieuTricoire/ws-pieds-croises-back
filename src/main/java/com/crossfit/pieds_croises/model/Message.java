@@ -41,11 +41,11 @@ public class Message {
     private LocalDate expirationDate;
 
 
-    public enum MessageType{
+    public enum MessageType {
         INFORMATION,
         ALERT,
-        EVENEMENT,
-        RAPPEL
+        EVENT,
+        REMINDER
     }
 
 }
