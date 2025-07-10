@@ -41,6 +41,8 @@ VALUES ('Jean', 'Dupont', '$2y$10$pN5sgqp.gbzAJcoh04/1xeAsv/trTPxeNoep06U4i1WUWo
         '0601020304', NULL,
         NOW(), NOW()),
        ('Admin', 'User', '$2y$10$dUo1l4qgxCAgCetO4Y04U./8jQGw5wW6ZC2tv/G9tP2K3Q4uGbW6i', 'admin@example.com',
+        '0601020305', NULL,
+        NOW(), NOW()),
        ('Coco', 'Rico', '{noop}coach123', 'coach@example.com', '0602030408', NULL,
         NOW(), NOW());
 
