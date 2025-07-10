@@ -34,6 +34,7 @@ public class Message {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+
     @Column(name = "start_date")
     private LocalDate startDate;
 
@@ -41,11 +42,11 @@ public class Message {
     private LocalDate expirationDate;
 
 
-    public enum MessageType{
+    public enum MessageType {
         INFORMATION,
         ALERT,
-        EVENEMENT,
-        RAPPEL
+        EVENT,
+        REMINDER
     }
 
 }
