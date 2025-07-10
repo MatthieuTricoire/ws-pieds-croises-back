@@ -1,0 +1,26 @@
+meta {
+  name: Create Course
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:8080/courses
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "title":"Cour",
+    "description":"Bla Bla",
+    "startDatetime": "2025-08-01T15:00:00",
+    "duration": 45,
+    "personLimit":12,
+    "coachId": 3
+  }
+}

@@ -41,14 +41,26 @@ VALUES ('Jean', 'Dupont', '$2y$10$pN5sgqp.gbzAJcoh04/1xeAsv/trTPxeNoep06U4i1WUWo
         '0601020304', NULL,
         NOW(), NOW()),
        ('Admin', 'User', '$2y$10$dUo1l4qgxCAgCetO4Y04U./8jQGw5wW6ZC2tv/G9tP2K3Q4uGbW6i', 'admin@example.com',
-        '0602030405', NULL,
+       ('Coco', 'Rico', '{noop}coach123', 'coach@example.com', '0602030408', NULL,
         NOW(), NOW());
+
+-- Peupler la table Course
+INSERT INTO course (title, description, start_datetime, duration, person_limit, status, created_at, updated_at,
+                    coach_id)
+VALUES ('Cour', 'Bla Bla', '2025-08-01T10:00:00', 45, 12, 'OPEN', '2025-06-13T11:42:51.40986',
+        '2025-06-13T11:42:51.40986', 3),
+       ('Cour2', 'Toujour du Bla Bla', '2025-09-01T10:00:00', 45, 2, 'OPEN', '2025-06-13T11:42:51.40986',
+        '2025-06-13T11:42:51.40986', 3),
+       ('Cour3', 'Coucou les petits loups !', '2025-07-01T10:00:00', 45, 5, 'OPEN', '2025-06-13T11:42:51.40986',
+        '2025-06-13T11:42:51.40986', 3);
+
 
 -- Peupler la table user_roles (si @ElementCollection utilise une table "user_roles" avec user_id et roles)
 INSERT INTO user_roles (user_id, roles)
 VALUES (1, 'ROLE_USER'),
        (2, 'ROLE_USER'),
-       (2, 'ROLE_ADMIN');
+       (2, 'ROLE_ADMIN'),
+       (3, 'ROLE_COACH');
 
 INSERT INTO performance_history(date, value, exercice_id, user_id)
 VALUES ('2025-02-01', 33, 2, 2),

@@ -1,0 +1,27 @@
+meta {
+  name: Update Course
+  type: http
+  seq: 6
+}
+
+put {
+  url: http://localhost:8080/courses/1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "id": 1,
+    "title":"Cour1",
+    "description":"change",
+    "startDatetime": "2025-10-01T10:00:00",
+    "duration": 45,
+    "personLimit":12,
+    "coachId": 3
+  }
+}

@@ -43,5 +43,6 @@ public class UserDto {
     private Boolean isFirstLoginComplete;
     private Set<String> roles;
 
+    private List<Long> coursesId;
 
 }

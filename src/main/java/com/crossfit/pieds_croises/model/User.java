@@ -179,6 +179,10 @@ public class User implements UserDetails {
         this.suspensionType = null;
     }
 
+    public boolean isCoach() {
+        return roles != null && roles.contains("ROLE_COACH");
+    }
+
     public void removeUserSubscription(UserSubscription userSubscription) {
         this.userSubscriptions.remove(userSubscription);
         userSubscription.setUser(null);
