@@ -67,7 +67,7 @@ public class UserService {
 
             User createdUser = userRepository.save(user);
 
-            return userMapper.convertToUserCreatedDto(createdUser);
+            return userMapper.convertToCreatedDto(createdUser);
         } catch (Exception e) {
             throw new RuntimeException("Error creating user", e);
         }
