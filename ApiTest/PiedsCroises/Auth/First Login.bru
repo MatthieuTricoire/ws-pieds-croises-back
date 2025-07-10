@@ -1,0 +1,18 @@
+meta {
+  name: First Login
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/auth/register
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "registrationToken": "ccd9a46a-5990-4e39-9240-56ac8bc52a1e",
+      "password": "password123"
+  }
+}
