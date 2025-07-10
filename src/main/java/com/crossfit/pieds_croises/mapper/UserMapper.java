@@ -8,21 +8,20 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "isFirstLoginComplete", ignore = true)
     UserDto convertToDtoForUser(User user);
-
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "profilePicture", ignore = true)
-    @Mapping(target = "strikeCount", ignore = true)
-    @Mapping(target = "userSubscriptions", ignore = true)
-    @Mapping(target = "weightHistory", ignore = true)
-    @Mapping(target = "performanceHistoryList", ignore = true)
-    UserDto convertToCreatedDto(User user);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "weightHistory", ignore = true)
     @Mapping(target = "performanceHistoryList", ignore = true)
     UserDto convertToDtoForAdmin(User user);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "weightHistory", ignore = true)
+    @Mapping(target = "performanceHistoryList", ignore = true)
+    @Mapping(target = "strikeCount", ignore = true)
+    @Mapping(target = "roles", source = "roles")
+    UserDto convertToUserCreatedDto(User user);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

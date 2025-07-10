@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class User implements UserDetails {
 
     @Id
@@ -52,7 +51,6 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-
     private Byte strikeCount;
 
     @Enumerated(EnumType.STRING)
@@ -80,9 +78,15 @@ public class User implements UserDetails {
     @ManyToMany
     @JoinTable(name = "user_course", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "course_id"))
     private List<Course> courses;
+
+    @Column(name = "registration_token", nullable = true)
     private String registrationToken;
+
+    @Column(name = "token_expiry_date", nullable = true)
     private LocalDateTime tokenExpiryDate;
-    private boolean isFirstLoginComplete;
+
+    @Column(name = "is_first_login_complete", nullable = true)
+    private Boolean isFirstLoginComplete;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

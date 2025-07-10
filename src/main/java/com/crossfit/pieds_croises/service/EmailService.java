@@ -1,38 +1,47 @@
 package com.crossfit.pieds_croises.service;
 
+import com.crossfit.pieds_croises.exception.EmailSendingException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    private final JavaMailSender javaMailSender;
 
-    public void sendInvitationEmail(String to, String invitationLink) {
-        String subject = "Votre accès à la plateforme CrossFit Pieds Croisés";
-        String content = buildHtmlContent(invitationLink);
+    @Value("${spring.mail.username}")
+    private String from;
 
+    public void sendHtmlEmail(String to, String subject, String htmlContent) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setTo(to);
+            helper.setFrom(from);
             helper.setSubject(subject);
-            helper.setText(content, true); // true pour HTML
+            helper.setText(htmlContent, true);
 
-            mailSender.send(message);
+            javaMailSender.send(message);
 
         } catch (MessagingException e) {
-            throw new RuntimeException("Échec de l'envoi de l'email à " + to, e);
+            throw new EmailSendingException("Erreur lors de l'envoi de l'e-mail à " + to, e);
         }
     }
 
-    private String buildHtmlContent(String link) {
+    public void sendInvitationEmail(String to, String invitationLink) {
+        String subject = "Votre accès à la plateforme CrossFit Pieds Croisés";
+        String content = buildInvitationHtmlContent(invitationLink);
+        sendHtmlEmail(to, subject, content);
+    }
+
+    private String buildInvitationHtmlContent(String link) {
         return """
                 <html>
                     <body>
