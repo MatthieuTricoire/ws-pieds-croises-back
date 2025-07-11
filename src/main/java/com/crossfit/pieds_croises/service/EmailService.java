@@ -60,4 +60,34 @@ public class EmailService {
                 </html>
                 """.formatted(link);
     }
+
+    public void sendPasswordResetEmail(String to, String resetLink) {
+        String subject = "Réinitialisation de votre mot de passe - CrossFit Pieds Croisés";
+        String content = buildResetPasswordHtmlContent(resetLink);
+        sendHtmlEmail(to, subject, content);
+    }
+
+    private String buildResetPasswordHtmlContent(String link) {
+        return """
+                <html>
+                    <body>
+                        <h2>Réinitialisation de votre mot de passe</h2>
+                        <p>Vous avez demandé à réinitialiser votre mot de passe pour votre compte CrossFit Pieds Croisés.</p>
+                        <p>Cliquez sur le bouton ci-dessous pour définir un nouveau mot de passe :</p>
+                        <p style="margin-top: 20px;">
+                            <a href="%s" style="padding: 10px 20px; background-color: #2d6cdf; color: white; text-decoration: none; border-radius: 5px;">
+                                Réinitialiser mon mot de passe
+                            </a>
+                        </p>
+                        <p style="margin-top: 20px; font-size: 0.9em;">Ce lien est valable pendant 30 minutes.</p>
+                        <br/>
+                        <p>Si vous n’avez pas fait cette demande, vous pouvez ignorer cet e-mail.</p>
+                        <br/>
+                        <p>Sportivement,<br/>L'équipe CrossFit Pieds Croisés</p>
+                    </body>
+                </html>
+                """.formatted(link);
+    }
+
+
 }

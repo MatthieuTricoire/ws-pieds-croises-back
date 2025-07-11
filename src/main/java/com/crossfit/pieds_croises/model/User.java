@@ -82,11 +82,17 @@ public class User implements UserDetails {
     @Column(name = "registration_token", nullable = true)
     private String registrationToken;
 
-    @Column(name = "token_expiry_date", nullable = true)
-    private LocalDateTime tokenExpiryDate;
+    @Column(name = "registration_token_expiry_date", nullable = true)
+    private LocalDateTime registrationTokenExpiryDate;
 
     @Column(name = "is_first_login_complete", nullable = true)
     private Boolean isFirstLoginComplete;
+
+    @Column(name = "reset_password_token", nullable = true)
+    private String resetPasswordToken;
+
+    @Column(name = "password_token_expiry_date", nullable = true)
+    private LocalDateTime resetPasswordTokenExpiryDate;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
