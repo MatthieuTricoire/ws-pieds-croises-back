@@ -6,6 +6,7 @@ import com.crossfit.pieds_croises.model.User;
 import com.crossfit.pieds_croises.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -47,8 +48,8 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto user) {
-        UserDto userDto = userService.createUser(user);
-        return ResponseEntity.ok(userDto);
+        UserDto invitedUser = userService.createUser(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(invitedUser);
     }
 
     // 🔹 UPDATE
@@ -77,7 +78,7 @@ public class UserController {
 
     // 🔹 DELETE USER PROFILE
     @DeleteMapping("/profile")
-    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal User user) {
+    public ResponseEntity<Void> deleteUserProfile(@AuthenticationPrincipal User user) {
         userService.deleteUser(user.getId());
         return ResponseEntity.noContent().build();
     }
