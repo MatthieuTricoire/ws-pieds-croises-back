@@ -18,7 +18,7 @@ INSERT INTO message (title, content, message_type, start_date, expiration_date, 
 VALUES ('Oyez Oyez rappel', 'Accusamus molestias fugiat asperiores quas neque laboriosam non magnam dolorem. Totam repellat veniam nihil corporis in. Facilis veniam ducimus. Veritatis maiores explicabo doloribus quisquam odio architecto. Est at ullam earum et repellat neque delectus tempore eius. Quisquam suscipit dolor dolores tempora voluptatum.', 'REMINDER', '2025-05-17', '2025-12-01',
         '2025-05-01T10:00:00', '2025-05-01T10:00:00');
 
-    -- Rajouter une enom monthly
+-- Rajouter une enom monthly
 -- Peupler la table Subscription
 INSERT INTO subscription (name, price, duration, freeze_days_allowed, session_per_week, termination_conditions)
 VALUES ('Classique', 19.99, 31, 5, 2, 'blablabla');
@@ -37,9 +37,11 @@ VALUES ('Back squat', 'WEIGHT');
 
 -- Peupler la table user
 INSERT INTO user (firstname, lastname, password, email, phone, profile_picture, created_at, updated_at)
-VALUES ('Jean', 'Dupont', '{noop}user123', 'jean.dupont@example.com', '0601020304', NULL,
+VALUES ('Jean', 'Dupont', '$2y$10$pN5sgqp.gbzAJcoh04/1xeAsv/trTPxeNoep06U4i1WUWooSgc0Su', 'jean.dupont@example.com',
+        '0601020304', NULL,
         NOW(), NOW()),
-       ('Admin', 'User', '{noop}admin123', 'admin@example.com', '0602030405', NULL,
+       ('Admin', 'User', '$2y$10$dUo1l4qgxCAgCetO4Y04U./8jQGw5wW6ZC2tv/G9tP2K3Q4uGbW6i', 'admin@example.com',
+        '0601020305', NULL,
         NOW(), NOW()),
        ('Coco', 'Rico', '{noop}coach123', 'coach@example.com', '0602030408', NULL,
         NOW(), NOW());
