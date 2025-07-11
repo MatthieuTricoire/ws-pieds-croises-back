@@ -34,6 +34,7 @@ public class Message {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+
     @Column(name = "start_date")
     private LocalDate startDate;
 
