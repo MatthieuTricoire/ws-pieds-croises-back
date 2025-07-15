@@ -1,7 +1,5 @@
 package com.crossfit.pieds_croises.dto;
 
-import com.crossfit.pieds_croises.model.PerformanceHistory;
-import com.crossfit.pieds_croises.model.WeightHistory;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -29,7 +27,7 @@ public class UserDto {
     @NotBlank(message = "Email is required")
     @Email(message = "Please provide a valid email address")
     private String email;
-    
+
     private String phone;
 
     private String profilePicture;
@@ -37,8 +35,8 @@ public class UserDto {
     private LocalDateTime updatedAt;
     private Byte strikeCount;
     private List<UserSubscriptionDto> userSubscriptions;
-    private List<WeightHistory> weightHistory;
-    private List<PerformanceHistory> performanceHistoryList;
+    private List<WeightHistoryDTO> weightHistory;
+    private List<PerformanceHistoryDTO> performanceHistoryList;
     private String registrationToken;
     private Boolean isFirstLoginComplete;
     private Set<String> roles;
