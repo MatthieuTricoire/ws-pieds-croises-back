@@ -37,10 +37,8 @@ public class AuthenticationService {
 
     public void handleForgotPassword(String email) {
         // 1. Vérifie si l'utilisateur existe
-        // 2. Génère un token de réinitialisation (JWT ou UUID)
-        // 3. Envoie un e-mail avec un lien vers une page front-end (ex: /reset-password?token=...)
-        // (Tu peux utiliser JavaMailSender ou tout autre service d’emailing)
-
+        // 2. Génère un token de réinitialisation (UUID)
+        // 3. Envoie un e-mail avec un lien vers une page front-end
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
@@ -65,7 +63,7 @@ public class AuthenticationService {
 
         if (user.getResetPasswordTokenExpiryDate() == null ||
                 user.getResetPasswordTokenExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Le lien de réinitialisation a expiré.");
+            throw new RuntimeException("Le lien de réinitialisation a expiré. Veuillez faire une nouvelle demande.");
         }
 
         // Encoder le nouveau mot de passe
