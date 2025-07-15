@@ -23,6 +23,7 @@ src/main/resources/env.properties
 
 ### Environment ###
 .env
+.env.dev
 
 ### NetBeans ###
 /nbproject/private/
