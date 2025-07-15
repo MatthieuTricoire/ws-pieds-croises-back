@@ -136,11 +136,4 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public String generateResetToken(User user) {
-        String token = UUID.randomUUID().toString();
-        user.setRegistrationToken(token);
-        user.setRegistrationTokenExpiryDate(LocalDateTime.now().plusMinutes(30)); // expire dans 30 minutes
-        userRepository.save(user);
-        return token;
-    }
 }
