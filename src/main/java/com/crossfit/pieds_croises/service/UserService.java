@@ -25,8 +25,8 @@ public class UserService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${app.registration.base-url}")
-    private String registrationBaseUrl;
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     public List<UserDto> getAllUsers() {
         List<User> users = userRepository.findAll();
@@ -49,7 +49,6 @@ public class UserService {
             User user = userMapper.convertToEntity(userDto);
             user.setCreatedAt(LocalDateTime.now());
             user.setUpdatedAt(LocalDateTime.now());
-            //user.setRoles(Set.of("ROLE_USER")); // role user par défaut
             Set<String> roles = userDto.getRoles();
             if (roles == null || roles.isEmpty()) {
                 roles = Set.of("ROLE_USER"); // Valeur par défaut si aucun rôle fourni
@@ -59,10 +58,10 @@ public class UserService {
             // génération du token pour la première connexion
             String token = UUID.randomUUID().toString();
             user.setRegistrationToken(token);
-            user.setTokenExpiryDate(LocalDateTime.now().plusDays(2));
+            user.setRegistrationTokenExpiryDate(LocalDateTime.now().plusDays(2));
             user.setIsFirstLoginComplete(false);
             // Envoi du lien par email
-            String registrationUrl = registrationBaseUrl + "?token=" + token;
+            String registrationUrl = baseUrl + "register?token=" + token;
             emailService.sendInvitationEmail(user.getEmail(), registrationUrl);
 
             User createdUser = userRepository.save(user);
@@ -124,16 +123,17 @@ public class UserService {
         User user = userRepository.findByRegistrationToken(dto.getRegistrationToken())
                 .orElseThrow(() -> new ResourceNotFoundException("Lien invalide"));
 
-        if (user.getTokenExpiryDate().isBefore(LocalDateTime.now())) {
+        if (user.getRegistrationTokenExpiryDate().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("Lien expiré");
         }
 
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setRegistrationToken(null); // Token à usage unique
-        user.setTokenExpiryDate(null);
+        user.setRegistrationToken(null);
+        user.setRegistrationTokenExpiryDate(null);
         user.setIsFirstLoginComplete(true);
         user.setUpdatedAt(LocalDateTime.now());
 
         userRepository.save(user);
     }
+
 }

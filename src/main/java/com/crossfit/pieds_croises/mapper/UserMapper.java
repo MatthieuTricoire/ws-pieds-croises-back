@@ -10,6 +10,7 @@ public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "isFirstLoginComplete", ignore = true)
+    @Mapping(target = "coursesId", ignore = true)
     UserDto convertToDtoForUser(User user);
 
     @Mapping(target = "createdAt", ignore = true)
