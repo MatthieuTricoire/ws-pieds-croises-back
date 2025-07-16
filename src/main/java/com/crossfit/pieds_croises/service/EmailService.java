@@ -4,16 +4,27 @@ import com.crossfit.pieds_croises.exception.EmailSendingException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class EmailService {
 
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
     private final JavaMailSender javaMailSender;
+    private final TemplateEngine templateEngine;
+
 
     @Value("${spring.mail.username}")
     private String from;
@@ -29,65 +40,30 @@ public class EmailService {
             helper.setText(htmlContent, true);
 
             javaMailSender.send(message);
+            logger.info("Email sends to {}", to);
 
         } catch (MessagingException e) {
-            throw new EmailSendingException("Erreur lors de l'envoi de l'e-mail à " + to, e);
+            logger.error("Error during sending email to {}: {}", to, e.getMessage());
+            throw new EmailSendingException("Error during sending email to" + to, e);
         }
     }
 
-    public void sendInvitationEmail(String to, String invitationLink) {
-        String subject = "Votre accès à la plateforme CrossFit Pieds Croisés";
-        String content = buildInvitationHtmlContent(invitationLink);
-        sendHtmlEmail(to, subject, content);
+    public void sendTemplateEmail(String to, String subject, String templateName, Map<String, Object> variables) {
+        Context context = new Context();
+        context.setVariables(variables);
+
+        String htmlContent = templateEngine.process("email/" + templateName, context);
+        sendHtmlEmail(to, subject, htmlContent);
+
     }
 
-    private String buildInvitationHtmlContent(String link) {
-        return """
-                <html>
-                    <body>
-                        <h2>Bienvenue sur CrossFit Pieds Croisés !</h2>
-                        <p>Vous avez été invité à rejoindre notre plateforme.</p>
-                        <p>Cliquez sur le bouton ci-dessous pour définir votre mot de passe et activer votre compte :</p>
-                        <p style="margin-top: 20px;">
-                            <a href="%s" style="padding: 10px 20px; background-color: #2d6cdf; color: white; text-decoration: none; border-radius: 5px;">
-                                Activer mon compte
-                            </a>
-                        </p>
-                        <p style="margin-top: 20px; font-size: 0.9em;">Ce lien est valable pendant 48 heures.</p>
-                        <br/>
-                        <p>Sportivement,<br/>L'équipe CrossFit Pieds Croisés</p>
-                    </body>
-                </html>
-                """.formatted(link);
+    public String generateInvitationLink(String baseUrl, String token) {
+        try {
+            String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
+            return baseUrl + "?token=" + encodedToken;
+        } catch (Exception e) {
+            logger.error("Error in EmailService", e);
+            return null;
+        }
     }
-
-    public void sendPasswordResetEmail(String to, String resetLink) {
-        String subject = "Réinitialisation de votre mot de passe - CrossFit Pieds Croisés";
-        String content = buildResetPasswordHtmlContent(resetLink);
-        sendHtmlEmail(to, subject, content);
-    }
-
-    private String buildResetPasswordHtmlContent(String link) {
-        return """
-                <html>
-                    <body>
-                        <h2>Réinitialisation de votre mot de passe</h2>
-                        <p>Vous avez demandé à réinitialiser votre mot de passe pour votre compte CrossFit Pieds Croisés.</p>
-                        <p>Cliquez sur le bouton ci-dessous pour définir un nouveau mot de passe :</p>
-                        <p style="margin-top: 20px;">
-                            <a href="%s" style="padding: 10px 20px; background-color: #2d6cdf; color: white; text-decoration: none; border-radius: 5px;">
-                                Réinitialiser mon mot de passe
-                            </a>
-                        </p>
-                        <p style="margin-top: 20px; font-size: 0.9em;">Ce lien est valable pendant 30 minutes.</p>
-                        <br/>
-                        <p>Si vous n’avez pas fait cette demande, vous pouvez ignorer cet e-mail.</p>
-                        <br/>
-                        <p>Sportivement,<br/>L'équipe CrossFit Pieds Croisés</p>
-                    </body>
-                </html>
-                """.formatted(link);
-    }
-
-
 }
