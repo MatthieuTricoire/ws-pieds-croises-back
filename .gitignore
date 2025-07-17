@@ -22,7 +22,7 @@ src/main/resources/env.properties
 *.ipr
 
 ### Environment ###
-.env
+.env*
 
 ### NetBeans ###
 /nbproject/private/

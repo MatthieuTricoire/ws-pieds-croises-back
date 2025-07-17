@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -28,8 +29,12 @@ public class UserService {
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
-    @Value("${app.registration.base-url}")
-    private String registrationBaseUrl;
+
+    @Value("${app.base-url}${app.registration.uri}")
+    private String registrationUrl;
+    @Value("${app.registration.token-expiration-days}")
+    private int registrationTokenExpirationDays;
+
 
     public List<UserDto> getAllUsers() {
         List<User> users = userRepository.findAll();
@@ -57,25 +62,33 @@ public class UserService {
             logger.warn("Attempt to create user with existing email: {}", userDto.getEmail());
             throw new DuplicateResourceException("User already exists");
         }
+      
         User user = userMapper.convertToEntity(userDto);
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
-        //user.setRoles(Set.of("ROLE_USER")); // role user par défaut
+
         Set<String> roles = userDto.getRoles();
         if (roles == null || roles.isEmpty()) {
             roles = Set.of("ROLE_USER"); // Valeur par défaut si aucun rôle fourni
         }
         user.setRoles(roles);
 
-        // génération du token pour la première connexion
+
+
         String token = UUID.randomUUID().toString();
         user.setRegistrationToken(token);
-        user.setTokenExpiryDate(LocalDateTime.now().plusDays(2));
+        user.setRegistrationTokenExpiryDate(LocalDateTime.now().plusDays(registrationTokenExpirationDays));
         user.setIsFirstLoginComplete(false);
         // Envoi du lien par email
         logger.info("Sending registration email to {}", user.getEmail());
-        String registrationEmailLink = emailService.generateInvitationLink(registrationBaseUrl, token);
-        emailService.sendInvitationEmail(user.getEmail(), registrationEmailLink);
+        String registrationEmailLink = emailService.generateInvitationLink(registrationUrl, token);
+        Map<String, Object> emailVariables = Map.of(
+                "registrationEmailLink", registrationEmailLink
+        );
+        emailService.sendTemplateEmail(user.getEmail(),
+                "Votre accès à la plateforme CrossFit Pieds Croisés",
+                "first-connection",
+                emailVariables);
 
         User createdUser = userRepository.save(user);
         logger.info("User created with ID {}", createdUser.getId());
@@ -143,18 +156,20 @@ public class UserService {
                     return new ResourceNotFoundException("Invalid registration token");
                 });
 
-        if (user.getTokenExpiryDate().isBefore(LocalDateTime.now())) {
+
+        if (user.getRegistrationTokenExpiryDate().isBefore(LocalDateTime.now())) {
             logger.warn("Registration token expired for user ID: {}", user.getId());
-            throw new RuntimeException("Registration token expired");
+            throw new RuntimeException("Lien expiré");
         }
 
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setRegistrationToken(null); // Token à usage unique
-        user.setTokenExpiryDate(null);
+        user.setRegistrationToken(null);
+        user.setRegistrationTokenExpiryDate(null);
         user.setIsFirstLoginComplete(true);
         user.setUpdatedAt(LocalDateTime.now());
 
         userRepository.save(user);
         logger.info("First long completed for user ID {}", user.getId());
     }
+
 }
