@@ -63,6 +63,7 @@ public class UserService {
       throw new DuplicateResourceException("User already exists");
     }
 
+
     User user = userMapper.convertToEntity(userDto);
     user.setCreatedAt(LocalDateTime.now());
     user.setUpdatedAt(LocalDateTime.now());
@@ -103,7 +104,6 @@ public class UserService {
 
     userMapper.updateUserFromDto(userDto, existingUser);
     existingUser.setUpdatedAt(LocalDateTime.now());
-
     try {
       User updatedUser = userRepository.save(existingUser);
       return userMapper.convertToDtoForAdmin(updatedUser);
@@ -140,26 +140,29 @@ public class UserService {
 
   }
 
-  public void completeFirstLogin(FirstLoginDto dto) {
-    logger.info("Completing first login for token {}", dto.getRegistrationToken());
-    User user = userRepository.findByRegistrationToken(dto.getRegistrationToken())
-        .orElseThrow(() -> {
-          logger.warn("Invalid registration token :{}", dto.getRegistrationToken());
-          return new ResourceNotFoundException("Invalid registration token");
-        });
 
-    if (user.getRegistrationTokenExpiryDate().isBefore(LocalDateTime.now())) {
-      logger.warn("Registration token expired for user ID: {}", user.getId());
-      throw new RuntimeException("Lien expiré");
+    public void completeFirstLogin(FirstLoginDto dto) {
+        logger.info("Completing first login for token {}", dto.getRegistrationToken());
+        User user = userRepository.findByRegistrationToken(dto.getRegistrationToken())
+                .orElseThrow(() -> {
+                    logger.warn("Invalid registration token :{}", dto.getRegistrationToken());
+                    return new ResourceNotFoundException("Invalid registration token");
+                });
+
+
+        if (user.getRegistrationTokenExpiryDate().isBefore(LocalDateTime.now())) {
+            logger.warn("Registration token expired for user ID: {}", user.getId());
+            throw new RuntimeException("Lien expiré");
+        }
+
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setRegistrationToken(null);
+        user.setRegistrationTokenExpiryDate(null);
+        user.setIsFirstLoginComplete(true);
+        user.setUpdatedAt(LocalDateTime.now());
+
+        userRepository.save(user);
+        logger.info("First long completed for user ID {}", user.getId());
     }
-
-    user.setPassword(passwordEncoder.encode(dto.getPassword()));
-    user.setRegistrationToken(null);
-    user.setRegistrationTokenExpiryDate(null);
-    user.setIsFirstLoginComplete(true);
-    user.setUpdatedAt(LocalDateTime.now());
-
-    userRepository.save(user);
-  }
 
 }
