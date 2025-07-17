@@ -44,8 +44,8 @@ VALUES ('Jean', 'Dupont', '$2y$10$pN5sgqp.gbzAJcoh04/1xeAsv/trTPxeNoep06U4i1WUWo
         '0601020305', NULL,
         NOW(), NOW()),
        ('Coco', 'Rico', '{noop}coach123', 'coach@example.com', '0602030408', NULL,
-        NOW(), NOW());
-
+        NOW(), NOW()),
+('Matthieu', 'Tricoire', '$2y$10$H9nV.LDccqVGYNar5dHDIeEpu5SsKduKk.c0Mr5feafA8un6E9PMO', 'matthieutricoire@gmail.com', '0668272972', NULL, NOW(), NOW());
 -- Peupler la table Course
 INSERT INTO course (title, description, start_datetime, duration, person_limit, status, created_at, updated_at,
                     coach_id)
