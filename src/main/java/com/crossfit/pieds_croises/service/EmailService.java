@@ -21,49 +21,60 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class EmailService {
 
-    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
-    private final JavaMailSender javaMailSender;
-    private final TemplateEngine templateEngine;
+  private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
+  private final JavaMailSender javaMailSender;
+  private final TemplateEngine templateEngine;
 
+  @Value("${spring.mail.username}")
+  private String from;
 
-    @Value("${spring.mail.username}")
-    private String from;
+  public void sendHtmlEmail(String to, String subject, String htmlContent) {
+    try {
+      MimeMessage message = javaMailSender.createMimeMessage();
+      MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-    public void sendHtmlEmail(String to, String subject, String htmlContent) {
-        try {
-            MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+      helper.setTo(to);
+      helper.setFrom(from);
+      helper.setSubject(subject);
+      helper.setText(htmlContent, true);
 
-            helper.setTo(to);
-            helper.setFrom(from);
-            helper.setSubject(subject);
-            helper.setText(htmlContent, true);
+      javaMailSender.send(message);
+      logger.info("Email sends to {}", to);
 
-            javaMailSender.send(message);
-            logger.info("Email sends to {}", to);
-
-        } catch (MessagingException e) {
-            logger.error("Error during sending email to {}: {}", to, e.getMessage());
-            throw new EmailSendingException("Error during sending email to" + to, e);
-        }
+    } catch (MessagingException e) {
+      logger.error("Error during sending email to {}: {}", to, e.getMessage());
+      throw new EmailSendingException("Error during sending email to" + to, e);
     }
+  }
 
-    public void sendTemplateEmail(String to, String subject, String templateName, Map<String, Object> variables) {
-        Context context = new Context();
-        context.setVariables(variables);
+  public void sendTemplateEmail(String to, String subject, String templateName, Map<String, Object> variables) {
+    Context context = new Context();
+    context.setVariables(variables);
 
-        String htmlContent = templateEngine.process("email/" + templateName, context);
-        sendHtmlEmail(to, subject, htmlContent);
+    String htmlContent = templateEngine.process("email/" + templateName, context);
+    sendHtmlEmail(to, subject, htmlContent);
 
+  }
+
+  public String generateInvitationLink(String baseUrl, String token) {
+    return generateInvitationLink(baseUrl, token, null);
+  }
+
+  public String generateInvitationLink(String baseUrl, String token, String username) {
+    try {
+      String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
+      StringBuilder link = new StringBuilder(baseUrl + "?token=" + encodedToken);
+
+      if (username != null && !username.isBlank()) {
+        String encodedUsername = URLEncoder.encode(username, StandardCharsets.UTF_8);
+        link.append("&username=").append(encodedUsername);
+      }
+
+      return link.toString();
+    } catch (Exception e) {
+      logger.error("Error in EmailService", e);
+      return null;
     }
+  }
 
-    public String generateInvitationLink(String baseUrl, String token) {
-        try {
-            String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
-            return baseUrl + "?token=" + encodedToken;
-        } catch (Exception e) {
-            logger.error("Error in EmailService", e);
-            return null;
-        }
-    }
 }
