@@ -35,6 +35,7 @@ public class UserService {
     @Value("${app.registration.token-expiration-days}")
     private int registrationTokenExpirationDays;
 
+
     public List<UserDto> getAllUsers() {
         List<User> users = userRepository.findAll();
         if (users.isEmpty()) {
@@ -55,22 +56,23 @@ public class UserService {
 
     public UserDto createUser(UserDto userDto) {
         logger.info("Creating user {}", userDto.getEmail());
-
         User existingUser = userRepository.findByEmail(userDto.getEmail())
                 .orElse(null);
         if (existingUser != null) {
             logger.warn("Attempt to create user with existing email: {}", userDto.getEmail());
             throw new DuplicateResourceException("User already exists");
         }
-
+      
         User user = userMapper.convertToEntity(userDto);
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
+
         Set<String> roles = userDto.getRoles();
         if (roles == null || roles.isEmpty()) {
             roles = Set.of("ROLE_USER"); // Valeur par défaut si aucun rôle fourni
         }
         user.setRoles(roles);
+
 
 
         String token = UUID.randomUUID().toString();
@@ -96,7 +98,9 @@ public class UserService {
     }
 
     public UserDto updateUser(Long id, UserUpdateDto userDto) {
+        logger.info("Updating user with ID: {}", userDto.getId());
         if (userDto.getId() != null && !userDto.getId().equals(id)) {
+            logger.error("ID mismatch : path ID {} does not match body ID {}", id, userDto.getId());
             throw new IllegalArgumentException("ID mismatch between path variable and request body");
         }
 
@@ -108,8 +112,10 @@ public class UserService {
 
         try {
             User updatedUser = userRepository.save(existingUser);
+            logger.info("User updated with ID {}", updatedUser.getId());
             return userMapper.convertToDtoForAdmin(updatedUser);
         } catch (Exception e) {
+            logger.error("Failed to update user with ID: {}", id, e);
             throw new RuntimeException("Failed to update user with id: " + id, e);
         }
     }
@@ -150,6 +156,7 @@ public class UserService {
                     return new ResourceNotFoundException("Invalid registration token");
                 });
 
+
         if (user.getRegistrationTokenExpiryDate().isBefore(LocalDateTime.now())) {
             logger.warn("Registration token expired for user ID: {}", user.getId());
             throw new RuntimeException("Lien expiré");
@@ -162,6 +169,7 @@ public class UserService {
         user.setUpdatedAt(LocalDateTime.now());
 
         userRepository.save(user);
+        logger.info("First long completed for user ID {}", user.getId());
     }
 
 }

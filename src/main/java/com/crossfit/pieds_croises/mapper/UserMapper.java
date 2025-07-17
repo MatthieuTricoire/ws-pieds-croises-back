@@ -13,6 +13,7 @@ public interface UserMapper {
     @Mapping(target = "coursesId", ignore = true)
     UserDto convertToDtoForUser(User user);
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "profilePicture", ignore = true)
