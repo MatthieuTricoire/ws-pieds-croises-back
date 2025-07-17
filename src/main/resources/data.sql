@@ -5,14 +5,14 @@ INSERT INTO box (name, address, city, zipcode, schedule, created_at, updated_at)
 VALUES ('Pieds croisés Pau', '1 rue des Pyrénées', 'Pau', '64000', 'Lun-Ven 08h-18h', NOW(), NOW());
 
 -- Peupler la table Message
-INSERT INTO message (title, content, message_type, start_date, expiration_date,  created_at, updated_at)
-VALUES ('Oyez Oyez info', 'Eum neque facilis commodi sequi dolores cum quod.', 'INFORMATION', '2025-05-17', '2025-06-01',
+INSERT INTO message (title, content, message_type, start_date, expiration_date, created_at, updated_at)
+VALUES ('Oyez Oyez info', 'Contenu du message 1', 'INFORMATION', '2025-05-17', '2025-06-01',
         '2025-05-01T10:00:00', '2025-05-01T10:00:00');
-INSERT INTO message (title, content, message_type, start_date, expiration_date,  created_at, updated_at)
-VALUES ('Oyez Oyez alert', 'Porro dolores at architecto delectus molestias cupiditate iusto.', 'ALERT', '2025-08-17', '2025-12-01',
+INSERT INTO message (title, content, message_type, start_date, expiration_date, created_at, updated_at)
+VALUES ('Oyez Oyez alert', 'Contenu du message 2', 'ALERT', '2025-08-17', '2025-12-01',
         '2025-05-01T10:00:00', '2025-05-01T10:00:00');
-INSERT INTO message (title, content, message_type, start_date, expiration_date,  created_at, updated_at)
-VALUES ('Oyez Oyez event', 'In consequuntur asperiores totam.', 'EVENT', '2025-05-17', '2025-12-01',
+INSERT INTO message (title, content, message_type, start_date, expiration_date, created_at, updated_at)
+VALUES ('Oyez Oyez event', 'Contenu du message 3', 'EVENT', '2025-05-17', '2025-12-01',
         '2025-05-01T10:00:00', '2025-05-01T10:00:00');
 INSERT INTO message (title, content, message_type, start_date, expiration_date,  created_at, updated_at)
 VALUES ('Oyez Oyez rappel', 'Accusamus molestias fugiat asperiores quas neque laboriosam non magnam dolorem. Totam repellat veniam nihil corporis in. Facilis veniam ducimus. Veritatis maiores explicabo doloribus quisquam odio architecto. Est at ullam earum et repellat neque delectus tempore eius. Quisquam suscipit dolor dolores tempora voluptatum.', 'REMINDER', '2025-05-17', '2025-12-01',
