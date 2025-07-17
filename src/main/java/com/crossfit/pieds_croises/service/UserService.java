@@ -24,129 +24,122 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Service
 public class UserService {
-    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
-    private final UserMapper userMapper;
-    private final UserRepository userRepository;
-    private final EmailService emailService;
-    private final PasswordEncoder passwordEncoder;
+  private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+  private final UserMapper userMapper;
+  private final UserRepository userRepository;
+  private final EmailService emailService;
+  private final PasswordEncoder passwordEncoder;
 
-    @Value("${app.base-url}${app.registration.uri}")
-    private String registrationUrl;
-    @Value("${app.registration.token-expiration-days}")
-    private int registrationTokenExpirationDays;
+  @Value("${app.base-url}${app.registration.uri}")
+  private String registrationUrl;
+  @Value("${app.registration.token-expiration-days}")
+  private int registrationTokenExpirationDays;
 
+  public List<UserDto> getAllUsers() {
+    List<User> users = userRepository.findAll();
+    if (users.isEmpty()) {
+      logger.warn("No users found in the database");
+      throw new ResourceNotFoundException("No users found");
+    }
+    logger.info("Found {} users", users.size());
+    return users.stream()
+        .map(userMapper::convertToDtoForAdmin)
+        .toList();
+  }
 
-    public List<UserDto> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        if (users.isEmpty()) {
-            logger.warn("No users found in the database");
-            throw new ResourceNotFoundException("No users found");
-        }
-        logger.info("Found {} users", users.size());
-        return users.stream()
-                .map(userMapper::convertToDtoForAdmin)
-                .toList();
+  public UserDto getUserById(Long id) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+    return userMapper.convertToDtoForAdmin(user);
+  }
+
+  public UserDto createUser(UserDto userDto) {
+    logger.info("Creating user {}", userDto.getEmail());
+
+    User existingUser = userRepository.findByEmail(userDto.getEmail())
+        .orElse(null);
+    if (existingUser != null) {
+      logger.warn("Attempt to create user with existing email: {}", userDto.getEmail());
+      throw new DuplicateResourceException("User already exists");
     }
 
-    public UserDto getUserById(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        return userMapper.convertToDtoForAdmin(user);
+
+    User user = userMapper.convertToEntity(userDto);
+    user.setCreatedAt(LocalDateTime.now());
+    user.setUpdatedAt(LocalDateTime.now());
+    Set<String> roles = userDto.getRoles();
+    if (roles == null || roles.isEmpty()) {
+      roles = Set.of("ROLE_USER"); // Valeur par défaut si aucun rôle fourni
+    }
+    user.setRoles(roles);
+
+    String token = UUID.randomUUID().toString();
+    user.setRegistrationToken(token);
+    user.setRegistrationTokenExpiryDate(LocalDateTime.now().plusDays(registrationTokenExpirationDays));
+    user.setIsFirstLoginComplete(false);
+    // Envoi du lien par email
+    logger.info("Sending registration email to {}", user.getEmail());
+    String registrationEmailLink = emailService.generateInvitationLink(registrationUrl, token, user.getFirstname());
+    Map<String, Object> emailVariables = Map.of(
+        "registrationEmailLink", registrationEmailLink);
+    emailService.sendTemplateEmail(user.getEmail(),
+        "Votre accès à la plateforme CrossFit Pieds Croisés",
+        "first-connection",
+        emailVariables);
+
+    User createdUser = userRepository.save(user);
+    logger.info("User created with ID {}", createdUser.getId());
+
+    return userMapper.convertToCreatedDto(createdUser);
+
+  }
+
+  public UserDto updateUser(Long id, UserUpdateDto userDto) {
+    if (userDto.getId() != null && !userDto.getId().equals(id)) {
+      throw new IllegalArgumentException("ID mismatch between path variable and request body");
     }
 
-    public UserDto createUser(UserDto userDto) {
-        logger.info("Creating user {}", userDto.getEmail());
-        User existingUser = userRepository.findByEmail(userDto.getEmail())
-                .orElse(null);
-        if (existingUser != null) {
-            logger.warn("Attempt to create user with existing email: {}", userDto.getEmail());
-            throw new DuplicateResourceException("User already exists");
-        }
-      
-        User user = userMapper.convertToEntity(userDto);
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
+    User existingUser = userRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        Set<String> roles = userDto.getRoles();
-        if (roles == null || roles.isEmpty()) {
-            roles = Set.of("ROLE_USER"); // Valeur par défaut si aucun rôle fourni
-        }
-        user.setRoles(roles);
+    userMapper.updateUserFromDto(userDto, existingUser);
+    existingUser.setUpdatedAt(LocalDateTime.now());
+    try {
+      User updatedUser = userRepository.save(existingUser);
+      return userMapper.convertToDtoForAdmin(updatedUser);
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to update user with id: " + id, e);
+    }
+  }
 
+  public void deleteUser(Long id) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+    userRepository.delete(user);
+  }
 
+  public UserDto getMyProfile(Long id) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+    return userMapper.convertToDtoForUser(user);
+  }
 
-        String token = UUID.randomUUID().toString();
-        user.setRegistrationToken(token);
-        user.setRegistrationTokenExpiryDate(LocalDateTime.now().plusDays(registrationTokenExpirationDays));
-        user.setIsFirstLoginComplete(false);
-        // Envoi du lien par email
-        logger.info("Sending registration email to {}", user.getEmail());
-        String registrationEmailLink = emailService.generateInvitationLink(registrationUrl, token);
-        Map<String, Object> emailVariables = Map.of(
-                "registrationEmailLink", registrationEmailLink
-        );
-        emailService.sendTemplateEmail(user.getEmail(),
-                "Votre accès à la plateforme CrossFit Pieds Croisés",
-                "first-connection",
-                emailVariables);
+  public UserDto updateProfile(String username, UserUpdateDto userDto) {
+    User existingUser = userRepository.findByEmail(username)
+        .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + username));
 
-        User createdUser = userRepository.save(user);
-        logger.info("User created with ID {}", createdUser.getId());
+    userMapper.updateUserFromDto(userDto, existingUser);
+    existingUser.setUpdatedAt(LocalDateTime.now());
 
-        return userMapper.convertToCreatedDto(createdUser);
-
+    try {
+      User updatedUser = userRepository.save(existingUser);
+      return userMapper.convertToDtoForUser(updatedUser);
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to update user: " + username, e);
     }
 
-    public UserDto updateUser(Long id, UserUpdateDto userDto) {
-        logger.info("Updating user with ID: {}", userDto.getId());
-        if (userDto.getId() != null && !userDto.getId().equals(id)) {
-            logger.error("ID mismatch : path ID {} does not match body ID {}", id, userDto.getId());
-            throw new IllegalArgumentException("ID mismatch between path variable and request body");
-        }
+  }
 
-        User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-
-        userMapper.updateUserFromDto(userDto, existingUser);
-        existingUser.setUpdatedAt(LocalDateTime.now());
-
-        try {
-            User updatedUser = userRepository.save(existingUser);
-            logger.info("User updated with ID {}", updatedUser.getId());
-            return userMapper.convertToDtoForAdmin(updatedUser);
-        } catch (Exception e) {
-            logger.error("Failed to update user with ID: {}", id, e);
-            throw new RuntimeException("Failed to update user with id: " + id, e);
-        }
-    }
-
-    public void deleteUser(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        userRepository.delete(user);
-    }
-
-    public UserDto getMyProfile(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        return userMapper.convertToDtoForUser(user);
-    }
-
-    public UserDto updateProfile(String username, UserUpdateDto userDto) {
-        User existingUser = userRepository.findByEmail(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + username));
-
-        userMapper.updateUserFromDto(userDto, existingUser);
-        existingUser.setUpdatedAt(LocalDateTime.now());
-
-        try {
-            User updatedUser = userRepository.save(existingUser);
-            return userMapper.convertToDtoForUser(updatedUser);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to update user: " + username, e);
-        }
-
-    }
 
     public void completeFirstLogin(FirstLoginDto dto) {
         logger.info("Completing first login for token {}", dto.getRegistrationToken());
