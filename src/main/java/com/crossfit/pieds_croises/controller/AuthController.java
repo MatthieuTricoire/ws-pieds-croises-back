@@ -5,7 +5,9 @@ import com.crossfit.pieds_croises.dto.ForgotPasswordRequestDto;
 import com.crossfit.pieds_croises.dto.LoginRequestDto;
 import com.crossfit.pieds_croises.dto.ResetPasswordRequestDto;
 import com.crossfit.pieds_croises.security.AuthenticationService;
+import com.crossfit.pieds_croises.security.JwtCookieService;
 import com.crossfit.pieds_croises.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,20 +16,28 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @AllArgsConstructor
 @RequestMapping("/auth")
 public class AuthController {
     private final AuthenticationService authenticationService;
     private final UserService userService;
+    private final JwtCookieService jwtCookieService;
+
 
     @PostMapping("/login")
-    public ResponseEntity<String> authenticate(@RequestBody LoginRequestDto loginRequestDto) {
+    public ResponseEntity<?> authenticate(@RequestBody LoginRequestDto loginRequestDto,
+                                          HttpServletResponse response) {
         String token = authenticationService.authenticate(
                 loginRequestDto.getEmail(),
                 loginRequestDto.getPassword()
         );
-        return ResponseEntity.ok(token);
+
+        jwtCookieService.addJwtCookie(response, token);
+
+        return ResponseEntity.ok().body(Map.of("message", "Connexion réussie"));
     }
 
     @PostMapping("/register")
@@ -46,5 +56,10 @@ public class AuthController {
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequestDto request) {
         authenticationService.resetPassword(request.getResetPasswordToken(), request.getNewPassword());
         return ResponseEntity.ok("Mot de passe réinitialisé avec succès.");
+    }
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        jwtCookieService.removeJwtCookie(response);
+        return ResponseEntity.ok().body(Map.of("message", "Déconnexion réussie"));
     }
 }
