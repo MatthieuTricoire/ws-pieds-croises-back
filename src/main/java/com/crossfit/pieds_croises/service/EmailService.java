@@ -17,9 +17,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
 @Service
 @RequiredArgsConstructor
 public class EmailService {
@@ -60,10 +57,18 @@ public class EmailService {
 
     }
 
-    public String generateInvitationLink(String baseUrl, String token) {
+
+    public String generateInvitationLink(String baseUrl, String token, String username) {
         try {
             String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
-            return baseUrl + "?token=" + encodedToken;
+            StringBuilder link = new StringBuilder(baseUrl + "?token=" + encodedToken);
+
+            if (username != null && !username.isBlank()) {
+                String encodedUsername = URLEncoder.encode(username, StandardCharsets.UTF_8);
+                link.append("&username=").append(encodedUsername);
+            }
+
+            return link.toString();
         } catch (Exception e) {
             logger.error("Error in EmailService", e);
             return null;
@@ -71,12 +76,6 @@ public class EmailService {
     }
 
     public String generateInvitationLink(String baseUrl, String token) {
-        try {
-            String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
-            return baseUrl + "?token=" + encodedToken;
-        } catch (Exception e) {
-            logger.error("Error in EmailService", e);
-            return null;
-        }
+        return generateInvitationLink(baseUrl, token, null);
     }
 }
