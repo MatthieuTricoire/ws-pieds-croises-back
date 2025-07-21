@@ -10,7 +10,11 @@ import com.crossfit.pieds_croises.model.User;
 import com.crossfit.pieds_croises.repository.UserRepository;
 import com.crossfit.pieds_croises.security.AuthenticationService;
 import com.crossfit.pieds_croises.security.JwtCookieService;
+import com.crossfit.pieds_croises.security.JwtService;
 import com.crossfit.pieds_croises.service.UserService;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -30,19 +34,41 @@ import java.util.Map;
 @AllArgsConstructor
 @RequestMapping("/auth")
 public class AuthController {
+  private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AuthController.class);
   private final AuthenticationService authenticationService;
   private final UserService userService;
   private final JwtCookieService jwtCookieService;
   private final UserRepository userRepository;
+  private final JwtService jwtService;
+
   private final AuthUserMapper authUserMapper;
 
   @GetMapping("/check")
-  public ResponseEntity<?> checkAuthentication(Authentication authentication) {
-    if (authentication != null && authentication.isAuthenticated()) {
-      return ResponseEntity.ok(Map.of("message", "Utilisateur authentifié"));
-    } else {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+  public ResponseEntity<Boolean> checkAuth(HttpServletRequest request) {
+
+    Cookie[] cookies = request.getCookies();
+    boolean isAuthenticated = false;
+
+    if (cookies != null) {
+      for (Cookie cookie : cookies) {
+        if ("token".equals(cookie.getName())) {
+          try {
+            String tokenValue = cookie.getValue();
+            isAuthenticated = jwtService.validateJwtToken(tokenValue);
+            break;
+          } catch (Exception e) {
+            logger.error("Erreur validation token: {}", e.getMessage());
+            e.printStackTrace();
+          }
+        }
+      }
     }
+
+    if (!isAuthenticated) {
+      logger.warn("Cookie 'token' non trouvé ou invalide");
+    }
+
+    return ResponseEntity.ok(isAuthenticated);
   }
 
   @GetMapping("/me")
@@ -65,7 +91,7 @@ public class AuthController {
 
     jwtCookieService.addJwtCookie(response, token);
 
-    return ResponseEntity.ok().body(Map.of("message", "Connexion réussie"));
+    return ResponseEntity.ok().build();
   }
 
   @PostMapping("/register")
