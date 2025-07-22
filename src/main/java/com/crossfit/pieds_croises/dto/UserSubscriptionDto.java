@@ -27,4 +27,6 @@ public class UserSubscriptionDto {
     @NotNull(message = "Subscription ID is required")
     private Long subscriptionId;
 
+    private SubscriptionDto subscription;
+
 }
