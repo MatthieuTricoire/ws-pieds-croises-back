@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -11,27 +12,30 @@ import java.util.List;
 @Configuration
 public class CorsGlobalConfiguration {
 
-  @Bean
-  public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
+    @Value("${app.base-url}")
+    private String appBaseUrl;
 
-    // TODO: Modifier quand on sera en prod pour mettre l'url de la prod
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
 
-    configuration.setAllowedOrigins(List.of("http://localhost:4200"));
-    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE",
-        "OPTIONS", "PATCH"));
-    configuration.setAllowedHeaders(List.of(
-        "*"));
-    configuration.setExposedHeaders(List.of(
-        "Access-Control-Allow-Origin",
-        "Access-Control-Allow-Credentials",
-        "Set-Cookie"));
-    configuration.setAllowCredentials(true);
-    configuration.setMaxAge(3600L);
+        // TODO: Modifier quand on sera en prod pour mettre l'url de la prod
 
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", configuration);
+        configuration.setAllowedOrigins(List.of(appBaseUrl));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE",
+                "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(List.of(
+                "*"));
+        configuration.setExposedHeaders(List.of(
+                "Access-Control-Allow-Origin",
+                "Access-Control-Allow-Credentials",
+                "Set-Cookie"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
-    return source;
-  }
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
+    }
 }
