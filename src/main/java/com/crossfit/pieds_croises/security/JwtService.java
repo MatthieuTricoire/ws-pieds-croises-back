@@ -54,4 +54,8 @@ public class JwtService {
     }
   }
 
+  public String getEmailFromToken(String token) {
+    return extractClaims(token).getSubject();
+  }
+
 }

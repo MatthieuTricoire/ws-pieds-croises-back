@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @AllArgsConstructor
@@ -52,14 +53,22 @@ public class AuthController {
     if (cookies != null) {
       for (Cookie cookie : cookies) {
         if ("token".equals(cookie.getName())) {
+          String tokenValue = cookie.getValue();
           try {
-            String tokenValue = cookie.getValue();
-            isAuthenticated = jwtService.validateJwtToken(tokenValue);
-            break;
+            if (jwtService.validateJwtToken(tokenValue)) {
+              String email = jwtService.getEmailFromToken(tokenValue);
+              Optional<User> optionalUser = userRepository.findByEmail(email);
+              if (optionalUser.isPresent() && optionalUser.get().isEnabled()) {
+                isAuthenticated = true;
+                logger.info("[/auth/check] Authentification OK pour {}", email);
+              } else {
+                logger.warn("[/auth/check] Token OK mais utilisateur inexistant ou inactif: {}", email);
+              }
+            }
           } catch (Exception e) {
-            logger.error("Erreur validation token: {}", e.getMessage());
-            e.printStackTrace();
+            logger.error("[/auth/check] Erreur de validation du token: {}", e.getMessage(), e);
           }
+          break;
         }
       }
     }
