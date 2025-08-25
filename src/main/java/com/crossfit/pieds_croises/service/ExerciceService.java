@@ -25,7 +25,7 @@ public class ExerciceService {
         return exercices.stream().map(exerciceMapper::convertToDTO).toList();
     }
 
-    public ExerciceDTO getExerciceById(long id) {
+    public ExerciceDTO getExerciceById(Long id) {
         Exercice exercice = exerciceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Exercice with id " + id + " not found!"));
         return exerciceMapper.convertToDTO(exercice);
@@ -36,7 +36,7 @@ public class ExerciceService {
         return exerciceMapper.convertToDTO(savedExercice);
     }
 
-    public ExerciceDTO updateExercice(long id, Exercice exerciceDetails) {
+    public ExerciceDTO updateExercice(Long id, Exercice exerciceDetails) {
         Exercice exercice = exerciceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Exercice with id " + id + " not found!"));
         exercice.setName(exerciceDetails.getName());
@@ -46,7 +46,7 @@ public class ExerciceService {
         return exerciceMapper.convertToDTO(updatedExercice);
     }
 
-    public void deleteExercice(long id) {
+    public void deleteExercice(Long id) {
         Exercice exercice = exerciceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Exercice with id " + id + " not found!"));
         exerciceRepository.delete(exercice);

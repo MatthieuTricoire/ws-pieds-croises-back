@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.service;
 
+import com.crossfit.pieds_croises.datetime.DateTimeProvider;
 import com.crossfit.pieds_croises.dto.CourseDTO;
 import com.crossfit.pieds_croises.dto.FirstLoginDto;
 import com.crossfit.pieds_croises.dto.UserDto;
@@ -35,6 +36,7 @@ public class UserService {
   private final PasswordEncoder passwordEncoder;
   private final CourseMapper courseMapper;
   private final UserSubscriptionService userSubscriptionService;
+  private final DateTimeProvider dateTimeProvider;
 
   @Value("${app.base-url}${app.registration.uri}")
   private String registrationUrl;
@@ -138,7 +140,6 @@ public class UserService {
         throw new RuntimeException("Failed to create subscription for user ID: " + createdUser.getId(), e);
       }
     }
-
     return userMapper.convertToCreatedDto(createdUser);
   }
 
@@ -150,22 +151,23 @@ public class UserService {
     User existingUser = userRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-    userMapper.updateUserFromDto(userDto, existingUser);
-    existingUser.setUpdatedAt(LocalDateTime.now());
-    try {
-      User updatedUser = userRepository.save(existingUser);
-      return userMapper.convertToDtoForAdmin(updatedUser);
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to update user with id: " + id, e);
+        userMapper.updateUserFromDto(userDto, existingUser);
+        existingUser.setUpdatedAt(dateTimeProvider.now());
+
+        try {
+            User updatedUser = userRepository.save(existingUser);
+            return userMapper.convertToDtoForAdmin(updatedUser);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update user with id: " + id, e);
+        }
     }
-  }
 
   public UserDto updateProfile(String username, UserUpdateDto userDto) {
     User existingUser = userRepository.findByEmail(username)
         .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + username));
 
-    userMapper.updateUserFromDto(userDto, existingUser);
-    existingUser.setUpdatedAt(LocalDateTime.now());
+        userMapper.updateUserFromDto(userDto, existingUser);
+        existingUser.setUpdatedAt(dateTimeProvider.now());
 
     try {
       User updatedUser = userRepository.save(existingUser);

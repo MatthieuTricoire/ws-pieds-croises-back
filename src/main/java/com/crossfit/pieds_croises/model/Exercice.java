@@ -34,5 +34,4 @@ public class Exercice {
         REPETITION,
         WEIGHT,
     }
-
 }

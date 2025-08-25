@@ -16,7 +16,7 @@ public class PerformanceHistoryDTO {
 
     @NotNull(message = "La valeur est obligatoire.")
     @Positive(message = "La valeur doit être strictement positive.")
-    private Float value;
+    private Float measuredValue;
 
     @NotNull(message = "La date est obligatoire.")
     @PastOrPresent(message = "La date ne peut pas être dans le futur.")
