@@ -2,48 +2,85 @@ package com.crossfit.pieds_croises.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Date;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
+  private final JwtService jwtService;
+  private final UserDetailsService userDetailsService;
+  private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
-    public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService) {
-        this.jwtService = jwtService;
-        this.userDetailsService = userDetailsService;
+  public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+    this.jwtService = jwtService;
+    this.userDetailsService = userDetailsService;
+  }
+
+  @Override
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      throws ServletException, IOException {
+
+    String jwt = extractJwtFromCookie(request);
+
+    if (jwt == null) {
+      logger.info("No JWT token found in cookies");
+      filterChain.doFilter(request, response);
+      return;
     }
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String authHeader = request.getHeader("Authorization");
+    try {
+      String username = jwtService.extractClaims(jwt).getSubject();
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String jwt = authHeader.substring(7);
-            String username = jwtService.extractClaims(jwt).getSubject();
+      if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                if (jwtService.extractClaims(jwt).getExpiration().after(new Date())) {
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities()
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
-            }
+        boolean isValid = jwtService.validateJwtToken(jwt);
+        logger.info("Is JWT valid? {}", isValid);
+
+        if (isValid) {
+          UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+          UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+              userDetails, null, userDetails.getAuthorities());
+          authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+          SecurityContextHolder.getContext().setAuthentication(authentication);
+          logger.info("Authentication set in SecurityContext for user: {}", username);
         }
+      } else if (SecurityContextHolder.getContext().getAuthentication() != null) {
+        logger.info("User already authenticated: {}", SecurityContextHolder.getContext().getAuthentication().getName());
+      }
 
-        filterChain.doFilter(request, response);
+    } catch (Exception e) {
+      logger.error("Error during JWT filter processing: {}", e.getMessage(), e);
+      SecurityContextHolder.clearContext();
     }
+
+    filterChain.doFilter(request, response);
+  }
+
+  private String extractJwtFromCookie(HttpServletRequest request) {
+    if (request.getCookies() != null) {
+      for (Cookie cookie : request.getCookies()) {
+        if ("token".equals(cookie.getName())) {
+          logger.info("Found token cookie with value length: {}", cookie.getValue().length());
+          return cookie.getValue();
+        }
+      }
+    }
+    logger.info("No cookies found or no 'token' cookie present");
+    return null;
+  }
 }
