@@ -9,7 +9,10 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+    componentModel = "spring",
+    uses = { UserSubscriptionMapper.class, CourseMapper.class }
+)
 public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
