@@ -9,7 +9,10 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+    componentModel = "spring",
+    uses = { UserSubscriptionMapper.class, CourseMapper.class }
+)
 public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -54,7 +57,6 @@ public interface UserMapper {
     @Mapping(target = "createdAt", ignore = true)
     void updateUserFromDto(UserUpdateDto userDto, @MappingTarget User user);
 
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "isFirstLoginComplete", ignore = true)
     @Mapping(target = "performanceHistoryList", ignore = true)
     @Mapping(target = "coursesId", ignore = true)
