@@ -1,0 +1,15 @@
+meta {
+  name: Check user
+  type: http
+  seq: 9
+}
+
+get {
+  url: http://localhost:8080/auth/check
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsInJvbGVzIjpbeyJhdXRob3JpdHkiOiJST0xFX1VTRVIifSx7ImF1dGhvcml0eSI6IlJPTEVfQURNSU4ifV0sImlhdCI6MTc1Mjg0OTc5NiwiZXhwIjoxNzUyODUzMzk2fQ.KVzgGJgNBlp39D3cpim5ZggdNp34wor8HmT7Xy_B_vM
+}
