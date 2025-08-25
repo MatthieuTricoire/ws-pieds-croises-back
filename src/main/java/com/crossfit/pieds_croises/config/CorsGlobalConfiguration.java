@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -11,14 +12,26 @@ import java.util.List;
 @Configuration
 public class CorsGlobalConfiguration {
 
+    @Value("${app.base-url}")
+    private String appBaseUrl;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:5173"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true); // si tu utilises des cookies ou JWT en HttpOnly
+        // TODO: Modifier quand on sera en prod pour mettre l'url de la prod
+
+        configuration.setAllowedOrigins(List.of(appBaseUrl));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE",
+                "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(List.of(
+                "*"));
+        configuration.setExposedHeaders(List.of(
+                "Access-Control-Allow-Origin",
+                "Access-Control-Allow-Credentials",
+                "Set-Cookie"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
