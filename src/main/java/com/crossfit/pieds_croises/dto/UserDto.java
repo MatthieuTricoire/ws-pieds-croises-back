@@ -1,15 +1,13 @@
 package com.crossfit.pieds_croises.dto;
 
-import com.crossfit.pieds_croises.model.PerformanceHistory;
-import com.crossfit.pieds_croises.model.WeightHistory;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -30,9 +28,6 @@ public class UserDto {
     @Email(message = "Please provide a valid email address")
     private String email;
 
-    @NotBlank(message = """
-            Phone number is required""")
-    @Pattern(regexp = "^[+]?[0-9\\s\\-\\(\\)]{8,20}$", message = "Please provide a valid phone number")
     private String phone;
 
     private String profilePicture;
@@ -40,8 +35,11 @@ public class UserDto {
     private LocalDateTime updatedAt;
     private Byte strikeCount;
     private List<UserSubscriptionDto> userSubscriptions;
-    private List<WeightHistory> weightHistory;
-    private List<PerformanceHistory> performanceHistoryList;
+    private List<WeightHistoryDTO> weightHistory;
+    private List<PerformanceHistoryDTO> performanceHistoryList;
+    private String registrationToken;
+    private Boolean isFirstLoginComplete;
+    private Set<String> roles;
 
     private List<Long> coursesId;
 

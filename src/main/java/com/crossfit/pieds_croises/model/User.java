@@ -51,7 +51,6 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-
     private Byte strikeCount;
 
     @Enumerated(EnumType.STRING)
@@ -79,6 +78,21 @@ public class User implements UserDetails {
     @ManyToMany
     @JoinTable(name = "user_course", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "course_id"))
     private List<Course> courses;
+
+    @Column(name = "registration_token", nullable = true)
+    private String registrationToken;
+
+    @Column(name = "registration_token_expiry_date", nullable = true)
+    private LocalDateTime registrationTokenExpiryDate;
+
+    @Column(name = "is_first_login_complete", nullable = true)
+    private Boolean isFirstLoginComplete;
+
+    @Column(name = "reset_password_token", nullable = true)
+    private String resetPasswordToken;
+
+    @Column(name = "password_token_expiry_date", nullable = true)
+    private LocalDateTime resetPasswordTokenExpiryDate;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -166,9 +180,9 @@ public class User implements UserDetails {
     }
 
     public void resetSuspensionTypeAndDates() {
-        this.suspensionType = null;
         this.suspensionStartDate = null;
         this.suspensionEndDate = null;
+        this.suspensionType = null;
     }
 
     public boolean isCoach() {
