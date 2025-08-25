@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.service;
 
+import com.crossfit.pieds_croises.datetime.DateTimeProvider;
 import com.crossfit.pieds_croises.dto.UserSubscriptionDto;
 import com.crossfit.pieds_croises.enums.UserSubscriptionStatus;
 import com.crossfit.pieds_croises.exception.ForbiddenException;
@@ -29,6 +30,7 @@ public class UserSubscriptionService {
     private final UserSubscriptionRepository userSubscriptionRepository;
     private final UserRepository userRepository;
     private final UserSubscriptionMapper userSubscriptionMapper;
+    private final DateTimeProvider dateTimeProvider;
 
     public UserSubscriptionDto createUserSubscription(UserSubscriptionDto userSubscriptionDto) {
         User user = userRepository.findById(userSubscriptionDto.getUserId())
@@ -37,7 +39,7 @@ public class UserSubscriptionService {
         Subscription subscription = subscriptionRepository.findById(userSubscriptionDto.getSubscriptionId())
             .orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
 
-        LocalDateTime currentDate = LocalDateTime.now();
+        LocalDateTime currentDate = dateTimeProvider.now();
 
         // Vérifier le dernier abonnement actif
         Optional<UserSubscription> existingUserSubscription = userSubscriptionRepository

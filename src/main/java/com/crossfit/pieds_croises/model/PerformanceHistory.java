@@ -19,7 +19,7 @@ public class PerformanceHistory {
     private Long id;
 
     @Column(nullable = false)
-    private float value;
+    private float measuredValue;
 
     @Column(nullable = false)
     private LocalDate date;

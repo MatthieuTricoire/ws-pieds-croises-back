@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "app_user")
 public class User implements UserDetails {
 
   @Id

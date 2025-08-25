@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.service;
 
+import com.crossfit.pieds_croises.datetime.DateTimeProvider;
 import com.crossfit.pieds_croises.dto.PerformanceHistoryDTO;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.PerformanceHistoryMapper;
@@ -25,6 +26,7 @@ public class PerformanceHistoryService {
     private final PerformanceHistoryMapper performanceHistoryMapper;
     private final UserRepository userRepository;
     private final ExerciceRepository exerciceRepository;
+    private final DateTimeProvider dateTimeProvider;
 
     public List<PerformanceHistoryDTO> getAllPerformanceHistory(Long userId) {
         List<PerformanceHistory> performanceHistoryList = performanceHistoryRepository.findAllByUserIdOrderByDateAsc(userId);
@@ -34,7 +36,7 @@ public class PerformanceHistoryService {
     }
 
     public List<PerformanceHistoryDTO> getAllPerformanceHistoryForLastXMonths(Long userId, Integer months) {
-        LocalDate startDate = LocalDate.now().withDayOfMonth(1).minusMonths(months - 1);
+        LocalDate startDate = dateTimeProvider.today().withDayOfMonth(1).minusMonths(months - 1);
         List<PerformanceHistory> performanceHistoryList = performanceHistoryRepository.findAllByUserIdForLastXMonths(userId, startDate);
         return performanceHistoryList.stream()
                 .map(performanceHistoryMapper::convertToDTO)
@@ -52,8 +54,8 @@ public class PerformanceHistoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Exercice with id " + performanceHistoryDTO.getExerciseId() + " not found."));
         performanceHistory.setExercice(exercice);
 
-        PerformanceHistory performanceHistorySaved = performanceHistoryRepository.save(performanceHistory);
-        return performanceHistoryMapper.convertToDTO(performanceHistorySaved);
+        PerformanceHistory savedPerformanceHistory = performanceHistoryRepository.save(performanceHistory);
+        return performanceHistoryMapper.convertToDTO(savedPerformanceHistory);
     }
 
     public PerformanceHistoryDTO updatePerformanceHistory(Long id, PerformanceHistoryDTO performanceHistoryDTO, Long userId) {
