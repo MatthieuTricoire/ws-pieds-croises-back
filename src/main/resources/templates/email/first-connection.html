@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <h2>Bienvenue sur CrossFit Pieds Croisés !</h2>
+    <p>Vous avez été invité à rejoindre notre plateforme.</p>
+    <p>
+      Cliquez sur le bouton ci-dessous pour définir votre mot de passe et
+      activer votre compte :
+    </p>
+    <p style="margin-top: 20px">
+      <a
+        style="
+          padding: 10px 20px;
+          background-color: #2d6cdf;
+          color: white;
+          text-decoration: none;
+          border-radius: 5px;
+        "
+        th:href="${registrationEmailLink}"
+      >
+        Activer mon compte
+      </a>
+    </p>
+    <p style="margin-top: 20px; font-size: 0.9em">
+      Ce lien est valable pendant 48 heures.
+    </p>
+    <br />
+    <p>Sportivement,<br />L'équipe CrossFit Pieds Croisés</p>
+  </body>
+</html>
+
+monTitre = { text: 'treeeeeee long', tag: h2 className }
+
+<typo typo="{montitre}" />
+
+<composantTypo> <ng-content /> </composantTypo>

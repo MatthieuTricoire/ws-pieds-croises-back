@@ -3,12 +3,18 @@ package com.crossfit.pieds_croises.mapper;
 import com.crossfit.pieds_croises.dto.UserDto;
 import com.crossfit.pieds_croises.dto.UserUpdateDto;
 import com.crossfit.pieds_croises.model.User;
-import org.mapstruct.*;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "isFirstLoginComplete", ignore = true)
+    @Mapping(target = "coursesId", ignore = true)
     UserDto convertToDtoForUser(User user);
 
     @Mapping(target = "id", ignore = true)
@@ -20,11 +26,9 @@ public interface UserMapper {
     @Mapping(target = "weightHistory", ignore = true)
     @Mapping(target = "performanceHistoryList", ignore = true)
     @Mapping(target = "coursesId", ignore = true)
+    @Mapping(target = "roles", source = "roles")
     UserDto convertToCreatedDto(User user);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "weightHistory", ignore = true)
-    @Mapping(target = "performanceHistoryList", ignore = true)
     @Mapping(target = "coursesId", expression = "java(user.getCourses() != null ? user.getCourses().stream().map(com.crossfit.pieds_croises.model.Course::getId).toList() : java.util.Collections.emptyList())")
     UserDto convertToDtoForAdmin(User user);
 
@@ -49,4 +53,10 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     void updateUserFromDto(UserUpdateDto userDto, @MappingTarget User user);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "isFirstLoginComplete", ignore = true)
+    @Mapping(target = "performanceHistoryList", ignore = true)
+    @Mapping(target = "coursesId", ignore = true)
+    UserDto convertToAuthDto(User user);
 }

@@ -1,0 +1,15 @@
+meta {
+  name: Delete My Profile
+  type: http
+  seq: 8
+}
+
+delete {
+  url: http://localhost:8080/users/profile
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
