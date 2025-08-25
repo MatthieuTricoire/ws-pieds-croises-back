@@ -28,7 +28,6 @@ public class CourseService {
     private final CourseMapper courseMapper;
     private final UserRepository userRepository;
 
-    private final LocalDateTime today = LocalDateTime.now();
     private final UserMapper userMapper;
 
     public List<CourseDTO> getAllCourses() {
@@ -38,7 +37,8 @@ public class CourseService {
     }
 
     public List<CourseDTO> getCoursesNextTwoWeeks() {
-        List<Course> courses = courseRepository.findByStartDatetimeBetweenOrderByStartDatetimeAsc(today, today.plusWeeks(2));
+        LocalDateTime now = LocalDateTime.now();
+        List<Course> courses = courseRepository.findByStartDatetimeBetweenOrderByStartDatetimeAsc(now, now.plusWeeks(2));
 
         return courses.stream().map(courseMapper::convertToDto).collect(Collectors.toList());
     }
@@ -63,7 +63,7 @@ public class CourseService {
 
         courseRepository.findByCoachIdAndStartDatetime(courseCreateDTO.getCoachId(), courseCreateDTO.getStartDatetime())
                 .ifPresent(c -> {
-                    throw new ResourceNotFoundException("A course already exists with this coach at this start date.");
+                    throw new BusinessException("A course already exists with this coach at this start date.");
                 });
 
         Course course = courseMapper.convertToEntity(courseCreateDTO);
@@ -111,11 +111,11 @@ public class CourseService {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not existing"));
 
-        boolean userAlreadyRegisted = existingCourse.getUsers().stream().anyMatch(user -> user.getId().equals(existingUser.getId()));
+        boolean userAlreadyRegistered = existingCourse.getUsers().stream().anyMatch(user -> user.getId().equals(existingUser.getId()));
         boolean courseFull = existingCourse.getStatus().equals(Course.Status.FULL);
         boolean userSuspended = existingUser.isSuspended();
 
-        if (userAlreadyRegisted) {
+        if (userAlreadyRegistered) {
             throw new BusinessException("User already registered to this course");
         }
 
@@ -145,9 +145,9 @@ public class CourseService {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not existing"));
 
-        boolean userRegisted = existingCourse.getUsers().contains(existingUser);
+        boolean userRegistered = existingCourse.getUsers().contains(existingUser);
 
-        if (!userRegisted) {
+        if (!userRegistered) {
             throw new BusinessException("User not enrolled in this course");
         }
 
@@ -170,22 +170,14 @@ public class CourseService {
             userRepository.save(user);
         }
 
-        if (!existingCourse.getUsers().isEmpty()) {
-            existingCourse.setStatus(Course.Status.CANCELLED);
-            existingCourse.setUpdatedAt(LocalDateTime.now());
-            courseRepository.save(existingCourse);
-        }
         courseRepository.delete(existingCourse);
     }
 
     public List<UserDto> getUsersNotInCourse(Long id) {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
-        List<User> users = userRepository.findAll();
-
+        List<User> users = userRepository.findAllUsersNotInCourse(course, course.getCoach());
         return users.stream()
-                .filter(user -> !course.getUsers().contains(user))
-                .filter(user -> !user.getId().equals(course.getCoach().getId()))
                 .map(userMapper::convertToDtoForAdmin)
                 .collect(Collectors.toList());
     }
