@@ -57,7 +57,6 @@ public interface UserMapper {
     @Mapping(target = "createdAt", ignore = true)
     void updateUserFromDto(UserUpdateDto userDto, @MappingTarget User user);
 
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "isFirstLoginComplete", ignore = true)
     @Mapping(target = "performanceHistoryList", ignore = true)
     @Mapping(target = "coursesId", ignore = true)
