@@ -26,7 +26,7 @@ public class Box {
     @Column(length = 100, nullable = false)
     private String email;
 
-    @Column(length = 20, nullable = false)
+    @Column(length = 20, name="phone_number", nullable = false)
     private String phoneNumber;
 
     @Column()
