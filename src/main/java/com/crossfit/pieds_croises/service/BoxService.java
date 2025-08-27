@@ -1,6 +1,7 @@
 package com.crossfit.pieds_croises.service;
 
 import com.crossfit.pieds_croises.dto.BoxDto;
+import com.crossfit.pieds_croises.dto.BoxInfoDTO;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.BoxMapper;
 import com.crossfit.pieds_croises.model.Box;
@@ -37,6 +38,15 @@ public class BoxService {
         }
         Box firstBox = boxes.getFirst();
         return boxMapper.convertToBoxDto(firstBox);
+    }
+
+    public BoxInfoDTO getBoxInfo() {
+        List<Box> boxes = boxRepository.findAll();
+        if (boxes.isEmpty()) {
+            throw new ResourceNotFoundException("No boxes found");
+        }
+        Box firstBox = boxes.getFirst();
+        return boxMapper.convertToBoxInfoDto(firstBox);
     }
 
     public BoxDto getBoxById(Long id) {

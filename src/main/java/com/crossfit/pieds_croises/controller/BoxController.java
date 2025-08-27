@@ -1,18 +1,12 @@
 package com.crossfit.pieds_croises.controller;
 
 import com.crossfit.pieds_croises.dto.BoxDto;
+import com.crossfit.pieds_croises.dto.BoxInfoDTO;
 import com.crossfit.pieds_croises.service.BoxService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -32,6 +26,12 @@ public class BoxController {
   public ResponseEntity<BoxDto> getFirstBox() {
     BoxDto boxDto = boxService.getFirstBox();
     return ResponseEntity.ok(boxDto);
+  }
+
+  @GetMapping("/box-info")
+  public ResponseEntity<BoxInfoDTO> getBoxInfo() {
+    BoxInfoDTO boxInfo = boxService.getBoxInfo();
+    return ResponseEntity.ok(boxInfo);
   }
 
   @GetMapping("/{id}")

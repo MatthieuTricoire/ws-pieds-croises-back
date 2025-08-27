@@ -17,6 +17,14 @@ public class BoxDto {
   @Size(max = 100, message = "Name must be less than 100 characters")
   private String name;
 
+  @NotBlank(message = "Email is required")
+  @Size(max = 100, message = "Email must be less than 100 characters")
+  private String email;
+
+  @NotBlank(message = "Phone number is required")
+  @Size(max = 20, message = "Phone number must be less than 20 characters")
+  private String phoneNumber;
+
   @NotBlank(message = "Address is required")
   private String address;
 

@@ -23,6 +23,12 @@ public class Box {
     @Column(length = 100, nullable = false)
     private String name;
 
+    @Column(length = 100, nullable = false)
+    private String email;
+
+    @Column(length = 20, nullable = false)
+    private String phoneNumber;
+
     @Column()
     private String address;
 
