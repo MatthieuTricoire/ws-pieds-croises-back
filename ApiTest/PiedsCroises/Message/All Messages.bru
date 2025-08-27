@@ -5,9 +5,13 @@ meta {
 }
 
 get {
-  url: http://localhost:8080/messages
+  url: http://localhost:8080/messages?status=active
   body: none
   auth: bearer
+}
+
+params:query {
+  status: active
 }
 
 auth:bearer {

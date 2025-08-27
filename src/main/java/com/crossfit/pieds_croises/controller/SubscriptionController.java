@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.controller;
 
+import com.crossfit.pieds_croises.dto.SubscriptionCreateDto;
 import com.crossfit.pieds_croises.dto.SubscriptionDto;
 import com.crossfit.pieds_croises.service.SubscriptionService;
 import jakarta.validation.Valid;
@@ -19,12 +20,18 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/subscriptions")
-public class BoxSubscriptionController {
+public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 
+    @GetMapping
+    public ResponseEntity<List<SubscriptionDto>> getAllSubscriptions() {
+        List<SubscriptionDto> subscriptionDtos = subscriptionService.getAllSubscriptions();
+        return ResponseEntity.ok(subscriptionDtos);
+    }
+
     @PostMapping
-    public ResponseEntity<SubscriptionDto> addSubscription(@Valid @RequestBody SubscriptionDto subscriptionDto) {
-        SubscriptionDto createdSubscription = subscriptionService.addSubscription(subscriptionDto);
+    public ResponseEntity<SubscriptionDto> addSubscription(@Valid @RequestBody SubscriptionCreateDto subscriptionCreateDto) {
+        SubscriptionDto createdSubscription = subscriptionService.addSubscription(subscriptionCreateDto);
         return ResponseEntity.ok().body(createdSubscription);
     }
 
@@ -52,12 +59,4 @@ public class BoxSubscriptionController {
         return ResponseEntity.ok(updatedSubscription);
     }
 
-    @GetMapping("/box/{boxId}")
-    public ResponseEntity<List<SubscriptionDto>> getSubscriptionsByBoxId(@PathVariable Long boxId) {
-        List<SubscriptionDto> subscriptions = subscriptionService.getAllSubscriptionsByBoxId(boxId);
-        if (subscriptions.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(subscriptions);
-    }
 }

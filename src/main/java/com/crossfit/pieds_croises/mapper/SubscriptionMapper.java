@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.mapper;
 
+import com.crossfit.pieds_croises.dto.SubscriptionCreateDto;
 import com.crossfit.pieds_croises.dto.SubscriptionDto;
 import com.crossfit.pieds_croises.model.Subscription;
 import org.mapstruct.Mapper;
@@ -15,7 +16,7 @@ public interface SubscriptionMapper {
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "userSubscriptions", ignore = true)
   @Mapping(target = "box", ignore = true)
-  Subscription convertToSubscriptionEntity(SubscriptionDto subscriptionDto);
+  Subscription convertToSubscriptionEntity(SubscriptionCreateDto subscriptionCreateDto);
 
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "box", ignore = true)

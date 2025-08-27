@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserSubscriptionRepository extends JpaRepository<UserSubscription, Long> {
-    List<UserSubscription> findByUser(User user);
+    Optional<UserSubscription> findByUser(User user);
 
     Optional<UserSubscription> findTopByUserAndEndDateAfterOrderByEndDateDesc(User user, LocalDateTime endDate);
 

@@ -34,4 +34,5 @@ public class UserSubscription {
     @ManyToOne
     @JoinColumn(name = "subscription_id")
     private Subscription subscription;
+
 }
