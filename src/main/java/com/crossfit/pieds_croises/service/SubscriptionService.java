@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.service;
 
+import com.crossfit.pieds_croises.dto.SubscriptionCreateDto;
 import com.crossfit.pieds_croises.dto.SubscriptionDto;
 import com.crossfit.pieds_croises.exception.DuplicateResourceException;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
@@ -21,22 +22,22 @@ public class SubscriptionService {
     private final BoxRepository boxRepository;
     private final SubscriptionMapper subscriptionMapper;
 
-    public SubscriptionDto addSubscription(SubscriptionDto subscriptionDto) {
-        if (subscriptionDto.getBoxId() == null) {
+    public SubscriptionDto addSubscription(SubscriptionCreateDto subscriptionCreateDto) {
+        if (subscriptionCreateDto.getBoxId() == null) {
             throw new IllegalArgumentException("Box id is required");
         }
-        Long boxId = subscriptionDto.getBoxId();
+        Long boxId = subscriptionCreateDto.getBoxId();
         Box box = boxRepository.findById(boxId).orElseThrow(() -> new ResourceNotFoundException("Box not found"));
 
-        if (subscriptionRepository.existsByName(subscriptionDto.getName())) {
+        if (subscriptionRepository.existsByName(subscriptionCreateDto.getName())) {
             throw new DuplicateResourceException("A subscription with this name already exists");
         }
 
-        if (subscriptionRepository.existsByPrice(subscriptionDto.getPrice())) {
+        if (subscriptionRepository.existsByPrice(subscriptionCreateDto.getPrice())) {
             throw new DuplicateResourceException("A subscription with this price already exists");
         }
 
-        Subscription subscription = subscriptionMapper.convertToSubscriptionEntity(subscriptionDto);
+        Subscription subscription = subscriptionMapper.convertToSubscriptionEntity(subscriptionCreateDto);
         subscription.setBox(box);
 
         Subscription savedSubscription = subscriptionRepository.save(subscription);
@@ -72,5 +73,15 @@ public class SubscriptionService {
         return subscriptions.stream()
                 .map(subscriptionMapper::convertToSubscriptionDto)
                 .collect(Collectors.toList());
+    }
+
+    public List<SubscriptionDto> getAllSubscriptions() {
+        List<Subscription> subscriptions = subscriptionRepository.findAll();
+        if (subscriptions.isEmpty()) {
+            throw new ResourceNotFoundException("No subscriptions found");
+        }
+        return subscriptions.stream()
+                .map(subscriptionMapper::convertToSubscriptionDto)
+                .toList();
     }
 }

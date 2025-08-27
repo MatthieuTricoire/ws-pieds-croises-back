@@ -20,7 +20,7 @@ public class UserSubscriptionController {
 
     private final UserSubscriptionService userSubscriptionService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PostAuthorize("hasRole('ADMIN') or returnObject.body.userId == authentication.principal.id")
     @PostMapping()
     public ResponseEntity<UserSubscriptionDto> createUserSubscription(
             @Valid @RequestBody UserSubscriptionDto userSubscriptionDto) {
@@ -30,7 +30,7 @@ public class UserSubscriptionController {
 
     @PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.id")
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<UserSubscriptionDto>> getUserSubscription(@PathVariable Long userId) {
+    public ResponseEntity<List<UserSubscriptionDto>> getUserSubscriptions(@PathVariable Long userId) {
         List<UserSubscriptionDto> userSubscriptionDto = userSubscriptionService.getAllUserSubscriptionsByUserId(userId);
         return ResponseEntity.ok(userSubscriptionDto);
     }
@@ -51,7 +51,6 @@ public class UserSubscriptionController {
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{userSubscriptionId}")
     public ResponseEntity<Void> deleteUserSubscription(@PathVariable Long userSubscriptionId) {
         userSubscriptionService.deleteUserSubscription(userSubscriptionId);

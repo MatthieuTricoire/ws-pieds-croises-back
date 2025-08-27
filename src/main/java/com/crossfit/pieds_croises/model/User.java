@@ -189,9 +189,9 @@ public class User implements UserDetails {
         return roles != null && roles.contains("ROLE_COACH");
     }
 
-    public void removeUserSubscription(UserSubscription userSubscription) {
-        this.userSubscriptions.remove(userSubscription);
-        userSubscription.setUser(null);
-    }
+//    public void removeUserSubscription(UserSubscription userSubscription) {
+//        this.userSubscription.remove(userSubscription);
+//        userSubscription.setUser(null);
+//    }
 
 }
