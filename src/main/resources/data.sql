@@ -1,8 +1,8 @@
 -- Peupler la table Box
-INSERT INTO box (name, address, city, zipcode, schedule, created_at, updated_at)
-VALUES ('Pieds croisés Paris', '12 Champs-Élysée', 'Paris', '72000', 'Lun-Ven 08h-18h', NOW(), NOW());
-INSERT INTO box (name, address, city, zipcode, schedule, created_at, updated_at)
-VALUES ('Pieds croisés Pau', '1 rue des Pyrénées', 'Pau', '64000', 'Lun-Ven 08h-18h', NOW(), NOW());
+INSERT INTO box (name, address, email, phone_number, city, zipcode, schedule, created_at, updated_at)
+VALUES ('Pieds croisés Paris', '12 Champs-Élysée', 'pied.croises@example.com', '01 02 03 04 05', 'Paris', '72000', 'Lun-Ven 08h-18h', NOW(), NOW());
+INSERT INTO box (name, address, email, phone_number, city, zipcode, schedule, created_at, updated_at)
+VALUES ('Pieds croisés Pau', '1 rue des Pyrénées', 'pied.croises@example.com', '01 02 03 04 05', 'Pau', '64000', 'Lun-Ven 08h-18h', NOW(), NOW());
 
 -- Peupler la table Message
 INSERT INTO message (title, content, message_type, start_date, expiration_date, created_at, updated_at)
