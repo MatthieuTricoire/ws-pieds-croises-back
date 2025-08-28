@@ -50,7 +50,8 @@ public class UserSubscriptionService {
 
             // On clôture l'ancien abonnement si chevauchement
             if (currentSub.getStartDate().isBefore(startDate)) {
-                currentSub.setEndDate(startDate.minusDays(1));
+//                currentSub.setEndDate(startDate.minusDays(1));
+                currentSub.setStatus(UserSubscriptionStatus.CANCELLED);
                 userSubscriptionRepository.save(currentSub);
             }
         }
@@ -152,5 +153,16 @@ public class UserSubscriptionService {
                 .map(User::getId)
                 .map(id -> id.equals(currentUserId))
                 .orElse(false);
+    }
+
+    public UserSubscriptionDto getActiveUserSubscription(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + userId));
+
+        UserSubscription userSubscription = userSubscriptionRepository
+                .findTopByUserAndStatusOrderByEndDateDesc(user, UserSubscriptionStatus.ACTIVE)
+                .orElseThrow(() -> new ResourceNotFoundException("No active subscription found for user " + userId));
+
+        return userSubscriptionMapper.convertToUserSubscriptionDto(userSubscription);
     }
 }
