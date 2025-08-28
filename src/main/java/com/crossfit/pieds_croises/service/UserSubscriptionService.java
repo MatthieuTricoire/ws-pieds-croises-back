@@ -1,6 +1,7 @@
 package com.crossfit.pieds_croises.service;
 
 import com.crossfit.pieds_croises.dto.UserSubscriptionDto;
+import com.crossfit.pieds_croises.enums.UserSubscriptionStatus;
 import com.crossfit.pieds_croises.exception.ForbiddenException;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.UserSubscriptionMapper;
@@ -11,6 +12,8 @@ import com.crossfit.pieds_croises.repository.SubscriptionRepository;
 import com.crossfit.pieds_croises.repository.UserRepository;
 import com.crossfit.pieds_croises.repository.UserSubscriptionRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -35,33 +38,32 @@ public class UserSubscriptionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
 
         LocalDateTime currentDate = LocalDateTime.now();
-        LocalDateTime startDate = userSubscriptionDto.getStartDate();
-        if (userSubscriptionDto.getStartDate() == null) {
-            startDate = LocalDateTime.now();
+        LocalDateTime startDate = Optional.ofNullable(userSubscriptionDto.getStartDate())
+                .orElse(currentDate);
+
+        // Vérifier le dernier abonnement actif
+        Optional<UserSubscription> existingUserSubscription =
+                userSubscriptionRepository.findTopByUserAndEndDateAfterOrderByEndDateDesc(user, currentDate);
+
+        if (existingUserSubscription.isPresent()) {
+            UserSubscription currentSub = existingUserSubscription.get();
+
+            // On clôture l'ancien abonnement si chevauchement
+            if (currentSub.getStartDate().isBefore(startDate)) {
+                currentSub.setEndDate(startDate.minusDays(1));
+                userSubscriptionRepository.save(currentSub);
+            }
         }
 
-        Optional<UserSubscription> existingUserSubscription = userSubscriptionRepository.findByUser(user);
-        existingUserSubscription.ifPresent(userSubscription -> deleteUserSubscription(userSubscription.getId()));
-
-        // find the latest subscription for the user. Could be in the future.
-//        Optional<UserSubscription> latestUserSubscriptionOpt = userSubscriptionRepository.findTopByUserAndEndDateAfterOrderByEndDateDesc(user, currentDate);
-//        if (latestUserSubscriptionOpt.isPresent()) {
-//            UserSubscription lastestUserSubscription = latestUserSubscriptionOpt.get();
-//
-//            if (lastestUserSubscription.getEndDate() == null) {
-//                throw new ForbiddenException("The latest user subscription has no end date");
-//            }
-//
-//            if (startDate != null && startDate.isBefore(lastestUserSubscription.getEndDate())) {
-//                startDate = lastestUserSubscription.getEndDate().plusDays(1);
-//                userSubscriptionDto.setStartDate(startDate);
-//            }
-//        }
-
+        // Création du nouvel abonnement
         UserSubscription userSubscription = userSubscriptionMapper.convertToUserSubscriptionEntity(userSubscriptionDto);
+        userSubscription.setUser(user);
+        userSubscription.setSubscription(subscription);
         userSubscription.setFreezeDaysRemaining(subscription.getFreezeDaysAllowed());
         userSubscription.setStartDate(startDate);
+        userSubscription.setStatus(UserSubscriptionStatus.ACTIVE);
         userSubscription.setEndDate(startDate.plusDays(subscription.getDuration()));
+
         UserSubscription savedUserSubscription = userSubscriptionRepository.save(userSubscription);
 
         return userSubscriptionMapper.convertToUserSubscriptionDto(savedUserSubscription);
@@ -71,13 +73,13 @@ public class UserSubscriptionService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        Optional<UserSubscription> userSubscription = userSubscriptionRepository.findByUser(user);
+        List<UserSubscription> userSubscriptions = userSubscriptionRepository.findByUser(user);
 
-        if (userSubscription.isEmpty()) {
+        if (userSubscriptions.isEmpty()) {
             throw new ResourceNotFoundException("No subscriptions found for user with id: " + userId);
         }
 
-        return userSubscription.stream()
+        return userSubscriptions.stream()
                 .map(userSubscriptionMapper::convertToUserSubscriptionDto)
                 .collect(Collectors.toList());
     }
@@ -120,7 +122,6 @@ public class UserSubscriptionService {
         user.setSuspensionStartDate(freezeStartDate.toLocalDate());
         user.setSuspensionEndDate(freezeEndDate.toLocalDate());
         userRepository.save(user);
-
     }
 
     public void deleteUserSubscription(Long userSubscriptionId) {
@@ -128,10 +129,28 @@ public class UserSubscriptionService {
                 .orElseThrow(() -> new ResourceNotFoundException("User subscription not found"));
 
         User user = userSubscription.getUser();
-//        user.removeUserSubscription(userSubscription);
         user.resetSuspensionTypeAndDates();
         userSubscriptionRepository.delete(userSubscription);
         userRepository.save(user);
+    }
 
+    public void cancelUserSubscription(Long userSubscriptionId) {
+        UserSubscription userSubscription = userSubscriptionRepository.findById(userSubscriptionId)
+                .orElseThrow(() -> new ResourceNotFoundException("User subscription not found"));
+
+        userSubscription.setStatus(UserSubscriptionStatus.CANCELLED);
+        userSubscriptionRepository.save(userSubscription);
+    }
+
+    public boolean isOwnerOfSubscription(Long userSubscriptionId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        Long currentUserId = currentUser.getId();
+
+        return userSubscriptionRepository.findById(userSubscriptionId)
+                .map(UserSubscription::getUser)
+                .map(User::getId)
+                .map(id -> id.equals(currentUserId))
+                .orElse(false);
     }
 }

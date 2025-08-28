@@ -12,6 +12,5 @@ public class SubscriptionDto {
     private int sessionPerWeek;
     private short duration;
     private String terminationConditions;
-    private Long boxId;
     private int freezeDaysAllowed;
 }

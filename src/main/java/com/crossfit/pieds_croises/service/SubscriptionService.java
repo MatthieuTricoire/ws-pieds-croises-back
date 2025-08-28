@@ -23,12 +23,6 @@ public class SubscriptionService {
     private final SubscriptionMapper subscriptionMapper;
 
     public SubscriptionDto addSubscription(SubscriptionCreateDto subscriptionCreateDto) {
-        if (subscriptionCreateDto.getBoxId() == null) {
-            throw new IllegalArgumentException("Box id is required");
-        }
-        Long boxId = subscriptionCreateDto.getBoxId();
-        Box box = boxRepository.findById(boxId).orElseThrow(() -> new ResourceNotFoundException("Box not found"));
-
         if (subscriptionRepository.existsByName(subscriptionCreateDto.getName())) {
             throw new DuplicateResourceException("A subscription with this name already exists");
         }
@@ -38,11 +32,9 @@ public class SubscriptionService {
         }
 
         Subscription subscription = subscriptionMapper.convertToSubscriptionEntity(subscriptionCreateDto);
-        subscription.setBox(box);
 
         Subscription savedSubscription = subscriptionRepository.save(subscription);
         return subscriptionMapper.convertToSubscriptionDto(savedSubscription);
-
     }
 
     public SubscriptionDto getSubscriptionById(Long id) {

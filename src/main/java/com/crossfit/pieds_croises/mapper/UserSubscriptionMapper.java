@@ -5,8 +5,10 @@ import com.crossfit.pieds_croises.model.UserSubscription;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
-
+@Mapper(
+        componentModel = "spring",
+        uses = {SubscriptionMapper.class}
+)
 public interface UserSubscriptionMapper {
 
     @Mapping(target = "userId", source = "user.id")
