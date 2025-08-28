@@ -1,6 +1,7 @@
 # 🏋️‍♀️ pieds-croises
 
-Ce projet est une application Spring Boot initialisée avec [Spring Initializr](https://start.spring.io/) et utilisant Maven comme outil de build.  
+Ce projet est une application Spring Boot initialisée avec [Spring Initializr](https://start.spring.io/) et utilisant
+Maven comme outil de build.  
 Il sert de base pour développer une API REST.
 
 ---
@@ -26,12 +27,12 @@ Le projet a été généré à l’aide de [Spring Initializr](https://start.spr
 - **Packaging** : Jar
 - **Java** : 17+
 - **Dependencies** :
-  - Spring Web
-  - Spring Data JPA
-  - Lombok
-  - Spring Boot DevTools
-  - MySQL Driver
-  - jsonwebtoken
+    - Spring Web
+    - Spring Data JPA
+    - Lombok
+    - Spring Boot DevTools
+    - MySQL Driver
+    - jsonwebtoken
 
 ---
 
@@ -52,15 +53,21 @@ git clone https://github.com/MatthieuTricoire/ws-pieds-croises-back.git
 cd ws-pieds-croises-back
 ```
 
-
 2. **Configurer la base de données**
 
-   - Créer une base de données MySQL nommée `pieds_croises`
-   - Mettre à jour le fichier `src/main/resources/application.properties` avec vos informations de connexion à la base de données. Il est possible de définir les variables d'environnement directement dans la configuration du backend.
+    - Créer une base de données MySQL nommée `pieds_croises`
+    - Mettre à jour le fichier `src/main/resources/application.properties` avec vos informations de connexion à la base
+      de données. Il est possible de définir les variables d'environnement directement dans la configuration du backend.
 
    ![img.png](img.png)
    ![img_1.png](img_1.png)
 
+## Charger le fichier application-dev.properties lors du lancement local
+
+```
+spring.config.import=optional:classpath:.env.dev
+spring.datasource.url=jdbc:mysql://localhost:3306/${DB_NAME}?createDatabaseIfNotExist=true
+```
 
 ## 📦️ Workflow Git
 
@@ -70,6 +77,6 @@ Les nouvelles branches de features ou de corrections doivent toujours être cré
 
 Pour passer les tests mis en place sur github, une PR doit toujours être préfixée par 'feature/ ' ou 'fix/ '
 
-
 #### Rebase pour se se mettre à jour par rapport à la dev
+
 ![img_3.png](img_3.png)

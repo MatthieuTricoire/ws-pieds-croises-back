@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.controller;
 
+import com.crossfit.pieds_croises.dto.CourseDTO;
 import com.crossfit.pieds_croises.dto.UserDto;
 import com.crossfit.pieds_croises.dto.UserUpdateDto;
 import com.crossfit.pieds_croises.model.User;
@@ -42,6 +43,13 @@ public class UserController {
     public ResponseEntity<UserDto> getMyProfile(@AuthenticationPrincipal User user) {
         UserDto userDto = userService.getMyProfile(user.getId());
         return ResponseEntity.ok(userDto);
+    }
+
+    // 🔹 READ USER COURSES
+    @GetMapping("/courses")
+    public ResponseEntity<List<CourseDTO>> getUserCourses(@AuthenticationPrincipal User user) {
+        List<CourseDTO> myCourses = userService.getUserCourses(user.getId());
+        return ResponseEntity.ok(myCourses);
     }
 
     // 🔹 CREATE
