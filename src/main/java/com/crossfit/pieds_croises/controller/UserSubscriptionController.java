@@ -30,9 +30,14 @@ public class UserSubscriptionController {
 
     @PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.id")
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<UserSubscriptionDto>> getUserSubscriptions(@PathVariable Long userId) {
-        List<UserSubscriptionDto> userSubscriptionDto = userSubscriptionService.getAllUserSubscriptionsByUserId(userId);
-        return ResponseEntity.ok(userSubscriptionDto);
+    public ResponseEntity<?> getUserSubscriptions(@PathVariable Long userId, @RequestParam(required = false) String status) {
+        if ("active".equalsIgnoreCase(status)) {
+            UserSubscriptionDto activeSub = userSubscriptionService.getActiveUserSubscription(userId);
+            return ResponseEntity.ok(activeSub);
+        }
+
+        List<UserSubscriptionDto> subs = userSubscriptionService.getAllUserSubscriptionsByUserId(userId);
+        return ResponseEntity.ok(subs);
     }
 
     @PostAuthorize("hasRole('ADMIN') or returnObject.body.userId == authentication.principal.id")

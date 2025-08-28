@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.repository;
 
+import com.crossfit.pieds_croises.enums.UserSubscriptionStatus;
 import com.crossfit.pieds_croises.model.User;
 import com.crossfit.pieds_croises.model.UserSubscription;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +11,8 @@ import java.util.Optional;
 
 public interface UserSubscriptionRepository extends JpaRepository<UserSubscription, Long> {
     List<UserSubscription> findByUser(User user);
+
+    Optional<UserSubscription> findTopByUserAndStatusOrderByEndDateDesc(User user, UserSubscriptionStatus status);
 
     Optional<UserSubscription> findTopByUserAndEndDateAfterOrderByEndDateDesc(User user, LocalDateTime endDate);
 
