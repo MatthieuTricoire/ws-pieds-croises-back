@@ -42,12 +42,19 @@ public class UserSubscriptionController {
         return ResponseEntity.ok(userSubscriptionDto);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or @userSubscriptionService.isOwnerOfSubscription(#userSubscriptionId)")
     @PutMapping("/{userSubscriptionId}/freeze")
     public ResponseEntity<Void> freezeUserSubscription(@PathVariable Long userSubscriptionId, @RequestBody Map<String, LocalDateTime> freezeDates) {
         LocalDateTime freezeStartDate = freezeDates.get("freezeStartDate");
         LocalDateTime freezeEndDate = freezeDates.get("freezeEndDate");
         userSubscriptionService.freezeUserSubscription(userSubscriptionId, freezeStartDate, freezeEndDate);
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or @userSubscriptionService.isOwnerOfSubscription(#userSubscriptionId)")
+    @PutMapping("/{userSubscriptionId}/cancel")
+    public ResponseEntity<Void> cancelUserSubscription(@PathVariable Long userSubscriptionId) {
+        userSubscriptionService.cancelUserSubscription(userSubscriptionId);
         return ResponseEntity.ok().build();
     }
 

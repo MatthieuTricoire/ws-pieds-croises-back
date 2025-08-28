@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.dto;
 
+import com.crossfit.pieds_croises.enums.UserSubscriptionStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,10 +18,9 @@ public class UserSubscriptionDto {
 
     //    @NotNull
     private LocalDateTime startDate;
-
     private LocalDateTime endDate;
-
     private int freezeDaysRemaining;
+    private UserSubscriptionStatus status;
 
     @NotNull(message = "User ID is required")
     private Long userId;
@@ -28,5 +28,4 @@ public class UserSubscriptionDto {
     private Long subscriptionId;
 
     private SubscriptionDto subscription;
-
 }
