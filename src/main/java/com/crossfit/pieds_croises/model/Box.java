@@ -29,20 +29,17 @@ public class Box {
     @Column(length = 20, name="phone_number", nullable = false)
     private String phoneNumber;
 
-    @Column()
+    @Column(nullable = false)
     private String address;
 
-    @Column(length = 100)
+    @Column(length = 100, nullable = false)
     private String city;
 
     @Column(length = 5, nullable = false)
     private String zipcode;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String schedule;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
