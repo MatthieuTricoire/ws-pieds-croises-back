@@ -10,6 +10,10 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BoxInfoDTO {
+    @NotBlank(message = "Name is required")
+    @Size(max = 100, message = "Name must be less than 100 characters")
+    private String name;
+
     @NotBlank(message = "Email is required")
     @Size(max = 100, message = "Email must be less than 100 characters")
     private String email;
@@ -19,6 +23,7 @@ public class BoxInfoDTO {
     private String phoneNumber;
 
     @NotBlank(message = "Address is required")
+    @Size(max = 255, message = "Address must be less than 255 characters")
     private String address;
 
     @NotBlank
@@ -29,5 +34,6 @@ public class BoxInfoDTO {
     @Size(max = 5, message = "Zipcode must be less than 5 characters")
     private String zipcode;
 
+    @NotBlank(message = "Schedule is required")
     private String schedule;
 }

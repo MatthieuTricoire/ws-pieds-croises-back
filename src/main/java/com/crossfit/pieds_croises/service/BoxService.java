@@ -1,14 +1,10 @@
 package com.crossfit.pieds_croises.service;
 
-import com.crossfit.pieds_croises.dto.BoxDto;
 import com.crossfit.pieds_croises.dto.BoxInfoDTO;
-import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.BoxMapper;
 import com.crossfit.pieds_croises.model.Box;
 import com.crossfit.pieds_croises.repository.BoxRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class BoxService {
@@ -21,64 +17,21 @@ public class BoxService {
         this.boxRepository = boxRepository;
     }
 
-    public List<BoxDto> getAllBoxes() {
-        List<Box> boxes = boxRepository.findAll();
-        if (boxes.isEmpty()) {
-            throw new ResourceNotFoundException("No boxes found");
-        }
-        return boxes.stream()
-                .map(boxMapper::convertToBoxDto)
-                .toList();
-    }
-
-    public BoxDto getFirstBox() {
-        List<Box> boxes = boxRepository.findAll();
-        if (boxes.isEmpty()) {
-            throw new ResourceNotFoundException("No boxes found");
-        }
-        Box firstBox = boxes.getFirst();
-        return boxMapper.convertToBoxDto(firstBox);
-    }
-
     public BoxInfoDTO getBoxInfo() {
-        List<Box> boxes = boxRepository.findAll();
-        if (boxes.isEmpty()) {
-            throw new ResourceNotFoundException("No boxes found");
-        }
-        Box firstBox = boxes.getFirst();
-        return boxMapper.convertToBoxInfoDto(firstBox);
+        Box box = boxRepository.findAll()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No box found"));
+        return boxMapper.convertToBoxInfoDTO(box);
     }
 
-    public BoxDto getBoxById(Long id) {
-        Box box = boxRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Box not found with id: " + id));
-        return boxMapper.convertToBoxDto(box);
+    public BoxInfoDTO updateBox(BoxInfoDTO boxDTO) {
+        Box existingBox = boxRepository.findAll()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No box found"));
+        boxMapper.updateBoxFromDTO(boxDTO, existingBox);
+        boxRepository.save(existingBox);
+        return boxMapper.convertToBoxInfoDTO(existingBox);
     }
-
-    public BoxDto createBox(BoxDto boxDto) {
-        try {
-            Box box = boxMapper.convertToBoxEntity(boxDto);
-            Box createdBox = boxRepository.save(box);
-            return boxMapper.convertToBoxDto(createdBox);
-        } catch (Exception e) {
-            System.err.println("Error creating box: " + e.getMessage());
-            throw new RuntimeException("Error creating box", e);
-        }
-    }
-
-    public BoxDto updateBox(Long id, BoxDto boxDto) {
-        Box existingBox = boxRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Box not found with id: " + id));
-        boxMapper.updateBoxFromDto(boxDto, existingBox);
-        Box updatedBox = boxRepository.save(existingBox);
-        return boxMapper.convertToBoxDto(updatedBox);
-    }
-
-    public void deleteBox(Long id) {
-        Box box = boxRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Box not found with id: " + id));
-        boxRepository.delete(box);
-    }
-
-
 }
