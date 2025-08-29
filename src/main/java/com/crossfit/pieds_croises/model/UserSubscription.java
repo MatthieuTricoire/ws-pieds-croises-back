@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.model;
 
+import com.crossfit.pieds_croises.enums.UserSubscriptionStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -34,4 +35,9 @@ public class UserSubscription {
     @ManyToOne
     @JoinColumn(name = "subscription_id")
     private Subscription subscription;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private UserSubscriptionStatus status;
+
 }

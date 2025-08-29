@@ -1,6 +1,7 @@
 package com.crossfit.pieds_croises.controller;
 
 import com.crossfit.pieds_croises.dto.UserSubscriptionDto;
+import com.crossfit.pieds_croises.enums.UserSubscriptionStatus;
 import com.crossfit.pieds_croises.service.UserSubscriptionService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -20,7 +21,7 @@ public class UserSubscriptionController {
 
     private final UserSubscriptionService userSubscriptionService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PostAuthorize("hasRole('ADMIN') or returnObject.body.userId == authentication.principal.id")
     @PostMapping()
     public ResponseEntity<UserSubscriptionDto> createUserSubscription(
             @Valid @RequestBody UserSubscriptionDto userSubscriptionDto) {
@@ -30,9 +31,14 @@ public class UserSubscriptionController {
 
     @PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.id")
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<UserSubscriptionDto>> getUserSubscription(@PathVariable Long userId) {
-        List<UserSubscriptionDto> userSubscriptionDto = userSubscriptionService.getAllUserSubscriptionsByUserId(userId);
-        return ResponseEntity.ok(userSubscriptionDto);
+    public ResponseEntity<?> getUserSubscriptions(@PathVariable Long userId, @RequestParam(required = false) UserSubscriptionStatus status) {
+        if (status != null && status.equals(UserSubscriptionStatus.ACTIVE)) {
+            UserSubscriptionDto activeUserSubscription = userSubscriptionService.getActiveUserSubscription(userId);
+            return ResponseEntity.ok(activeUserSubscription);
+        }
+
+        List<UserSubscriptionDto> subs = userSubscriptionService.getAllUserSubscriptionsByUserId(userId);
+        return ResponseEntity.ok(subs);
     }
 
     @PostAuthorize("hasRole('ADMIN') or returnObject.body.userId == authentication.principal.id")
@@ -42,16 +48,23 @@ public class UserSubscriptionController {
         return ResponseEntity.ok(userSubscriptionDto);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or @userSubscriptionService.isOwnerOfSubscription(#userSubscriptionId)")
     @PutMapping("/{userSubscriptionId}/freeze")
-    public ResponseEntity<Void> freezeUserSubscription(@PathVariable Long userSubscriptionId, @RequestBody Map<String, LocalDateTime> freezeDates) {
+    public ResponseEntity<Void> freezeUserSubscription(@PathVariable Long userSubscriptionId,
+                                                       @RequestBody Map<String, LocalDateTime> freezeDates) {
         LocalDateTime freezeStartDate = freezeDates.get("freezeStartDate");
         LocalDateTime freezeEndDate = freezeDates.get("freezeEndDate");
         userSubscriptionService.freezeUserSubscription(userSubscriptionId, freezeStartDate, freezeEndDate);
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or @userSubscriptionService.isOwnerOfSubscription(#userSubscriptionId)")
+    @PutMapping("/{userSubscriptionId}/cancel")
+    public ResponseEntity<Void> cancelUserSubscription(@PathVariable Long userSubscriptionId) {
+        userSubscriptionService.cancelUserSubscription(userSubscriptionId);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{userSubscriptionId}")
     public ResponseEntity<Void> deleteUserSubscription(@PathVariable Long userSubscriptionId) {
         userSubscriptionService.deleteUserSubscription(userSubscriptionId);
