@@ -23,8 +23,8 @@ public class Subscription {
   @Column(nullable = false, unique = true)
   private int price;
 
-  @Column(name = "session_per_week")
-  private int sessionPerWeek;
+  @Column(name = "session_per_week", nullable = true)
+  private Integer sessionPerWeek;
 
   @Column(nullable = false)
   private short duration; // number of days
