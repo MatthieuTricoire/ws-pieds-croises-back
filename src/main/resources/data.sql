@@ -14,8 +14,10 @@ VALUES ('Oyez Oyez alert', 'Contenu du message 2', 'ALERT', '2025-08-17', '2025-
 INSERT INTO message (title, content, message_type, start_date, expiration_date, created_at, updated_at)
 VALUES ('Oyez Oyez event', 'Contenu du message 3', 'EVENT', '2025-05-17', '2025-12-01',
         '2025-05-01T10:00:00', '2025-05-01T10:00:00');
-INSERT INTO message (title, content, message_type, start_date, expiration_date,  created_at, updated_at)
-VALUES ('Oyez Oyez rappel', 'Accusamus molestias fugiat asperiores quas neque laboriosam non magnam dolorem. Totam repellat veniam nihil corporis in. Facilis veniam ducimus. Veritatis maiores explicabo doloribus quisquam odio architecto. Est at ullam earum et repellat neque delectus tempore eius. Quisquam suscipit dolor dolores tempora voluptatum.', 'REMINDER', '2025-05-17', '2025-12-01',
+INSERT INTO message (title, content, message_type, start_date, expiration_date, created_at, updated_at)
+VALUES ('Oyez Oyez rappel',
+        'Accusamus molestias fugiat asperiores quas neque laboriosam non magnam dolorem. Totam repellat veniam nihil corporis in. Facilis veniam ducimus. Veritatis maiores explicabo doloribus quisquam odio architecto. Est at ullam earum et repellat neque delectus tempore eius. Quisquam suscipit dolor dolores tempora voluptatum.',
+        'REMINDER', '2025-05-17', '2025-12-01',
         '2025-05-01T10:00:00', '2025-05-01T10:00:00');
 
 -- Rajouter une enom monthly
@@ -25,7 +27,7 @@ VALUES ('Classique', 19.99, 31, 5, 2, 'blablabla');
 INSERT INTO subscription (name, price, duration, freeze_days_allowed, session_per_week, termination_conditions)
 VALUES ('Premium', 39.99, 31, 5, 4, 'blablabla');
 INSERT INTO subscription (name, price, duration, freeze_days_allowed, session_per_week, termination_conditions)
-VALUES ('Ultimate', 99.99, 31, 5, 0, 'blablabla');
+VALUES ('Ultimate', 99.99, 31, 5, null, 'blablabla');
 
 -- Peupler la table Exercice
 INSERT INTO exercice (name, measure_type)
@@ -45,7 +47,8 @@ VALUES ('Jean', 'Dupont', '$2y$10$pN5sgqp.gbzAJcoh04/1xeAsv/trTPxeNoep06U4i1WUWo
         NOW(), NOW()),
        ('Coco', 'Rico', '{noop}coach123', 'coach@example.com', '0602030408', NULL,
         NOW(), NOW()),
-('Matthieu', 'Tricoire', '$2y$10$H9nV.LDccqVGYNar5dHDIeEpu5SsKduKk.c0Mr5feafA8un6E9PMO', 'matthieutricoire@gmail.com', '0668272972', NULL, NOW(), NOW());
+       ('Matthieu', 'Tricoire', '$2y$10$H9nV.LDccqVGYNar5dHDIeEpu5SsKduKk.c0Mr5feafA8un6E9PMO',
+        'matthieutricoire@gmail.com', '0668272972', NULL, NOW(), NOW());
 -- Peupler la table Course
 INSERT INTO course (title, description, start_datetime, duration, person_limit, status, created_at, updated_at,
                     coach_id)
