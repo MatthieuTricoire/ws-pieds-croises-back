@@ -10,11 +10,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserSubscriptionRepository extends JpaRepository<UserSubscription, Long> {
-    List<UserSubscription> findByUser(User user);
+  List<UserSubscription> findByUser(User user);
 
-    Optional<UserSubscription> findTopByUserAndStatusOrderByEndDateDesc(User user, UserSubscriptionStatus status);
+  Optional<UserSubscription> findByUserAndStatus(User user, UserSubscriptionStatus status);
 
-    Optional<UserSubscription> findTopByUserAndEndDateAfterOrderByEndDateDesc(User user, LocalDateTime endDate);
+  Optional<UserSubscription> findTopByUserAndEndDateAfterOrderByEndDateDesc(User user, LocalDateTime endDate);
 
-    Optional<UserSubscription> findByUserAndStartDateBeforeAndEndDateAfter(User user, LocalDateTime now, LocalDateTime now2);
+  Optional<UserSubscription> findByUserAndStartDateBeforeAndEndDateAfter(User user, LocalDateTime now,
+      LocalDateTime now2);
 }

@@ -15,8 +15,6 @@ import java.time.LocalDateTime;
 public class UserSubscriptionDto {
 
     private Long id;
-
-    //    @NotNull
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private int freezeDaysRemaining;
