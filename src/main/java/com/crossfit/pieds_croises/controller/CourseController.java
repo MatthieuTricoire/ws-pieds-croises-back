@@ -111,7 +111,7 @@ public class CourseController {
     return ResponseEntity.ok(course);
   }
 
-  @PreAuthorize("hasRole('ADMIN') or #user.id == principal.id")
+  @PreAuthorize("hasRole('ADMIN') or #userId == principal.id")
   @GetMapping("/user/{userId}/weekly-count")
   public ResponseEntity<Long> getUserWeeklyCourseCount(@PathVariable Long userId,
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekDate) {
