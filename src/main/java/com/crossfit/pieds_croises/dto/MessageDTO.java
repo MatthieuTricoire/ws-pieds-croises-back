@@ -13,12 +13,13 @@ import java.time.LocalDateTime;
 @Builder
 public class MessageDTO {
 
-    private Long id;
-    private String title;
-    private String content;
-    private Message.MessageType messageType;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private LocalDate startDate;
-    private LocalDate expirationDate;
+  private Long id;
+  private String title;
+  private String content;
+  private Message.MessageStatus messageStatus;
+  private Message.MessageType messageType;
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
+  private LocalDate startDate;
+  private LocalDate expirationDate;
 }
