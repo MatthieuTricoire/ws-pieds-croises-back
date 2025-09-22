@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,7 +35,7 @@ public class MessageService {
 
     public MessageDTO getMessageById(Long id) {
         Message message = messageRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Le message avec l'id " + id + " n'a pas été trouvé"));
+            .orElseThrow(() -> new ResourceNotFoundException("Le message avec l'id " + id + " n'a pas été trouvé"));
         return messageMapper.convertToDto(message);
     }
 
@@ -47,25 +48,15 @@ public class MessageService {
         return messages.stream().map(messageMapper::convertToDto).collect(Collectors.toList());
     }
 
-//    public List<MessageDTO> getExpiredMessages(Long boxId) {
-//        List<Message> messages = messageRepository.findExpirationMessagesDESCByBoxId(boxId, today);
-//
-//        if (messages.isEmpty()) {
-//            throw new ResourceNotFoundException("There are no expired messages");
-//        }
-//
-//        return messages.stream().map(messageMapper::convertToDto).collect(Collectors.toList());
-//    }
+    public MessageDTO updateMessageStatus(Long id, Message.MessageStatus status) {
+        Message existingMessage = messageRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Message not found with id: " + id));
+        existingMessage.setMessageStatus(status);
+        existingMessage.setUpdatedAt(LocalDateTime.now());
 
-//    public List<MessageDTO> getComingMessages(Long boxId) {
-//        List<Message> messages = messageRepository.findComingMessagesASCByBoxId(boxId, today);
-//
-//        if (messages.isEmpty()) {
-//            throw new ResourceNotFoundException("There are no coming messages");
-//        }
-//
-//        return messages.stream().map(messageMapper::convertToDto).collect(Collectors.toList());
-//    }
+        Message savedMessage = messageRepository.save(existingMessage);
+        return messageMapper.convertToDto(savedMessage);
+    }
 
 
     public MessageDTO createMessage(MessageCreateDTO messageCreateDTO) {
@@ -81,7 +72,7 @@ public class MessageService {
     public MessageDTO updateMessage(Long id, @Valid MessageCreateDTO messageCreateDTO) {
 
         Message existingMessage = messageRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Message not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Message not found with id: " + id));
 
         messageMapper.updateFromDto(messageCreateDTO, existingMessage);
 
@@ -91,7 +82,7 @@ public class MessageService {
 
     public boolean deleteMessage(Long id) {
         Message message = messageRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Message not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Message not found with id: " + id));
 
         if (message == null) {
             return false;
