@@ -7,7 +7,7 @@ import com.crossfit.pieds_croises.mapper.PerformanceHistoryMapper;
 import com.crossfit.pieds_croises.model.Exercice;
 import com.crossfit.pieds_croises.model.PerformanceHistory;
 import com.crossfit.pieds_croises.model.User;
-import com.crossfit.pieds_croises.repository.ExerciceRepository;
+import com.crossfit.pieds_croises.repository.ExerciseRepository;
 import com.crossfit.pieds_croises.repository.PerformanceHistoryRepository;
 import com.crossfit.pieds_croises.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ public class PerformanceHistoryServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private ExerciceRepository exerciceRepository;
+    private ExerciseRepository exerciseRepository;
 
     @Mock
     private DateTimeProvider dateTimeProvider;
@@ -118,7 +118,7 @@ public class PerformanceHistoryServiceTest {
 
         when(performanceHistoryMapper.convertToEntity(inputDTO)).thenReturn(performanceHistory);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(exerciceRepository.findById(exerciseId)).thenReturn(Optional.of(exercise));
+        when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.of(exercise));
         when(performanceHistoryRepository.save(performanceHistory)).thenReturn(savedPerformanceHistory);
         when(performanceHistoryMapper.convertToDTO(savedPerformanceHistory)).thenReturn(expectedDTO);
 
@@ -131,7 +131,7 @@ public class PerformanceHistoryServiceTest {
         assertThat(performanceHistory.getExercice()).isEqualTo(exercise);
         verify(performanceHistoryMapper, times(1)).convertToEntity(inputDTO);
         verify(userRepository, times(1)).findById(userId);
-        verify(exerciceRepository, times(1)).findById(exerciseId);
+        verify(exerciseRepository, times(1)).findById(exerciseId);
         verify(performanceHistoryRepository, times(1)).save(performanceHistory);
         verify(performanceHistoryMapper, times(1)).convertToDTO(savedPerformanceHistory);
     }
@@ -153,7 +153,7 @@ public class PerformanceHistoryServiceTest {
         verify(performanceHistoryMapper, times(1)).convertToEntity(inputDTO);
         verify(userRepository, times(1)).findById(userId);
         verifyNoMoreInteractions(performanceHistoryMapper,  userRepository);
-        verifyNoInteractions(exerciceRepository);
+        verifyNoInteractions(exerciseRepository);
         verifyNoInteractions(performanceHistoryRepository);
     }
 
@@ -169,7 +169,7 @@ public class PerformanceHistoryServiceTest {
 
         when(performanceHistoryMapper.convertToEntity(inputDTO)).thenReturn(performanceHistory);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(exerciceRepository.findById(exerciseId)).thenReturn(Optional.empty());
+        when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThatThrownBy(() -> performanceHistoryService.createPerformanceHistory(inputDTO, userId))
@@ -177,8 +177,8 @@ public class PerformanceHistoryServiceTest {
                 .hasMessage("Exercice with id " + exerciseId + " not found.");
         verify(performanceHistoryMapper, times(1)).convertToEntity(inputDTO);
         verify(userRepository, times(1)).findById(userId);
-        verify(exerciceRepository, times(1)).findById(exerciseId);
-        verifyNoMoreInteractions(performanceHistoryMapper, userRepository, exerciceRepository);
+        verify(exerciseRepository, times(1)).findById(exerciseId);
+        verifyNoMoreInteractions(performanceHistoryMapper, userRepository, exerciseRepository);
         verifyNoInteractions(performanceHistoryRepository);
     }
 
@@ -199,7 +199,7 @@ public class PerformanceHistoryServiceTest {
         Exercice exercise = new Exercice();
 
         when(performanceHistoryRepository.findById(id)).thenReturn(Optional.of(performanceHistory));
-        when(exerciceRepository.findById(exerciseId)).thenReturn(Optional.of(exercise));
+        when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.of(exercise));
         doNothing().when(performanceHistoryMapper).updateEntityFromDTO(inputDTO, performanceHistory);
         when(performanceHistoryRepository.save(performanceHistory)).thenReturn(savedPerformanceHistory);
         when(performanceHistoryMapper.convertToDTO(savedPerformanceHistory)).thenReturn(expectedDTO);
@@ -211,7 +211,7 @@ public class PerformanceHistoryServiceTest {
         assertThat(result).isEqualTo(expectedDTO);
         assertThat(performanceHistory.getExercice()).isEqualTo(exercise);
         verify(performanceHistoryRepository, times(1)).findById(id);
-        verify(exerciceRepository, times(1)).findById(exerciseId);
+        verify(exerciseRepository, times(1)).findById(exerciseId);
         verify(performanceHistoryMapper, times(1)).updateEntityFromDTO(inputDTO, performanceHistory);
         verify(performanceHistoryRepository, times(1)).save(performanceHistory);
         verify(performanceHistoryMapper, times(1)).convertToDTO(savedPerformanceHistory);
@@ -232,7 +232,7 @@ public class PerformanceHistoryServiceTest {
                 .hasMessage("PerformanceHistory with id " + id + " not found.");
         verify(performanceHistoryRepository, times(1)).findById(id);
         verifyNoMoreInteractions(performanceHistoryRepository);
-        verifyNoInteractions(exerciceRepository);
+        verifyNoInteractions(exerciseRepository);
         verifyNoInteractions(performanceHistoryMapper);
     }
 
@@ -255,7 +255,7 @@ public class PerformanceHistoryServiceTest {
                 .hasMessage("Not authorized to update this performanceHistory.");
         verify(performanceHistoryRepository, times(1)).findById(id);
         verifyNoMoreInteractions(performanceHistoryRepository);
-        verifyNoInteractions(exerciceRepository);
+        verifyNoInteractions(exerciseRepository);
         verifyNoInteractions(performanceHistoryMapper);
     }
 
@@ -273,15 +273,15 @@ public class PerformanceHistoryServiceTest {
         performanceHistory.setUser(user);
 
         when(performanceHistoryRepository.findById(id)).thenReturn(Optional.of(performanceHistory));
-        when(exerciceRepository.findById(exerciseId)).thenReturn(Optional.empty());
+        when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThatThrownBy(() -> performanceHistoryService.updatePerformanceHistory(id, inputDTO, userId))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Exercice with id " + exerciseId + " not found.");
         verify(performanceHistoryRepository, times(1)).findById(id);
-        verify(exerciceRepository, times(1)).findById(exerciseId);
-        verifyNoMoreInteractions(performanceHistoryRepository, exerciceRepository);
+        verify(exerciseRepository, times(1)).findById(exerciseId);
+        verifyNoMoreInteractions(performanceHistoryRepository, exerciseRepository);
         verifyNoInteractions(performanceHistoryMapper);
     }
 
