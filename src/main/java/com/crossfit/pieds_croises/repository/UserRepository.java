@@ -17,7 +17,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     @Query("SELECT u FROM User u WHERE :course NOT MEMBER OF u.courses AND u != :coach")
-    List<User> findAllUsersNotInCourse(@Param("course") Course course,  @Param("coach") User coach);
+    List<User> findAllUsersNotInCourse(@Param("course") Course course, @Param("coach") User coach);
+
+    @Query("SELECT DISTINCT u FROM User u " + "LEFT JOIN FETCH u.userSubscriptions us " + " LEFT JOIN FETCH us.subscription s")
+    List<User> findAllWithUserSubscriptions();
 
     Optional<User> findByResetPasswordToken(String token);
 }
