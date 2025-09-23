@@ -1,11 +1,15 @@
 package com.crossfit.pieds_croises.service;
 
+import com.crossfit.pieds_croises.dto.CourseDTO;
 import com.crossfit.pieds_croises.dto.FirstLoginDto;
 import com.crossfit.pieds_croises.dto.UserDto;
+import com.crossfit.pieds_croises.dto.UserSubscriptionDto;
 import com.crossfit.pieds_croises.dto.UserUpdateDto;
 import com.crossfit.pieds_croises.exception.DuplicateResourceException;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
+import com.crossfit.pieds_croises.mapper.CourseMapper;
 import com.crossfit.pieds_croises.mapper.UserMapper;
+import com.crossfit.pieds_croises.model.Course;
 import com.crossfit.pieds_croises.model.User;
 import com.crossfit.pieds_croises.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,21 +33,29 @@ public class UserService {
   private final UserRepository userRepository;
   private final EmailService emailService;
   private final PasswordEncoder passwordEncoder;
+  private final CourseMapper courseMapper;
+  private final UserSubscriptionService userSubscriptionService;
 
   @Value("${app.base-url}${app.registration.uri}")
   private String registrationUrl;
   @Value("${app.registration.token-expiration-days}")
   private int registrationTokenExpirationDays;
 
-  public List<UserDto> getAllUsers() {
-    List<User> users = userRepository.findAll();
+  public List<UserDto> getAllUsers(boolean includeSubscriptions) {
+    List<User> users;
+    if (includeSubscriptions) {
+      users = userRepository.findAllWithUserSubscriptions();
+    } else {
+      users = userRepository.findAll();
+    }
     if (users.isEmpty()) {
       logger.warn("No users found in the database");
       throw new ResourceNotFoundException("No users found");
     }
     logger.info("Found {} users", users.size());
     return users.stream()
-        .map(userMapper::convertToDtoForAdmin)
+        .map(user -> includeSubscriptions ? userMapper.convertToDtoForAdminWithSubscriptions(user)
+            : userMapper.convertToDtoForAdmin(user))
         .toList();
   }
 
@@ -51,6 +63,25 @@ public class UserService {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
     return userMapper.convertToDtoForAdmin(user);
+  }
+
+  public UserDto getMyProfile(Long id) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+    return userMapper.convertToDtoForUser(user);
+  }
+
+  public List<CourseDTO> getUserCourses(Long id) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+    List<Course> courses = user.getCourses();
+    LocalDateTime now = LocalDateTime.now();
+
+    return courses.stream()
+        .filter(course -> course.getStartDatetime().isAfter(now))
+        .map(courseMapper::convertToDto)
+        .toList();
   }
 
   public UserDto createUser(UserDto userDto) {
@@ -62,7 +93,6 @@ public class UserService {
       logger.warn("Attempt to create user with existing email: {}", userDto.getEmail());
       throw new DuplicateResourceException("User already exists");
     }
-
 
     User user = userMapper.convertToEntity(userDto);
     user.setCreatedAt(LocalDateTime.now());
@@ -90,8 +120,26 @@ public class UserService {
     User createdUser = userRepository.save(user);
     logger.info("User created with ID {}", createdUser.getId());
 
-    return userMapper.convertToCreatedDto(createdUser);
+    if (userDto.getSubscriptionId() != null) {
+      try {
+        UserSubscriptionDto userSubscriptionDto = new UserSubscriptionDto(
+            null,
+            null,
+            null,
+            0,
+            null,
+            createdUser.getId(),
+            userDto.getSubscriptionId(),
+            null);
 
+        userSubscriptionService.createUserSubscription(userSubscriptionDto);
+      } catch (Exception e) {
+        logger.error("Failed to create subscription for user ID {}: {}", createdUser.getId(), e.getMessage());
+        throw new RuntimeException("Failed to create subscription for user ID: " + createdUser.getId(), e);
+      }
+    }
+
+    return userMapper.convertToCreatedDto(createdUser);
   }
 
   public UserDto updateUser(Long id, UserUpdateDto userDto) {
@@ -112,18 +160,6 @@ public class UserService {
     }
   }
 
-  public void deleteUser(Long id) {
-    User user = userRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-    userRepository.delete(user);
-  }
-
-  public UserDto getMyProfile(Long id) {
-    User user = userRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-    return userMapper.convertToDtoForUser(user);
-  }
-
   public UserDto updateProfile(String username, UserUpdateDto userDto) {
     User existingUser = userRepository.findByEmail(username)
         .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + username));
@@ -137,32 +173,34 @@ public class UserService {
     } catch (Exception e) {
       throw new RuntimeException("Failed to update user: " + username, e);
     }
-
   }
 
+  public void deleteUser(Long id) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+    userRepository.delete(user);
+  }
 
-    public void completeFirstLogin(FirstLoginDto dto) {
-        logger.info("Completing first login for token {}", dto.getRegistrationToken());
-        User user = userRepository.findByRegistrationToken(dto.getRegistrationToken())
-                .orElseThrow(() -> {
-                    logger.warn("Invalid registration token :{}", dto.getRegistrationToken());
-                    return new ResourceNotFoundException("Invalid registration token");
-                });
+  public void completeFirstLogin(FirstLoginDto dto) {
+    logger.info("Completing first login for token {}", dto.getRegistrationToken());
+    User user = userRepository.findByRegistrationToken(dto.getRegistrationToken())
+        .orElseThrow(() -> {
+          logger.warn("Invalid registration token :{}", dto.getRegistrationToken());
+          return new ResourceNotFoundException("Invalid registration token");
+        });
 
-
-        if (user.getRegistrationTokenExpiryDate().isBefore(LocalDateTime.now())) {
-            logger.warn("Registration token expired for user ID: {}", user.getId());
-            throw new RuntimeException("Lien expiré");
-        }
-
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setRegistrationToken(null);
-        user.setRegistrationTokenExpiryDate(null);
-        user.setIsFirstLoginComplete(true);
-        user.setUpdatedAt(LocalDateTime.now());
-
-        userRepository.save(user);
-        logger.info("First long completed for user ID {}", user.getId());
+    if (user.getRegistrationTokenExpiryDate().isBefore(LocalDateTime.now())) {
+      logger.warn("Registration token expired for user ID: {}", user.getId());
+      throw new RuntimeException("Lien expiré");
     }
 
+    user.setPassword(passwordEncoder.encode(dto.getPassword()));
+    user.setRegistrationToken(null);
+    user.setRegistrationTokenExpiryDate(null);
+    user.setIsFirstLoginComplete(true);
+    user.setUpdatedAt(LocalDateTime.now());
+
+    userRepository.save(user);
+    logger.info("First long completed for user ID {}", user.getId());
+  }
 }

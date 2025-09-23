@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,161 +25,173 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CourseService {
-    private final CourseRepository courseRepository;
-    private final CourseMapper courseMapper;
-    private final UserRepository userRepository;
+  private final CourseRepository courseRepository;
+  private final CourseMapper courseMapper;
+  private final UserRepository userRepository;
 
-    private final UserMapper userMapper;
+  private final UserMapper userMapper;
 
-    public List<CourseDTO> getAllCourses() {
-        List<Course> courses = courseRepository.findAll();
+  public List<CourseDTO> getAllCourses() {
+    List<Course> courses = courseRepository.findAll();
 
-        return courses.stream().map(courseMapper::convertToDto).collect(Collectors.toList());
+    return courses.stream().map(courseMapper::convertToDto).collect(Collectors.toList());
+  }
+
+  public List<CourseDTO> getCoursesNextTwoWeeks() {
+    LocalDateTime now = LocalDateTime.now();
+    List<Course> courses = courseRepository.findByStartDatetimeBetweenOrderByStartDatetimeAsc(now, now.plusWeeks(2));
+
+    return courses.stream().map(courseMapper::convertToDto).collect(Collectors.toList());
+  }
+
+  public List<CourseDTO> getCoursesByDay(LocalDate date) {
+
+    LocalDateTime startOfDay = date.atStartOfDay();
+    LocalDateTime endOfDay = date.atTime(23, 59, 59);
+
+    List<Course> courses = courseRepository.findByStartDatetimeBetweenOrderByStartDatetimeAsc(startOfDay, endOfDay);
+
+    return courses.stream().map(courseMapper::convertToDto).collect(Collectors.toList());
+  }
+
+  public CourseDTO getCourseByID(Long id) {
+    Course course = courseRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Course with id " + id + " not found"));
+    return courseMapper.convertToDto(course);
+  }
+
+  public CourseDTO createCourse(@Valid CourseCreateDTO courseCreateDTO) {
+
+    courseRepository.findByCoachIdAndStartDatetime(courseCreateDTO.getCoachId(), courseCreateDTO.getStartDatetime())
+        .ifPresent(course -> {
+          throw new BusinessException("A course already exists with this coach at this start date.");
+        });
+
+    Course course = courseMapper.convertToEntity(courseCreateDTO);
+
+    User coach = userRepository.findById(courseCreateDTO.getCoachId())
+        .orElseThrow(() -> new ResourceNotFoundException("Coach not found with id : " + courseCreateDTO.getCoachId()));
+
+    if (!coach.isCoach()) {
+      throw new ResourceNotFoundException("The selected user does not have the role of coach");
     }
 
-    public List<CourseDTO> getCoursesNextTwoWeeks() {
-        LocalDateTime now = LocalDateTime.now();
-        List<Course> courses = courseRepository.findByStartDatetimeBetweenOrderByStartDatetimeAsc(now, now.plusWeeks(2));
+    course.setCreatedAt(LocalDateTime.now());
+    course.setUpdatedAt(LocalDateTime.now());
+    course.setCoach(coach);
 
-        return courses.stream().map(courseMapper::convertToDto).collect(Collectors.toList());
+    course = courseRepository.save(course);
+    return courseMapper.convertToDto(course);
+  }
+
+  public CourseDTO updateCourse(Long id, @Valid CourseUpdateDTO courseUpdateDTO) {
+    Course existingCourse = courseRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
+
+    User coach = userRepository.findById(courseUpdateDTO.getCoachId())
+        .orElseThrow(() -> new ResourceNotFoundException("Coach not found with id : " + courseUpdateDTO.getCoachId()));
+
+    if (!coach.isCoach()) {
+      throw new ResourceNotFoundException("The selected user does not have the role of coach");
     }
 
-    public List<CourseDTO> getCoursesByDay(LocalDate date) {
+    courseMapper.updateFromDTO(courseUpdateDTO, existingCourse);
 
-        LocalDateTime startOfDay = date.atStartOfDay();
-        LocalDateTime endOfDay = date.atTime(23, 59, 59);
+    existingCourse.setCoach(coach);
 
-        List<Course> courses = courseRepository.findByStartDatetimeBetweenOrderByStartDatetimeAsc(startOfDay, endOfDay);
+    Course savedCourse = courseRepository.save(existingCourse);
+    return courseMapper.convertToDto(savedCourse);
+  }
 
-        return courses.stream().map(courseMapper::convertToDto).collect(Collectors.toList());
+  public CourseDTO addUserToCourse(Long courseId, Long userId) {
+
+    Course existingCourse = courseRepository.findById(courseId)
+        .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+
+    User existingUser = userRepository.findById(userId)
+        .orElseThrow(() -> new ResourceNotFoundException("User not existing"));
+
+    boolean userAlreadyRegistered = existingCourse.getUsers().stream()
+        .anyMatch(user -> user.getId().equals(existingUser.getId()));
+    boolean courseFull = existingCourse.getStatus().equals(Course.Status.FULL);
+    boolean userSuspended = existingUser.isSuspended();
+
+    if (userAlreadyRegistered) {
+      throw new BusinessException("User already registered to this course");
     }
 
-    public CourseDTO getCourseByID(Long id) {
-        Course course = courseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Course with id " + id + " not found"));
-        return courseMapper.convertToDto(course);
+    if (courseFull) {
+      throw new BusinessException("Course is already full");
     }
 
-    public CourseDTO createCourse(@Valid CourseCreateDTO courseCreateDTO) {
-
-        courseRepository.findByCoachIdAndStartDatetime(courseCreateDTO.getCoachId(), courseCreateDTO.getStartDatetime())
-                .ifPresent(c -> {
-                    throw new BusinessException("A course already exists with this coach at this start date.");
-                });
-
-        Course course = courseMapper.convertToEntity(courseCreateDTO);
-
-
-        User coach = userRepository.findById(courseCreateDTO.getCoachId())
-                .orElseThrow(() -> new ResourceNotFoundException("Coach not found with id : " + courseCreateDTO.getCoachId()));
-
-        if (!coach.isCoach()) {
-            throw new ResourceNotFoundException("The selected user does not have the role of coach");
-        }
-
-        course.setCreatedAt(LocalDateTime.now());
-        course.setUpdatedAt(LocalDateTime.now());
-        course.setCoach(coach);
-
-        course = courseRepository.save(course);
-        return courseMapper.convertToDto(course);
+    if (userSuspended) {
+      throw new BusinessException("User suspended");
     }
 
-    public CourseDTO updateCourse(Long id, @Valid CourseUpdateDTO courseUpdateDTO) {
-        Course existingCourse = courseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
+    existingCourse.getUsers().add(existingUser);
+    existingUser.getCourses().add(existingCourse);
+    existingCourse.changeStatus();
 
-        User coach = userRepository.findById(courseUpdateDTO.getCoachId())
-                .orElseThrow(() -> new ResourceNotFoundException("Coach not found with id : " + courseUpdateDTO.getCoachId()));
+    userRepository.save(existingUser);
+    courseRepository.save(existingCourse);
 
-        if (!coach.isCoach()) {
-            throw new ResourceNotFoundException("The selected user does not have the role of coach");
-        }
+    return courseMapper.convertToDto(existingCourse);
+  }
 
-        courseMapper.updateFromDTO(courseUpdateDTO, existingCourse);
+  public CourseDTO deleteUserFromCourse(Long courseId, Long userId) {
 
-        existingCourse.setCoach(coach);
+    Course existingCourse = courseRepository.findById(courseId)
+        .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
 
-        Course savedCourse = courseRepository.save(existingCourse);
-        return courseMapper.convertToDto(savedCourse);
+    User existingUser = userRepository.findById(userId)
+        .orElseThrow(() -> new ResourceNotFoundException("User not existing"));
+
+    boolean userRegistered = existingCourse.getUsers().contains(existingUser);
+
+    if (!userRegistered) {
+      throw new BusinessException("User not enrolled in this course");
     }
 
-    public CourseDTO addUserToCourse(Long courseId, Long userId) {
+    existingCourse.getUsers().remove(existingUser);
+    existingUser.getCourses().remove(existingCourse);
+    existingCourse.changeStatus();
 
-        Course existingCourse = courseRepository.findById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+    userRepository.save(existingUser);
+    courseRepository.save(existingCourse);
 
-        User existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not existing"));
+    return courseMapper.convertToDto(existingCourse);
+  }
 
-        boolean userAlreadyRegistered = existingCourse.getUsers().stream().anyMatch(user -> user.getId().equals(existingUser.getId()));
-        boolean courseFull = existingCourse.getStatus().equals(Course.Status.FULL);
-        boolean userSuspended = existingUser.isSuspended();
+  public void deleteCourse(Long id) {
+    Course existingCourse = courseRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
 
-        if (userAlreadyRegistered) {
-            throw new BusinessException("User already registered to this course");
-        }
-
-        if (courseFull) {
-            throw new BusinessException("Course is already full");
-        }
-
-        if (userSuspended) {
-            throw new BusinessException("User suspended");
-        }
-
-        existingCourse.getUsers().add(existingUser);
-        existingUser.getCourses().add(existingCourse);
-        existingCourse.changeStatus();
-
-        userRepository.save(existingUser);
-        courseRepository.save(existingCourse);
-
-        return courseMapper.convertToDto(existingCourse);
+    for (User user : existingCourse.getUsers()) {
+      user.getCourses().remove(existingCourse);
+      userRepository.save(user);
     }
 
-    public CourseDTO deleteUserFromCourse(Long courseId, Long userId) {
+    courseRepository.delete(existingCourse);
+  }
 
-        Course existingCourse = courseRepository.findById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+  public List<UserDto> getUsersNotInCourse(Long id) {
+    Course course = courseRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
+    List<User> users = userRepository.findAllUsersNotInCourse(course, course.getCoach());
+    return users.stream()
+        .map(userMapper::convertToDtoForAdmin)
+        .collect(Collectors.toList());
+  }
 
-        User existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not existing"));
+  public Long getUserWeeklyCourseCount(Long userId, LocalDate weekDate) {
+    // Calculate civil week
+    LocalDate monday = weekDate.with(DayOfWeek.MONDAY);
+    LocalDate sunday = monday.plusDays(6);
 
-        boolean userRegistered = existingCourse.getUsers().contains(existingUser);
+    LocalDateTime startWeek = monday.atStartOfDay();
+    LocalDateTime endWeek = sunday.atTime(23, 59, 59);
 
-        if (!userRegistered) {
-            throw new BusinessException("User not enrolled in this course");
-        }
+    return courseRepository.countUserCoursesInWeek(userId, startWeek, endWeek);
 
-        existingCourse.getUsers().remove(existingUser);
-        existingUser.getCourses().remove(existingCourse);
-        existingCourse.changeStatus();
-
-        userRepository.save(existingUser);
-        courseRepository.save(existingCourse);
-
-        return courseMapper.convertToDto(existingCourse);
-    }
-
-    public void deleteCourse(Long id) {
-        Course existingCourse = courseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
-
-        for (User user : existingCourse.getUsers()) {
-            user.getCourses().remove(existingCourse);
-            userRepository.save(user);
-        }
-
-        courseRepository.delete(existingCourse);
-    }
-
-    public List<UserDto> getUsersNotInCourse(Long id) {
-        Course course = courseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
-        List<User> users = userRepository.findAllUsersNotInCourse(course, course.getCoach());
-        return users.stream()
-                .map(userMapper::convertToDtoForAdmin)
-                .collect(Collectors.toList());
-    }
+  }
 }
