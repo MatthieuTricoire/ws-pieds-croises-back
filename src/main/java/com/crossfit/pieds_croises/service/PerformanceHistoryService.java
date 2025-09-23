@@ -7,7 +7,7 @@ import com.crossfit.pieds_croises.mapper.PerformanceHistoryMapper;
 import com.crossfit.pieds_croises.model.Exercice;
 import com.crossfit.pieds_croises.model.PerformanceHistory;
 import com.crossfit.pieds_croises.model.User;
-import com.crossfit.pieds_croises.repository.ExerciceRepository;
+import com.crossfit.pieds_croises.repository.ExerciseRepository;
 import com.crossfit.pieds_croises.repository.PerformanceHistoryRepository;
 import com.crossfit.pieds_croises.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -25,7 +25,7 @@ public class PerformanceHistoryService {
     private final PerformanceHistoryRepository performanceHistoryRepository;
     private final PerformanceHistoryMapper performanceHistoryMapper;
     private final UserRepository userRepository;
-    private final ExerciceRepository exerciceRepository;
+    private final ExerciseRepository exerciseRepository;
     private final DateTimeProvider dateTimeProvider;
 
     public List<PerformanceHistoryDTO> getAllPerformanceHistory(Long userId) {
@@ -50,7 +50,7 @@ public class PerformanceHistoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("User with id " + userId + " not found."));
         performanceHistory.setUser(user);
 
-        Exercice exercice = exerciceRepository.findById(performanceHistoryDTO.getExerciseId())
+        Exercice exercice = exerciseRepository.findById(performanceHistoryDTO.getExerciseId())
                 .orElseThrow(() -> new ResourceNotFoundException("Exercice with id " + performanceHistoryDTO.getExerciseId() + " not found."));
         performanceHistory.setExercice(exercice);
 
@@ -66,7 +66,7 @@ public class PerformanceHistoryService {
             throw new AccessDeniedException("Not authorized to update this performanceHistory.");
         }
 
-        Exercice exercice = exerciceRepository.findById(performanceHistoryDTO.getExerciseId())
+        Exercice exercice = exerciseRepository.findById(performanceHistoryDTO.getExerciseId())
                 .orElseThrow(() -> new ResourceNotFoundException("Exercice with id " + performanceHistoryDTO.getExerciseId() + " not found."));
 
         performanceHistoryMapper.updateEntityFromDTO(performanceHistoryDTO, performanceHistory);

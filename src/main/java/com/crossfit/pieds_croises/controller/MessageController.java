@@ -57,7 +57,6 @@ public class MessageController {
         if (messages.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-
         return ResponseEntity.ok(messages);
     }
 
@@ -76,9 +75,6 @@ public class MessageController {
         @Parameter(description = "ID du message", example = "1")
         @PathVariable Long id) {
         MessageDTO messageDTO = messageService.getMessageById(id);
-        if (messageDTO == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(messageDTO);
     }
 
@@ -117,9 +113,6 @@ public class MessageController {
         @Parameter(description = "Nouvelles données du message")
         @Valid @RequestBody MessageCreateDTO messageCreateDTO) {
         MessageDTO updateMessage = messageService.updateMessage(id, messageCreateDTO);
-        if (updateMessage == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(updateMessage);
     }
 

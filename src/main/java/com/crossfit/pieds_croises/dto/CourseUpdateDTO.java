@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 public class CourseUpdateDTO {
 
-    @NotNull(message = "L'id doit être renseigner")
+    @NotNull(message = "L'id doit être renseigné")
     private Long id;
 
     @NotBlank(message = "Le titre ne doit pas être vide")
@@ -30,7 +30,7 @@ public class CourseUpdateDTO {
     private LocalDateTime startDatetime;
 
     @NotNull(message = "La durée doit être renseignée")
-    private short duration;
+    private Short duration;
 
     @NotNull(message = "Le nombre de personnes max doit être renseigné")
     private Integer personLimit;

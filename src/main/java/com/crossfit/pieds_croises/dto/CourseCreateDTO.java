@@ -27,7 +27,7 @@ public class CourseCreateDTO {
     private LocalDateTime startDatetime;
 
     @NotNull(message = "La durée doit être renseignée")
-    private short duration;
+    private Short duration;
 
     @NotNull(message = "Le nombre de personnes max doit être renseigné")
     private Integer personLimit;

@@ -5,7 +5,7 @@ import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.ExerciceMapper;
 import com.crossfit.pieds_croises.model.Exercice;
 import com.crossfit.pieds_croises.model.PerformanceHistory;
-import com.crossfit.pieds_croises.repository.ExerciceRepository;
+import com.crossfit.pieds_croises.repository.ExerciseRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,13 +25,13 @@ import static org.mockito.Mockito.*;
 public class ExerciseServiceTest {
 
     @Mock
-    private ExerciceRepository exerciceRepository;
+    private ExerciseRepository exerciseRepository;
 
     @Mock
-    private ExerciceMapper exerciceMapper;
+    private ExerciceMapper exerciseMapper;
 
     @InjectMocks
-    private ExerciceService exerciceService;
+    private ExerciseService exerciseService;
 
     @Test
     public void testGetAllExercises() {
@@ -42,19 +42,19 @@ public class ExerciseServiceTest {
         ExerciceDTO exerciseDTO2 = new ExerciceDTO();
         List<Exercice> exercises = List.of(exercise1, exercise2);
 
-        when(exerciceRepository.findAll()).thenReturn(exercises);
-        when(exerciceMapper.convertToDTO(exercise1)).thenReturn(exerciseDTO1);
-        when(exerciceMapper.convertToDTO(exercise2)).thenReturn(exerciseDTO2);
+        when(exerciseRepository.findAll()).thenReturn(exercises);
+        when(exerciseMapper.convertToDTO(exercise1)).thenReturn(exerciseDTO1);
+        when(exerciseMapper.convertToDTO(exercise2)).thenReturn(exerciseDTO2);
 
         // Act
-        List<ExerciceDTO> result = exerciceService.getAllExercices();
+        List<ExerciceDTO> result = exerciseService.getAllExercises();
 
         // Assert
         assertThat(result).hasSize(2);
         assertThat(result).containsExactly(exerciseDTO1, exerciseDTO2);
-        verify(exerciceRepository, times(1)).findAll();
-        verify(exerciceMapper, times(1)).convertToDTO(exercise1);
-        verify(exerciceMapper, times(1)).convertToDTO(exercise2);
+        verify(exerciseRepository, times(1)).findAll();
+        verify(exerciseMapper, times(1)).convertToDTO(exercise1);
+        verify(exerciseMapper, times(1)).convertToDTO(exercise2);
     }
 
     @Test
@@ -65,17 +65,17 @@ public class ExerciseServiceTest {
         exercise.setId(id);
         ExerciceDTO exerciseDTO = new ExerciceDTO();
 
-        when(exerciceRepository.findById(id)).thenReturn(Optional.of(exercise));
-        when(exerciceMapper.convertToDTO(exercise)).thenReturn(exerciseDTO);
+        when(exerciseRepository.findById(id)).thenReturn(Optional.of(exercise));
+        when(exerciseMapper.convertToDTO(exercise)).thenReturn(exerciseDTO);
 
         // Act
-        ExerciceDTO result = exerciceService.getExerciceById(id);
+        ExerciceDTO result = exerciseService.getExerciseById(id);
 
         // Assert
         assertThat(result).isNotNull();
         assertThat(result).isEqualTo(exerciseDTO);
-        verify(exerciceRepository, times(1)).findById(id);
-        verify(exerciceMapper, times(1)).convertToDTO(exercise);
+        verify(exerciseRepository, times(1)).findById(id);
+        verify(exerciseMapper, times(1)).convertToDTO(exercise);
     }
 
     @Test
@@ -83,14 +83,14 @@ public class ExerciseServiceTest {
         // Arrange
         Long id = 1L;
 
-        when(exerciceRepository.findById(id)).thenReturn(Optional.empty());
+        when(exerciseRepository.findById(id)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThatThrownBy(() -> exerciceService.getExerciceById(id))
+        assertThatThrownBy(() -> exerciseService.getExerciseById(id))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("Exercice with id " + id + " not found!");
-        verify(exerciceRepository, times(1)).findById(id);
-        verifyNoInteractions(exerciceMapper);
+                .hasMessage("Exercise with id " + id + " not found!");
+        verify(exerciseRepository, times(1)).findById(id);
+        verifyNoInteractions(exerciseMapper);
     }
 
     @Test
@@ -100,17 +100,17 @@ public class ExerciseServiceTest {
         Exercice savedExercise = new Exercice();
         ExerciceDTO exerciseDTO = new ExerciceDTO();
 
-        when(exerciceRepository.save(exercise)).thenReturn(savedExercise);
-        when(exerciceMapper.convertToDTO(savedExercise)).thenReturn(exerciseDTO);
+        when(exerciseRepository.save(exercise)).thenReturn(savedExercise);
+        when(exerciseMapper.convertToDTO(savedExercise)).thenReturn(exerciseDTO);
 
         // Act
-        ExerciceDTO result = exerciceService.createExercice(exercise);
+        ExerciceDTO result = exerciseService.createExercise(exercise);
 
         // Assert
         assertThat(result).isNotNull();
         assertThat(result).isEqualTo(exerciseDTO);
-        verify(exerciceRepository, times(1)).save(exercise);
-        verify(exerciceMapper, times(1)).convertToDTO(savedExercise);
+        verify(exerciseRepository, times(1)).save(exercise);
+        verify(exerciseMapper, times(1)).convertToDTO(savedExercise);
     }
 
     @Test
@@ -133,19 +133,19 @@ public class ExerciseServiceTest {
         expectedExerciseDTO.setName(exerciseDetails.getName());
         expectedExerciseDTO.setMeasureType(exerciseDetails.getMeasureType());
 
-        when(exerciceRepository.findById(id)).thenReturn(Optional.of(existingExercise));
-        when(exerciceRepository.save(existingExercise)).thenReturn(existingExercise);
-        when(exerciceMapper.convertToDTO(existingExercise)).thenReturn(expectedExerciseDTO);
+        when(exerciseRepository.findById(id)).thenReturn(Optional.of(existingExercise));
+        when(exerciseRepository.save(existingExercise)).thenReturn(existingExercise);
+        when(exerciseMapper.convertToDTO(existingExercise)).thenReturn(expectedExerciseDTO);
 
         // Act
-        ExerciceDTO result = exerciceService.updateExercice(id, exerciseDetails);
+        ExerciceDTO result = exerciseService.updateExercise(id, exerciseDetails);
 
         // Assert
         assertThat(result).isNotNull();
         assertThat(result).isEqualTo(expectedExerciseDTO);
-        verify(exerciceRepository, times(1)).findById(id);
-        verify(exerciceRepository, times(1)).save(existingExercise);
-        verify(exerciceMapper, times(1)).convertToDTO(existingExercise);
+        verify(exerciseRepository, times(1)).findById(id);
+        verify(exerciseRepository, times(1)).save(existingExercise);
+        verify(exerciseMapper, times(1)).convertToDTO(existingExercise);
     }
 
     @Test
@@ -154,15 +154,15 @@ public class ExerciseServiceTest {
         Long id = 1L;
         Exercice exerciseDetails = new Exercice();
 
-        when(exerciceRepository.findById(id)).thenReturn(Optional.empty());
+        when(exerciseRepository.findById(id)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThatThrownBy(() -> exerciceService.updateExercice(id, exerciseDetails))
+        assertThatThrownBy(() -> exerciseService.updateExercise(id, exerciseDetails))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("Exercice with id " + id + " not found!");
-        verify(exerciceRepository, times(1)).findById(id);
-        verifyNoMoreInteractions(exerciceRepository);
-        verifyNoInteractions(exerciceMapper);
+                .hasMessage("Exercise with id " + id + " not found!");
+        verify(exerciseRepository, times(1)).findById(id);
+        verifyNoMoreInteractions(exerciseRepository);
+        verifyNoInteractions(exerciseMapper);
     }
 
     @Test
@@ -171,14 +171,14 @@ public class ExerciseServiceTest {
         Long id = 1L;
         Exercice exercise = new Exercice();
 
-        when(exerciceRepository.findById(id)).thenReturn(Optional.of(exercise));
+        when(exerciseRepository.findById(id)).thenReturn(Optional.of(exercise));
 
         // Act
-        exerciceService.deleteExercice(id);
+        exerciseService.deleteExercise(id);
 
         // Assert
-        verify(exerciceRepository, times(1)).findById(id);
-        verify(exerciceRepository, times(1)).delete(exercise);
+        verify(exerciseRepository, times(1)).findById(id);
+        verify(exerciseRepository, times(1)).delete(exercise);
     }
 
     @Test
@@ -186,13 +186,13 @@ public class ExerciseServiceTest {
         // Arrange
         Long id = 1L;
 
-        when(exerciceRepository.findById(id)).thenReturn(Optional.empty());
+        when(exerciseRepository.findById(id)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThatThrownBy(() -> exerciceService.deleteExercice(id))
+        assertThatThrownBy(() -> exerciseService.deleteExercise(id))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("Exercice with id " + id + " not found!");
-        verify(exerciceRepository, times(1)).findById(id);
-        verifyNoMoreInteractions(exerciceRepository);
+                .hasMessage("Exercise with id " + id + " not found!");
+        verify(exerciseRepository, times(1)).findById(id);
+        verifyNoMoreInteractions(exerciseRepository);
     }
 }
