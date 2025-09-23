@@ -12,6 +12,7 @@ public interface MessageMapper {
 
     MessageDTO convertToDto(Message message);
 
+    @Mapping(target = "messageStatus", expression = "java(com.crossfit.pieds_croises.model.Message.MessageStatus.ACTIVE)")
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     Message convertToEntity(MessageCreateDTO dto);

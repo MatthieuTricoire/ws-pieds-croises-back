@@ -14,39 +14,46 @@ import java.time.LocalDateTime;
 @Builder
 public class Message {
 
-    @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(length = 100, nullable = false)
-    private String title;
+  @Column(length = 100, nullable = false)
+  private String title;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private String content;
+  @Column(columnDefinition = "TEXT", nullable = false)
+  private String content;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "message_type", nullable = false)
-    private MessageType messageType;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "message_type", nullable = false)
+  private MessageType messageType;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "message_status", nullable = false)
+  private MessageStatus messageStatus;
 
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private LocalDateTime createdAt;
 
+  @Column(name = "updated_at", nullable = false)
+  private LocalDateTime updatedAt;
 
-    @Column(name = "start_date")
-    private LocalDate startDate;
+  @Column(name = "start_date")
+  private LocalDate startDate;
 
-    @Column(name = "expiration_date")
-    private LocalDate expirationDate;
+  @Column(name = "expiration_date")
+  private LocalDate expirationDate;
 
+  public enum MessageType {
+    INFORMATION,
+    ALERT,
+    EVENT,
+    REMINDER
+  }
 
-    public enum MessageType {
-        INFORMATION,
-        ALERT,
-        EVENT,
-        REMINDER
-    }
+  public enum MessageStatus {
+    ACTIVE,
+    INACTIVE
+  }
 
 }
