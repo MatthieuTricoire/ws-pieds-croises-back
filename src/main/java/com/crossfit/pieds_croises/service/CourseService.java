@@ -63,7 +63,7 @@ public class CourseService {
   public CourseDTO createCourse(@Valid CourseCreateDTO courseCreateDTO) {
 
     courseRepository.findByCoachIdAndStartDatetime(courseCreateDTO.getCoachId(), courseCreateDTO.getStartDatetime())
-        .ifPresent(c -> {
+        .ifPresent(course -> {
           throw new BusinessException("A course already exists with this coach at this start date.");
         });
 
