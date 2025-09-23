@@ -3,18 +3,15 @@ package com.crossfit.pieds_croises.mapper;
 import com.crossfit.pieds_croises.dto.UserDto;
 import com.crossfit.pieds_croises.dto.UserUpdateDto;
 import com.crossfit.pieds_croises.model.User;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", uses = { UserSubscriptionMapper.class, CourseMapper.class })
 public interface UserMapper {
-
+  
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "isFirstLoginComplete", ignore = true)
   @Mapping(target = "coursesId", ignore = true)
+  @Mapping(target = "profilePicture")
   UserDto convertToDtoForUser(User user);
 
   @Mapping(target = "id", ignore = true)
