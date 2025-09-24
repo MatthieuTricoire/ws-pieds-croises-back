@@ -20,15 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -156,7 +148,7 @@ public class CourseController {
   })
   public ResponseEntity<CourseDTO> registerToCourse(
       @Parameter(description = "ID du cours", example = "1")
-      @PathVariable Long courseId, 
+      @PathVariable Long courseId,
       @Parameter(hidden = true) @AuthenticationPrincipal User user) {
     CourseDTO courseWithNewUser = courseService.addUserToCourse(courseId, user.getId());
     return ResponseEntity.ok(courseWithNewUser);
@@ -235,7 +227,7 @@ public class CourseController {
   })
   public ResponseEntity<CourseDTO> addUserToCourse(
       @Parameter(description = "ID du cours", example = "1")
-      @PathVariable Long courseId, 
+      @PathVariable Long courseId,
       @Parameter(description = "ID de l'utilisateur", example = "1")
       @PathVariable Long userId) {
     CourseDTO course = courseService.addUserToCourse(courseId, userId);
@@ -258,7 +250,7 @@ public class CourseController {
   })
   public ResponseEntity<CourseDTO> removeUserFromCourse(
       @Parameter(description = "ID du cours", example = "1")
-      @PathVariable Long courseId, 
+      @PathVariable Long courseId,
       @Parameter(description = "ID de l'utilisateur", example = "1")
       @PathVariable Long userId) {
     CourseDTO course = courseService.deleteUserFromCourse(courseId, userId);

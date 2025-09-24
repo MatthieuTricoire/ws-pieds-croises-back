@@ -11,7 +11,9 @@ import com.crossfit.pieds_croises.mapper.CourseMapper;
 import com.crossfit.pieds_croises.mapper.UserMapper;
 import com.crossfit.pieds_croises.model.Course;
 import com.crossfit.pieds_croises.model.User;
+import com.crossfit.pieds_croises.model.UserCourse;
 import com.crossfit.pieds_croises.repository.CourseRepository;
+import com.crossfit.pieds_croises.repository.UserCourseRepository;
 import com.crossfit.pieds_croises.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,11 +28,12 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CourseService {
-    private final CourseRepository courseRepository;
-    private final CourseMapper courseMapper;
-    private final UserRepository userRepository;
-    private final DateTimeProvider dateTimeProvider;
-    private final UserMapper userMapper;
+  private final CourseRepository courseRepository;
+  private final CourseMapper courseMapper;
+  private final UserRepository userRepository;
+  private final UserCourseRepository userCourseRepository;
+  private final DateTimeProvider dateTimeProvider;
+  private final UserMapper userMapper;
 
   public List<CourseDTO> getAllCourses() {
     List<Course> courses = courseRepository.findAll();
@@ -45,9 +48,10 @@ public class CourseService {
     return courses.stream().map(courseMapper::convertToDto).collect(Collectors.toList());
   }
 
-    public List<CourseDTO> getCoursesByDay(LocalDate date) {
-        LocalDateTime startOfDay = date.atStartOfDay();
-        LocalDateTime endOfDay = date.atTime(23, 59, 59);
+  public List<CourseDTO> getCoursesByDay(LocalDate date) {
+
+    LocalDateTime startOfDay = date.atStartOfDay();
+    LocalDateTime endOfDay = date.atTime(23, 59, 59);
 
     List<Course> courses = courseRepository.findByStartDatetimeBetweenOrderByStartDatetimeAsc(startOfDay, endOfDay);
 
@@ -61,6 +65,7 @@ public class CourseService {
   }
 
   public CourseDTO createCourse(@Valid CourseCreateDTO courseCreateDTO) {
+
     courseRepository.findByCoachIdAndStartDatetime(courseCreateDTO.getCoachId(), courseCreateDTO.getStartDatetime())
         .ifPresent(course -> {
           throw new BusinessException("A course already exists with this coach at this start date.");
@@ -104,73 +109,78 @@ public class CourseService {
   }
 
     public CourseDTO addUserToCourse(Long courseId, Long userId) {
-        Course existingCourse = courseRepository.findById(courseId)
+        Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
 
-    User existingUser = userRepository.findById(userId)
-        .orElseThrow(() -> new ResourceNotFoundException("User not existing"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
-    boolean userAlreadyRegistered = existingCourse.getUsers().stream()
-        .anyMatch(user -> user.getId().equals(existingUser.getId()));
-    boolean courseFull = existingCourse.getStatus().equals(Course.Status.FULL);
-    boolean userSuspended = existingUser.isSuspended();
+        // Vérifier si l'inscription existe déjà
+        boolean alreadyRegistered = userCourseRepository.findByUserIdAndCourseId(userId, courseId).isPresent();
+        if (alreadyRegistered) {
+            throw new BusinessException("User already registered to this course");
+        }
 
-    if (userAlreadyRegistered) {
-      throw new BusinessException("User already registered to this course");
+        if (user.isSuspended()) {
+            throw new BusinessException("User is suspended");
+        }
+
+        // Déterminer le statut automatiquement selon le nombre d'inscrits
+        long registeredCount = course.getUserCourses().stream()
+                .filter(uc -> uc.getStatus() == UserCourse.Status.REGISTERED)
+                .count();
+
+        UserCourse.Status status = (registeredCount >= course.getPersonLimit())
+                ? UserCourse.Status.WAITING_LIST
+                : UserCourse.Status.REGISTERED;
+
+        // Créer le lien UserCourse
+        UserCourse userCourse = UserCourse.builder()
+                .user(user)
+                .course(course)
+                .status(status)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        userCourseRepository.save(userCourse);
+
+        // Mettre à jour les relations bidirectionnelles
+        course.getUserCourses().add(userCourse);
+        user.getUserCourses().add(userCourse);
+
+        // Mettre à jour le statut du cours
+        course.changeStatus();
+        courseRepository.save(course);
+
+        return courseMapper.convertToDto(course);
     }
-
-    if (courseFull) {
-      throw new BusinessException("Course is already full");
-    }
-
-    if (userSuspended) {
-      throw new BusinessException("User suspended");
-    }
-
-    existingCourse.getUsers().add(existingUser);
-    existingUser.getCourses().add(existingCourse);
-    existingCourse.changeStatus();
-
-    userRepository.save(existingUser);
-    courseRepository.save(existingCourse);
-
-    return courseMapper.convertToDto(existingCourse);
-  }
 
     public CourseDTO deleteUserFromCourse(Long courseId, Long userId) {
-        Course existingCourse = courseRepository.findById(courseId)
+        Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
 
-    User existingUser = userRepository.findById(userId)
-        .orElseThrow(() -> new ResourceNotFoundException("User not existing"));
+        UserCourse userCourse = course.getUserCourses().stream()
+                .filter(uc -> uc.getUser().getId().equals(userId) && uc.getStatus() == UserCourse.Status.REGISTERED)
+                .findFirst()
+                .orElseThrow(() -> new BusinessException("User not enrolled in this course"));
 
-    boolean userRegistered = existingCourse.getUsers().contains(existingUser);
+        course.getUserCourses().remove(userCourse);
+        userCourse.getUser().getUserCourses().remove(userCourse);
 
-    if (!userRegistered) {
-      throw new BusinessException("User not enrolled in this course");
+        course.changeStatus();
+        courseRepository.save(course);
+
+        return courseMapper.convertToDto(course);
     }
 
-    existingCourse.getUsers().remove(existingUser);
-    existingUser.getCourses().remove(existingCourse);
-    existingCourse.changeStatus();
 
-    userRepository.save(existingUser);
-    courseRepository.save(existingCourse);
+    public void deleteCourse(Long id) {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
 
-    return courseMapper.convertToDto(existingCourse);
-  }
-
-  public void deleteCourse(Long id) {
-    Course existingCourse = courseRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
-
-    for (User user : existingCourse.getUsers()) {
-      user.getCourses().remove(existingCourse);
-      userRepository.save(user);
+        courseRepository.delete(course);
     }
 
-    courseRepository.delete(existingCourse);
-  }
 
   public List<UserDto> getUsersNotInCourse(Long id) {
     Course course = courseRepository.findById(id)
