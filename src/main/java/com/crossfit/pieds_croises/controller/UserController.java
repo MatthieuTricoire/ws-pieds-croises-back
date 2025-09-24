@@ -4,6 +4,7 @@ import com.crossfit.pieds_croises.dto.CourseDTO;
 import com.crossfit.pieds_croises.dto.UserDto;
 import com.crossfit.pieds_croises.dto.UserUpdateDto;
 import com.crossfit.pieds_croises.model.User;
+import com.crossfit.pieds_croises.model.UserCourse;
 import com.crossfit.pieds_croises.repository.UserRepository;
 import com.crossfit.pieds_croises.service.UserService;
 import jakarta.validation.Valid;
@@ -15,16 +16,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -46,7 +37,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<UserDto>> getAllUsers(
-        @RequestParam(defaultValue = "false") boolean includeSubscriptions
+            @RequestParam(defaultValue = "false") boolean includeSubscriptions
     ) {
         List<UserDto> userDtos = userService.getAllUsers(includeSubscriptions);
         return ResponseEntity.ok(userDtos);
@@ -69,8 +60,11 @@ public class UserController {
 
     // 🔹 READ USER COURSES
     @GetMapping("/courses")
-    public ResponseEntity<List<CourseDTO>> getUserCourses(@AuthenticationPrincipal User user) {
-        List<CourseDTO> myCourses = userService.getUserCourses(user.getId());
+    public ResponseEntity<List<CourseDTO>> getUserCourses(
+            @AuthenticationPrincipal User user,
+            @RequestParam(value = "status", required = false) UserCourse.Status status) {
+
+        List<CourseDTO> myCourses = userService.getUserCourses(user.getId(), status);
         return ResponseEntity.ok(myCourses);
     }
 
