@@ -29,8 +29,8 @@ public interface UserMapper {
             target = "coursesId",
             expression = "java(user.getUserCourses() != null ? " +
                     "user.getUserCourses().stream()" +
-                    ".filter(uc -> uc.getStatus() == com.crossfit.pieds_croises.model.UserCourse.Status.REGISTERED)" +
-                    ".map(uc -> uc.getCourse().getId())" +
+                    ".filter(user_course -> user_course.getStatus() == com.crossfit.pieds_croises.model.UserCourse.Status.REGISTERED)" +
+                    ".map(user_course -> user_course.getCourse().getId())" +
                     ".toList() : java.util.Collections.emptyList())"
     )
     UserDto convertToDtoForAdmin(User user);
@@ -50,8 +50,8 @@ public interface UserMapper {
             target = "coursesId",
             expression = "java(user.getUserCourses() != null ? " +
                     "user.getUserCourses().stream()" +
-                    ".filter(uc -> uc.getStatus() == com.crossfit.pieds_croises.model.UserCourse.Status.REGISTERED)" +
-                    ".map(uc -> uc.getCourse().getId())" +
+                    ".filter(user_course -> user_course.getStatus() == com.crossfit.pieds_croises.model.UserCourse.Status.REGISTERED)" +
+                    ".map(uc -> user_course.getCourse().getId())" +
                     ".toList() : java.util.Collections.emptyList())"
     )
     UserDto convertToDtoForAnyUser(User user);
@@ -72,8 +72,8 @@ public interface UserMapper {
             target = "coursesId",
             expression = "java(user.getUserCourses() != null ? " +
                     "user.getUserCourses().stream()" +
-                    ".filter(uc -> uc.getStatus() == com.crossfit.pieds_croises.model.UserCourse.Status.REGISTERED)" +
-                    ".map(uc -> uc.getCourse().getId())" +
+                    ".filter(user_course -> user_course.getStatus() == com.crossfit.pieds_croises.model.UserCourse.Status.REGISTERED)" +
+                    ".map(user_course -> user_course.getCourse().getId())" +
                     ".toList() : java.util.Collections.emptyList())"
     )
     UserDto convertToAuthDto(User user);

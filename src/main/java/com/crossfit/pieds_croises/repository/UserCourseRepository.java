@@ -9,7 +9,6 @@ import java.util.Optional;
 @Repository
 public interface UserCourseRepository extends JpaRepository<UserCourse, Long> {
 
-    // Vérifie si un utilisateur est déjà inscrit à un cours
     Optional<UserCourse> findByUserIdAndCourseId(Long userId, Long courseId);
 
 }

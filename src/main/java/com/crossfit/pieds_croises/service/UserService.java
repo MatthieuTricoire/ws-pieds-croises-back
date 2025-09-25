@@ -74,7 +74,7 @@ public class UserService {
         LocalDateTime now = LocalDateTime.now();
 
         return user.getUserCourses().stream()
-                .filter(uc -> status == null || uc.getStatus() == status) // si status est null, on ne filtre pas
+                .filter(user_course -> status == null || user_course.getStatus() == status) // si status est null, on ne filtre pas
                 .map(UserCourse::getCourse)
                 .filter(course -> course.getStartDatetime().isAfter(now)) // uniquement les cours à venir
                 .map(courseMapper::convertToDto)
@@ -96,7 +96,7 @@ public class UserService {
         user.setUpdatedAt(LocalDateTime.now());
         Set<String> roles = userDto.getRoles();
         if (roles == null || roles.isEmpty()) {
-            roles = Set.of("ROLE_USER"); // Valeur par défaut si aucun rôle fourni
+            roles = Set.of("ROLE_USER");
         }
         user.setRoles(roles);
 
