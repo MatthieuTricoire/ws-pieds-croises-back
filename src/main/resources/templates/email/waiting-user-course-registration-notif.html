@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<p>Bonjour <span th:text="${firstname}">Utilisateur</span> <span th:text="${lastname}"></span>,</p>
+
+<p>Bonne nouvelle ! 🎉 Une place s’est libérée et vous êtes désormais inscrit au cours :</p>
+
+<p><b th:text="${courseTitle}"></b> le <span th:text="${courseDate}"></span></p>
+
+<p>À bientôt 💪</p>
+</body>
+</html>
