@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -33,7 +34,7 @@ public class UserController {
     private final UserRepository userRepository;
     private UserService userService;
 
-    // 🔹 READ ALL
+    // READ ALL
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<UserDto>> getAllUsers(
@@ -43,7 +44,7 @@ public class UserController {
         return ResponseEntity.ok(userDtos);
     }
 
-    // 🔹 READ ONE
+    // READ ONE
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
@@ -51,24 +52,37 @@ public class UserController {
         return ResponseEntity.ok(userDto);
     }
 
-    // 🔹 READ USER PROFILE
+    // READ USER PROFILE
     @GetMapping("/profile")
     public ResponseEntity<UserDto> getMyProfile(@AuthenticationPrincipal User user) {
         UserDto userDto = userService.getMyProfile(user.getId());
         return ResponseEntity.ok(userDto);
     }
 
-    // 🔹 READ USER COURSES
+    // READ USER COURSES
     @GetMapping("/courses")
-    public ResponseEntity<List<CourseDTO>> getUserCourses(
+    public ResponseEntity<?> getUserCourses(
             @AuthenticationPrincipal User user,
-            @RequestParam(value = "status", required = false) UserCourse.Status status) {
+            @RequestParam(value = "status", required = false) String status) {
 
-        List<CourseDTO> myCourses = userService.getUserCourses(user.getId(), status);
+        UserCourse.Status enumStatus = null;
+        if (status != null) {
+            try {
+                enumStatus = UserCourse.Status.valueOf(status.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body(
+                        Map.of(
+                                "error", "Invalid status value",
+                                "message", "Status must be one of: REGISTERED, WAITING_LIST, CANCELLED"
+                        )
+                );
+            }
+        }
+        List<CourseDTO> myCourses = userService.getUserCourses(user.getId(), enumStatus);
         return ResponseEntity.ok(myCourses);
     }
 
-    // 🔹 CREATE
+    // CREATE
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto user) {
@@ -76,7 +90,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(invitedUser);
     }
 
-    // 🔹 UPDATE
+    // UPDATE
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateDto userDetails) {
@@ -84,7 +98,7 @@ public class UserController {
         return ResponseEntity.ok(userDto);
     }
 
-    // 🔹 UPDATE USER PROFILE
+    // UPDATE USER PROFILE
     @PutMapping("/profile")
     public ResponseEntity<UserDto> updateProfile(@AuthenticationPrincipal User user,
                                                  @Valid @RequestBody UserUpdateDto userDetails) {
@@ -93,7 +107,7 @@ public class UserController {
         return ResponseEntity.ok(userDto);
     }
 
-    // 🔹 DELETE
+    // DELETE
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
@@ -101,14 +115,14 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    // 🔹 DELETE USER PROFILE
+    // DELETE USER PROFILE
     @DeleteMapping("/profile")
     public ResponseEntity<Void> deleteUserProfile(@AuthenticationPrincipal User user) {
         userService.deleteUser(user.getId());
         return ResponseEntity.noContent().build();
     }
 
-    // 🔹 UPLOAD USER PROFILE PICTURE
+    // UPLOAD USER PROFILE PICTURE
     @PostMapping("/profile/profile-picture")
     public ResponseEntity<String> uploadProfilePicture(
             @AuthenticationPrincipal User user,
@@ -127,7 +141,7 @@ public class UserController {
             return ResponseEntity.badRequest().body("Fichier trop volumineux");
         }
 
-        // 🔹 Supprimer l'ancienne photo si elle existe
+        // Supprimer l'ancienne photo si elle existe
         if (user.getProfilePicture() != null) {
             Path oldFile = Paths.get(user.getProfilePicture().replaceFirst("^/", "")); // enlever le "/" initial
             try {
@@ -155,7 +169,7 @@ public class UserController {
         return ResponseEntity.ok(user.getProfilePicture());
     }
 
-    // 🔹 DELETE USER PROFILE PICTURE
+    // DELETE USER PROFILE PICTURE
     @DeleteMapping("/profile/profile-picture")
     public ResponseEntity<String> deleteProfilePicture(@AuthenticationPrincipal User user) {
         try {
