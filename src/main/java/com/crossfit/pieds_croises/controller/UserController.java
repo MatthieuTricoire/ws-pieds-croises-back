@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -107,11 +108,24 @@ public class UserController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CourseDTO.class))),
         @ApiResponse(responseCode = "401", description = "Non autorisé", content = @Content)
     })
-    public ResponseEntity<List<CourseDTO>> getUserCourses(
-                @Parameter(hidden = true) @AuthenticationPrincipal User user,
-            @RequestParam(value = "status", required = false) UserCourse.Status status) {
+    public ResponseEntity<?> getUserCourses(
+            @Parameter(hidden = true) @AuthenticationPrincipal User user,
+            @RequestParam(value = "status", required = false) String status) {
 
-        List<CourseDTO> myCourses = userService.getUserCourses(user.getId(), status);
+        UserCourse.Status enumStatus = null;
+        if (status != null) {
+            try {
+                enumStatus = UserCourse.Status.valueOf(status.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body(
+                        Map.of(
+                                "error", "Invalid status value",
+                                "message", "Status must be one of: REGISTERED, WAITING_LIST, CANCELLED"
+                        )
+                );
+            }
+        }
+        List<CourseDTO> myCourses = userService.getUserCourses(user.getId(), enumStatus);
         return ResponseEntity.ok(myCourses);
     }
 
@@ -241,7 +255,7 @@ public class UserController {
             return ResponseEntity.badRequest().body("Fichier trop volumineux");
         }
 
-        // 🔹 Supprimer l'ancienne photo si elle existe
+        // Supprimer l'ancienne photo si elle existe
         if (user.getProfilePicture() != null) {
             Path oldFile = Paths.get(user.getProfilePicture().replaceFirst("^/", "")); // enlever le "/" initial
             try {
