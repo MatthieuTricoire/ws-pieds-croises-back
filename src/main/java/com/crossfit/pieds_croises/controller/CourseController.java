@@ -4,7 +4,6 @@ import com.crossfit.pieds_croises.dto.CourseCreateDTO;
 import com.crossfit.pieds_croises.dto.CourseDTO;
 import com.crossfit.pieds_croises.dto.CourseUpdateDTO;
 import com.crossfit.pieds_croises.dto.UserDto;
-import com.crossfit.pieds_croises.model.User;
 import com.crossfit.pieds_croises.service.CourseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,7 +18,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -31,7 +29,7 @@ import java.util.List;
 @Tag(name = "Course", description = "Gestion des cours")
 public class CourseController {
 
-  private final CourseService courseService;
+    private final CourseService courseService;
 
   @GetMapping
   @Operation(

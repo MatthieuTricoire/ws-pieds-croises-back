@@ -34,7 +34,6 @@ public class UserCourse {
 
     public enum Status {
         REGISTERED,
-        WAITING_LIST,
-        CANCELLED
+        WAITING_LIST
     }
 }
