@@ -51,7 +51,7 @@ public interface UserMapper {
             expression = "java(user.getUserCourses() != null ? " +
                     "user.getUserCourses().stream()" +
                     ".filter(user_course -> user_course.getStatus() == com.crossfit.pieds_croises.model.UserCourse.Status.REGISTERED)" +
-                    ".map(uc -> user_course.getCourse().getId())" +
+                    ".map(user_course -> user_course.getCourse().getId())" +
                     ".toList() : java.util.Collections.emptyList())"
     )
     UserDto convertToDtoForAnyUser(User user);
