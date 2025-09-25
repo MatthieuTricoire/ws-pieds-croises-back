@@ -60,7 +60,6 @@ public class MessageController {
         return ResponseEntity.ok(messages);
     }
 
-
     @GetMapping("/{id}")
     @Operation(
         summary = "Récupérer un message par ID",
@@ -77,7 +76,6 @@ public class MessageController {
         MessageDTO messageDTO = messageService.getMessageById(id);
         return ResponseEntity.ok(messageDTO);
     }
-
 
     @PostMapping
     @Operation(

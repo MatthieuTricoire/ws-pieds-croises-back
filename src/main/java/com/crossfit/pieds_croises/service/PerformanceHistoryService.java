@@ -50,9 +50,9 @@ public class PerformanceHistoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("User with id " + userId + " not found."));
         performanceHistory.setUser(user);
 
-        Exercice exercice = exerciseRepository.findById(performanceHistoryDTO.getExerciseId())
-                .orElseThrow(() -> new ResourceNotFoundException("Exercice with id " + performanceHistoryDTO.getExerciseId() + " not found."));
-        performanceHistory.setExercice(exercice);
+        Exercice exercise = exerciseRepository.findById(performanceHistoryDTO.getExerciseId())
+                .orElseThrow(() -> new ResourceNotFoundException("Exercise with id " + performanceHistoryDTO.getExerciseId() + " not found."));
+        performanceHistory.setExercice(exercise);
 
         PerformanceHistory savedPerformanceHistory = performanceHistoryRepository.save(performanceHistory);
         return performanceHistoryMapper.convertToDTO(savedPerformanceHistory);
@@ -66,11 +66,11 @@ public class PerformanceHistoryService {
             throw new AccessDeniedException("Not authorized to update this performanceHistory.");
         }
 
-        Exercice exercice = exerciseRepository.findById(performanceHistoryDTO.getExerciseId())
-                .orElseThrow(() -> new ResourceNotFoundException("Exercice with id " + performanceHistoryDTO.getExerciseId() + " not found."));
+        Exercice exercise = exerciseRepository.findById(performanceHistoryDTO.getExerciseId())
+                .orElseThrow(() -> new ResourceNotFoundException("Exercise with id " + performanceHistoryDTO.getExerciseId() + " not found."));
 
         performanceHistoryMapper.updateEntityFromDTO(performanceHistoryDTO, performanceHistory);
-        performanceHistory.setExercice(exercice);
+        performanceHistory.setExercice(exercise);
         PerformanceHistory updatedPerformanceHistory = performanceHistoryRepository.save(performanceHistory);
         return performanceHistoryMapper.convertToDTO(updatedPerformanceHistory);
     }

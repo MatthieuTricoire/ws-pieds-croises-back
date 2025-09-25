@@ -91,7 +91,7 @@ public class WeightHistoryController {
             @Parameter(description = "ID de l'entrée à mettre à jour", example = "1")
             @PathVariable Long id,
             @Parameter(description = "Nouvelles données de l'historique de poids")
-            @RequestBody WeightHistoryDTO weightHistoryDTO,
+            @Valid @RequestBody WeightHistoryDTO weightHistoryDTO,
             @Parameter(hidden = true) @AuthenticationPrincipal User user
     ) {
         WeightHistoryDTO updatedWeightHistory = weightHistoryService.updateWeightHistory(id, weightHistoryDTO, user.getId());

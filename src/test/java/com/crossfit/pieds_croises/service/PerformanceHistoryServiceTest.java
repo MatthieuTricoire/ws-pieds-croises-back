@@ -174,7 +174,7 @@ public class PerformanceHistoryServiceTest {
         // Act & Assert
         assertThatThrownBy(() -> performanceHistoryService.createPerformanceHistory(inputDTO, userId))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("Exercice with id " + exerciseId + " not found.");
+                .hasMessage("Exercise with id " + exerciseId + " not found.");
         verify(performanceHistoryMapper, times(1)).convertToEntity(inputDTO);
         verify(userRepository, times(1)).findById(userId);
         verify(exerciseRepository, times(1)).findById(exerciseId);
@@ -278,7 +278,7 @@ public class PerformanceHistoryServiceTest {
         // Act & Assert
         assertThatThrownBy(() -> performanceHistoryService.updatePerformanceHistory(id, inputDTO, userId))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("Exercice with id " + exerciseId + " not found.");
+                .hasMessage("Exercise with id " + exerciseId + " not found.");
         verify(performanceHistoryRepository, times(1)).findById(id);
         verify(exerciseRepository, times(1)).findById(exerciseId);
         verifyNoMoreInteractions(performanceHistoryRepository, exerciseRepository);
