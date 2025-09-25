@@ -21,7 +21,9 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +33,7 @@ public class CourseService {
     private final CourseMapper courseMapper;
     private final UserRepository userRepository;
     private final UserCourseRepository userCourseRepository;
+    private final EmailService emailService;
 
     private final UserMapper userMapper;
 
@@ -142,11 +145,9 @@ public class CourseService {
 
         userCourseRepository.save(userCourse);
 
-        // Mettre à jour les relations bidirectionnelles
         course.getUserCourses().add(userCourse);
         user.getUserCourses().add(userCourse);
 
-        // Mettre à jour le statut du cours
         course.changeStatus();
         courseRepository.save(course);
 
@@ -157,13 +158,38 @@ public class CourseService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
 
+        // Vérifier que l'utilisateur est bien inscrit
         UserCourse userCourse = course.getUserCourses().stream()
                 .filter(uc -> uc.getUser().getId().equals(userId) && uc.getStatus() == UserCourse.Status.REGISTERED)
                 .findFirst()
                 .orElseThrow(() -> new BusinessException("User not enrolled in this course"));
 
+        // Supprimer la relation user-course
         course.getUserCourses().remove(userCourse);
         userCourse.getUser().getUserCourses().remove(userCourse);
+
+        // Vérifie la liste d’attente et inscrit le premier
+        course.getUserCourses().stream()
+                .filter(uc -> uc.getStatus() == UserCourse.Status.WAITING_LIST)
+                .sorted(Comparator.comparing(UserCourse::getCreatedAt)) // plus ancien en premier
+                .findFirst()
+                .ifPresent(firstWaiting -> {
+                    firstWaiting.setStatus(UserCourse.Status.REGISTERED);
+
+                    // Envoi de l’email de notification
+                    Map<String, Object> variables = Map.of(
+                            "firstname", firstWaiting.getUser().getFirstname(),
+                            "lastname", firstWaiting.getUser().getLastname(),
+                            "courseTitle", course.getTitle(),
+                            "courseDate", course.getStartDatetime()
+                    );
+                    emailService.sendTemplateEmail(
+                            firstWaiting.getUser().getEmail(),
+                            "Bonne nouvelle, une place s’est libérée !",
+                            "waiting-user-course-registration-notif", // ton template thymeleaf
+                            variables
+                    );
+                });
 
         course.changeStatus();
         courseRepository.save(course);

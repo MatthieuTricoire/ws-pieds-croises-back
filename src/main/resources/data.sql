@@ -118,7 +118,7 @@ VALUES (55, '2025-01-01', 2),
 
 -- Peupler la table user_course
 INSERT INTO user_course (user_id, course_id, status, created_at)
-VALUES (3, 1, 'REGISTERED', NOW()),
+VALUES (1, 1, 'REGISTERED', NOW()),
        (2, 1, 'WAITING_LIST', NOW()),
        (3, 2, 'REGISTERED', NOW());
 
