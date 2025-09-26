@@ -94,7 +94,18 @@ jobs:
             echo 'SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
             echo 'SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
             echo 'SPRING_JPA_HIBERNATE_DDL_AUTO=${{ secrets.SPRING_JPA_HIBERNATE_DDL_AUTO }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            echo 'MAIL_HOST=${{secrets.MAIL_HOST}}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod
+            echo 'MAIL_HOST=${{secrets.MAIL_HOST}}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
+            echo 'MAIL_HOST=${{ secrets.MAIL_HOST }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
+            echo 'MAIL_PORT=${{ secrets.MAIL_PORT }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
+            echo 'MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
+            echo 'MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
+            echo 'MAIL_PROTOCOL=${{ secrets.MAIL_PROTOCOL }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
+            echo 'MAIL_AUTH=${{ secrets.MAIL_AUTH }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
+            echo 'MAIL_TLS=${{ secrets.MAIL_TLS }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
+            echo 'APP_BASE_URL=${{ secrets.APP_BASE_URL }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
+            echo 'REGISTER_URI=${{ secrets.REGISTER_URI }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
+            echo 'REGISTER_TOKEN_EXPIRATION_DAYS=${{ secrets.REGISTER_TOKEN_EXPIRATION_DAYS }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
+            echo 'RESET_PASSWORD_URI=${{ secrets.RESET_PASSWORD_URI }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
             chmod 600 /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod
             "
         - name: Build Docker image and deploy
