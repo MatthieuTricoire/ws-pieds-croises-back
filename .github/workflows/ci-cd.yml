@@ -42,8 +42,9 @@ jobs:
       name: Deploy Application
       needs: build-and-test  # Déployer seulement si les tests réussissent
       runs-on: ubuntu-latest
-      if: github.ref == 'refs/heads/main'  # Déployer uniquement sur main
-
+      # if: github.ref == 'refs/heads/main'  # Déployer uniquement sur main
+      #TODO: Retirer la condition de la feature
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/CICD-quest'
       steps:
         - name: Checkout code
           uses: actions/checkout@v3
