@@ -33,6 +33,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
 
+    // Ignore swagger endpoints
+    String path = request.getRequestURI();
+    logger.info("Processing request for path: {}", path);
+
+    if (isSwaggerEndpoint(path)) {
+      logger.debug("Ignoring Swagger endpoint: {}", path);
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     String jwt = extractJwtFromCookie(request);
 
     if (jwt == null) {
@@ -82,5 +92,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
     logger.info("No cookies found or no 'token' cookie present");
     return null;
+  }
+
+  private boolean isSwaggerEndpoint(String path) {
+    return path.startsWith("/swagger-ui") ||
+        path.startsWith("/v3/api-docs") ||
+        path.startsWith("/swagger-resources") ||
+        path.startsWith("/webjars") ||
+        path.equals("/swagger-ui.html") ||
+        path.equals("/favicon.ico");
   }
 }
