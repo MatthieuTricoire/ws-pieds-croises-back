@@ -11,7 +11,7 @@ on:
     branches:
       - main
       - dev
-
+## TO DELETE
 jobs:
   build-and-test:
     name: Build and Test Application
