@@ -7,6 +7,13 @@ import com.crossfit.pieds_croises.model.User;
 import com.crossfit.pieds_croises.model.UserCourse;
 import com.crossfit.pieds_croises.repository.UserRepository;
 import com.crossfit.pieds_croises.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,6 +35,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/users")
+@Tag(name = "User", description = "Gestion des utilisateurs")
 public class UserController {
 
     private static final long MAX_FILE_SIZE = 2_000_000L; // 2 Mo
@@ -37,8 +45,20 @@ public class UserController {
     // READ ALL
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
+    @Operation(
+        summary = "Récupérer tous les utilisateurs",
+        description = "Récupère la liste de tous les utilisateurs. Réservé aux administrateurs."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Liste récupérée avec succès",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
+        @ApiResponse(responseCode = "401", description = "Non autorisé", content = @Content),
+        @ApiResponse(responseCode = "403", description = "Accès refusé", content = @Content)
+    })
     public ResponseEntity<List<UserDto>> getAllUsers(
-            @RequestParam(defaultValue = "false") boolean includeSubscriptions
+        @Parameter(description = "Inclure les abonnements dans la réponse", example = "false")
+        @RequestParam(defaultValue = "false") boolean includeSubscriptions
+
     ) {
         List<UserDto> userDtos = userService.getAllUsers(includeSubscriptions);
         return ResponseEntity.ok(userDtos);
@@ -47,45 +67,58 @@ public class UserController {
     // READ ONE
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
+    @Operation(
+        summary = "Récupérer un utilisateur par ID",
+        description = "Récupère les détails d'un utilisateur spécifique. Réservé aux administrateurs."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Utilisateur trouvé",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
+        @ApiResponse(responseCode = "401", description = "Non autorisé", content = @Content),
+        @ApiResponse(responseCode = "403", description = "Accès refusé", content = @Content),
+        @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé", content = @Content)
+    })
+    public ResponseEntity<UserDto> getUserById(
+        @Parameter(description = "ID de l'utilisateur", example = "1")
+        @PathVariable Long id) {
         UserDto userDto = userService.getUserById(id);
         return ResponseEntity.ok(userDto);
     }
 
     // READ USER PROFILE
     @GetMapping("/profile")
-    public ResponseEntity<UserDto> getMyProfile(@AuthenticationPrincipal User user) {
+    @Operation(
+        summary = "Récupérer mon profil",
+        description = "Récupère le profil de l'utilisateur connecté."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Profil récupéré avec succès",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
+        @ApiResponse(responseCode = "401", description = "Non autorisé", content = @Content)
+    })
+    public ResponseEntity<UserDto> getMyProfile(
+        @Parameter(hidden = true) @AuthenticationPrincipal User user) {
         UserDto userDto = userService.getMyProfile(user.getId());
         return ResponseEntity.ok(userDto);
     }
 
-    // READ USER COURSES
-    @GetMapping("/courses")
-    public ResponseEntity<?> getUserCourses(
-            @AuthenticationPrincipal User user,
-            @RequestParam(value = "status", required = false) String status) {
-
-        UserCourse.Status enumStatus = null;
-        if (status != null) {
-            try {
-                enumStatus = UserCourse.Status.valueOf(status.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.badRequest().body(
-                        Map.of(
-                                "error", "Invalid status value",
-                                "message", "Status must be one of: REGISTERED, WAITING_LIST, CANCELLED"
-                        )
-                );
-            }
-        }
-        List<CourseDTO> myCourses = userService.getUserCourses(user.getId(), enumStatus);
-        return ResponseEntity.ok(myCourses);
-    }
-
-    // CREATE
+// CREATE
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto user) {
+    @Operation(
+        summary = "Créer un utilisateur",
+        description = "Crée un nouvel utilisateur. Réservé aux administrateurs."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Utilisateur créé avec succès",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
+        @ApiResponse(responseCode = "400", description = "Données invalides", content = @Content),
+        @ApiResponse(responseCode = "401", description = "Non autorisé", content = @Content),
+        @ApiResponse(responseCode = "403", description = "Accès refusé", content = @Content)
+    })
+    public ResponseEntity<UserDto> createUser(
+        @Parameter(description = "Données de l'utilisateur à créer")
+        @Valid @RequestBody UserDto user) {
         UserDto invitedUser = userService.createUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(invitedUser);
     }
@@ -93,15 +126,43 @@ public class UserController {
     // UPDATE
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateDto userDetails) {
+    @Operation(
+        summary = "Mettre à jour un utilisateur",
+        description = "Met à jour les informations d'un utilisateur. Réservé aux administrateurs."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Utilisateur mis à jour avec succès",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
+        @ApiResponse(responseCode = "400", description = "Données invalides", content = @Content),
+        @ApiResponse(responseCode = "401", description = "Non autorisé", content = @Content),
+        @ApiResponse(responseCode = "403", description = "Accès refusé", content = @Content),
+        @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé", content = @Content)
+    })
+    public ResponseEntity<UserDto> updateUser(
+        @Parameter(description = "ID de l'utilisateur", example = "1")
+        @PathVariable Long id, 
+        @Parameter(description = "Nouvelles données de l'utilisateur")
+        @Valid @RequestBody UserUpdateDto userDetails) {
         UserDto userDto = userService.updateUser(id, userDetails);
         return ResponseEntity.ok(userDto);
     }
 
     // UPDATE USER PROFILE
     @PutMapping("/profile")
-    public ResponseEntity<UserDto> updateProfile(@AuthenticationPrincipal User user,
-                                                 @Valid @RequestBody UserUpdateDto userDetails) {
+    @Operation(
+        summary = "Mettre à jour mon profil",
+        description = "Met à jour le profil de l'utilisateur connecté."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Profil mis à jour avec succès",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
+        @ApiResponse(responseCode = "400", description = "Données invalides", content = @Content),
+        @ApiResponse(responseCode = "401", description = "Non autorisé", content = @Content)
+    })
+    public ResponseEntity<UserDto> updateProfile(
+        @Parameter(hidden = true) @AuthenticationPrincipal User user,
+        @Parameter(description = "Nouvelles données du profil")
+        @Valid @RequestBody UserUpdateDto userDetails) {
         String username = user.getEmail();
         UserDto userDto = userService.updateProfile(username, userDetails);
         return ResponseEntity.ok(userDto);
@@ -110,22 +171,54 @@ public class UserController {
     // DELETE
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    @Operation(
+        summary = "Supprimer un utilisateur",
+        description = "Supprime un utilisateur. Réservé aux administrateurs."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Utilisateur supprimé avec succès"),
+        @ApiResponse(responseCode = "401", description = "Non autorisé", content = @Content),
+        @ApiResponse(responseCode = "403", description = "Accès refusé", content = @Content),
+        @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé", content = @Content)
+    })
+    public ResponseEntity<Void> deleteUser(
+        @Parameter(description = "ID de l'utilisateur", example = "1")
+        @PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
 
     // DELETE USER PROFILE
     @DeleteMapping("/profile")
-    public ResponseEntity<Void> deleteUserProfile(@AuthenticationPrincipal User user) {
+    @Operation(
+        summary = "Supprimer mon profil",
+        description = "Supprime le profil de l'utilisateur connecté."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Profil supprimé avec succès"),
+        @ApiResponse(responseCode = "401", description = "Non autorisé", content = @Content)
+    })
+    public ResponseEntity<Void> deleteUserProfile(
+        @Parameter(hidden = true) @AuthenticationPrincipal User user) {
         userService.deleteUser(user.getId());
         return ResponseEntity.noContent().build();
     }
 
     // UPLOAD USER PROFILE PICTURE
     @PostMapping("/profile/profile-picture")
+    @Operation(
+        summary = "Uploader une photo de profil",
+        description = "Upload une photo de profil pour l'utilisateur connecté."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Photo uploadée avec succès"),
+        @ApiResponse(responseCode = "400", description = "Fichier invalide", content = @Content),
+        @ApiResponse(responseCode = "401", description = "Non autorisé", content = @Content),
+        @ApiResponse(responseCode = "500", description = "Erreur serveur", content = @Content)
+    })
     public ResponseEntity<String> uploadProfilePicture(
-            @AuthenticationPrincipal User user,
+            @Parameter(hidden = true) @AuthenticationPrincipal User user,
+            @Parameter(description = "Fichier image à uploader")
             @RequestParam("file") MultipartFile file) throws IOException {
 
         // Créer le dossier si nécessaire
@@ -171,7 +264,17 @@ public class UserController {
 
     // DELETE USER PROFILE PICTURE
     @DeleteMapping("/profile/profile-picture")
-    public ResponseEntity<String> deleteProfilePicture(@AuthenticationPrincipal User user) {
+    @Operation(
+        summary = "Supprimer ma photo de profil",
+        description = "Supprime la photo de profil de l'utilisateur connecté."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Photo supprimée avec succès"),
+        @ApiResponse(responseCode = "401", description = "Non autorisé", content = @Content),
+        @ApiResponse(responseCode = "500", description = "Erreur serveur", content = @Content)
+    })
+    public ResponseEntity<String> deleteProfilePicture(
+        @Parameter(hidden = true) @AuthenticationPrincipal User user) {
         try {
             // Vérifie qu'une photo existe
             if (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty()) {

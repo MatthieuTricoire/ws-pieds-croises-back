@@ -3,6 +3,7 @@ package com.crossfit.pieds_croises.controller;
 import com.crossfit.pieds_croises.dto.UserSubscriptionDto;
 import com.crossfit.pieds_croises.enums.UserSubscriptionStatus;
 import com.crossfit.pieds_croises.service.UserSubscriptionService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.util.Map;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/user-subscriptions")
+@Tag(name = "User Subscription", description = "Gestion des abonnements utilisateur")
 public class UserSubscriptionController {
 
     private final UserSubscriptionService userSubscriptionService;
