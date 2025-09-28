@@ -138,7 +138,13 @@ public class UserCourseService {
         LocalDateTime startWeek = monday.atStartOfDay();
         LocalDateTime endWeek = sunday.atTime(23, 59, 59);
 
-        return courseRepository.countUserCoursesInWeek(userId, startWeek, endWeek);
+        Long count = courseRepository.countUserCoursesInWeek(userId, startWeek, endWeek);
+
+        if (count == null) {
+            throw new ResourceNotFoundException("Aucun utilisateur trouvé avec l'id " + userId);
+        }
+
+        return count;
     }
 
 }
