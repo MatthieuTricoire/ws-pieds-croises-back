@@ -3,14 +3,12 @@ package com.crossfit.pieds_croises.controller;
 import com.crossfit.pieds_croises.dto.CourseCreateDTO;
 import com.crossfit.pieds_croises.dto.CourseDTO;
 import com.crossfit.pieds_croises.dto.CourseUpdateDTO;
-import com.crossfit.pieds_croises.dto.UserDto;
 import com.crossfit.pieds_croises.service.CourseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -65,22 +63,6 @@ public class CourseController {
     public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
         courseService.deleteCourse(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/{id}/available-users")
-    public ResponseEntity<List<UserDto>> getAvailableUsers(@PathVariable Long id) {
-        List<UserDto> users = courseService.getUsersNotInCourse(id);
-        return ResponseEntity.ok(users);
-    }
-    
-
-    @PreAuthorize("hasRole('ADMIN') or #userId == principal.id")
-    @GetMapping("/user/{userId}/weekly-count")
-    public ResponseEntity<Long> getUserWeeklyCourseCount(@PathVariable Long userId,
-                                                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekDate) {
-        Long count = courseService.getUserWeeklyCourseCount(userId, weekDate);
-        return ResponseEntity.ok(count);
     }
 
 }

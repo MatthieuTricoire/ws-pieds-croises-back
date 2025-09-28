@@ -1,9 +1,11 @@
 package com.crossfit.pieds_croises.service;
 
 import com.crossfit.pieds_croises.dto.CourseDTO;
+import com.crossfit.pieds_croises.dto.UserDto;
 import com.crossfit.pieds_croises.exception.BusinessException;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.CourseMapper;
+import com.crossfit.pieds_croises.mapper.UserMapper;
 import com.crossfit.pieds_croises.model.Course;
 import com.crossfit.pieds_croises.model.User;
 import com.crossfit.pieds_croises.model.UserCourse;
@@ -13,15 +15,20 @@ import com.crossfit.pieds_croises.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserCourseService {
     private final CourseRepository courseRepository;
     private final CourseMapper courseMapper;
+    private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final UserCourseRepository userCourseRepository;
     private final EmailService emailService;
@@ -112,6 +119,26 @@ public class UserCourseService {
         courseRepository.save(course);
 
         return courseMapper.convertToDto(course);
+    }
+
+    public List<UserDto> getUsersNotInCourse(Long id) {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
+        List<User> users = userRepository.findAllUsersNotInCourse(course, course.getCoach());
+        return users.stream()
+                .map(userMapper::convertToDtoForAdmin)
+                .collect(Collectors.toList());
+    }
+
+    public Long getUserWeeklyCourseCount(Long userId, LocalDate weekDate) {
+        // Calculate civil week
+        LocalDate monday = weekDate.with(DayOfWeek.MONDAY);
+        LocalDate sunday = monday.plusDays(6);
+
+        LocalDateTime startWeek = monday.atStartOfDay();
+        LocalDateTime endWeek = sunday.atTime(23, 59, 59);
+
+        return courseRepository.countUserCoursesInWeek(userId, startWeek, endWeek);
     }
 
 }
