@@ -38,6 +38,10 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/auth/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/box/box-info").permitAll()
+            .requestMatchers("/swagger-ui/**", "/swagger-ui.html").permitAll()
+            .requestMatchers("/v3/api-docs", "/v3/api-docs/**").permitAll()
+            .requestMatchers("/swagger-resources/**").permitAll()
+            .requestMatchers("/webjars/**").permitAll()
             .anyRequest().authenticated())
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
