@@ -52,7 +52,6 @@ public class UserService {
     }
     if (users.isEmpty()) {
       logger.warn("No users found in the database");
-      throw new ResourceNotFoundException("No users found");
     }
     logger.info("Found {} users", users.size());
     return users.stream()
@@ -97,8 +96,9 @@ public class UserService {
     }
 
     User user = userMapper.convertToEntity(userDto);
-    user.setCreatedAt(LocalDateTime.now());
-    user.setUpdatedAt(LocalDateTime.now());
+    LocalDateTime now = dateTimeProvider.now();
+    user.setCreatedAt(now);
+    user.setUpdatedAt(now);
     Set<String> roles = userDto.getRoles();
     if (roles == null || roles.isEmpty()) {
       roles = Set.of("ROLE_USER"); // Valeur par défaut si aucun rôle fourni
@@ -107,7 +107,7 @@ public class UserService {
 
     String token = UUID.randomUUID().toString();
     user.setRegistrationToken(token);
-    user.setRegistrationTokenExpiryDate(LocalDateTime.now().plusDays(registrationTokenExpirationDays));
+    user.setRegistrationTokenExpiryDate(now.plusDays(registrationTokenExpirationDays));
     user.setIsFirstLoginComplete(false);
     // Envoi du lien par email
     logger.info("Sending registration email to {}", user.getEmail());
@@ -151,23 +151,23 @@ public class UserService {
     User existingUser = userRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        userMapper.updateUserFromDto(userDto, existingUser);
-        existingUser.setUpdatedAt(dateTimeProvider.now());
+    userMapper.updateUserFromDto(userDto, existingUser);
+    existingUser.setUpdatedAt(dateTimeProvider.now());
 
-        try {
-            User updatedUser = userRepository.save(existingUser);
-            return userMapper.convertToDtoForAdmin(updatedUser);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to update user with id: " + id, e);
-        }
+    try {
+        User updatedUser = userRepository.save(existingUser);
+        return userMapper.convertToDtoForAdmin(updatedUser);
+    } catch (Exception e) {
+        throw new RuntimeException("Failed to update user with id: " + id, e);
     }
+  }
 
   public UserDto updateProfile(String username, UserUpdateDto userDto) {
     User existingUser = userRepository.findByEmail(username)
         .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + username));
 
-        userMapper.updateUserFromDto(userDto, existingUser);
-        existingUser.setUpdatedAt(dateTimeProvider.now());
+    userMapper.updateUserFromDto(userDto, existingUser);
+    existingUser.setUpdatedAt(dateTimeProvider.now());
 
     try {
       User updatedUser = userRepository.save(existingUser);

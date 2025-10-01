@@ -21,9 +21,7 @@ import java.util.stream.Collectors;
 public class MessageService {
 
     private final MessageMapper messageMapper;
-
     private final MessageRepository messageRepository;
-
     private final DateTimeProvider dateTimeProvider;
 
     public List<MessageDTO> getAllMessages() {
@@ -40,7 +38,7 @@ public class MessageService {
     }
 
     public List<MessageDTO> getActiveMessages() {
-        List<Message> messages = messageRepository.findActiveMessagesOrderByExpirationDateDesc(today);
+        List<Message> messages = messageRepository.findActiveMessagesOrderByExpirationDateDesc(dateTimeProvider.today());
 
         if (messages.isEmpty()) {
             throw new ResourceNotFoundException("There are no current messages");

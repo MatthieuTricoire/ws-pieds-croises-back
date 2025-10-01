@@ -2,7 +2,7 @@ package com.crossfit.pieds_croises.service;
 
 import com.crossfit.pieds_croises.datetime.DateTimeProvider;
 import com.crossfit.pieds_croises.dto.UserSubscriptionDto;
-import com.crossfit.pieds_croises.exception.ForbiddenException;
+import com.crossfit.pieds_croises.enums.UserSubscriptionStatus;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.UserSubscriptionMapper;
 import com.crossfit.pieds_croises.model.Subscription;
@@ -53,62 +53,65 @@ public class UserSubscriptionServiceTest {
         Long userId = 1L;
         Long subscriptionId = 1L;
         LocalDateTime fixedCurrentDate = LocalDateTime.of(2025, 7, 17, 12, 0);
-        LocalDateTime fixedStartDate = LocalDateTime.of(2025, 7, 18, 12, 0);
-        LocalDateTime fixedEndDate = LocalDateTime.of(2025, 7, 19, 12, 0);
         UserSubscriptionDto inputUserSubscriptionDto = new UserSubscriptionDto();
         inputUserSubscriptionDto.setUserId(userId);
         inputUserSubscriptionDto.setSubscriptionId(subscriptionId);
-        inputUserSubscriptionDto.setStartDate(fixedStartDate);
-        UserSubscription latestUserSubscriptionOpt = new UserSubscription();
-        latestUserSubscriptionOpt.setEndDate(fixedEndDate);
+        UserSubscription existingSubscription = new UserSubscription(); // abonnement existant à annuler
         UserSubscription userSubscription = new UserSubscription();
         UserSubscription savedUserSubscription = new UserSubscription();
-        UserSubscriptionDto expectedUserSubscriptionDto = new UserSubscriptionDto();
+        UserSubscriptionDto expectedDto = new UserSubscriptionDto();
         User user = new User();
         Subscription subscription = new Subscription();
+        subscription.setDuration((short) 5);
+        subscription.setFreezeDaysAllowed((short) 3);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
         when(dateTimeProvider.now()).thenReturn(fixedCurrentDate);
-        when(userSubscriptionRepository.findTopByUserAndEndDateAfterOrderByEndDateDesc(user, fixedCurrentDate)).thenReturn(Optional.of(latestUserSubscriptionOpt));
+        when(userSubscriptionRepository.findTopByUserAndEndDateAfterOrderByEndDateDesc(user, fixedCurrentDate))
+                .thenReturn(Optional.of(existingSubscription));
         when(userSubscriptionMapper.convertToUserSubscriptionEntity(inputUserSubscriptionDto)).thenReturn(userSubscription);
-        when(userSubscriptionRepository.save(userSubscription)).thenReturn(savedUserSubscription);
-        when(userSubscriptionMapper.convertToUserSubscriptionDto(savedUserSubscription)).thenReturn(expectedUserSubscriptionDto);
+        when(userSubscriptionRepository.save(any(UserSubscription.class))).thenReturn(savedUserSubscription);
+        when(userSubscriptionMapper.convertToUserSubscriptionDto(savedUserSubscription)).thenReturn(expectedDto);
 
         // Act
         UserSubscriptionDto result = userSubscriptionService.createUserSubscription(inputUserSubscriptionDto);
 
         // Assert
-        assertThat(result).isNotNull();
-        assertThat(result).isEqualTo(expectedUserSubscriptionDto);
-        verify(userRepository, times(1)).findById(inputUserSubscriptionDto.getUserId());
-        verify(subscriptionRepository, times(1)).findById(inputUserSubscriptionDto.getSubscriptionId());
-        verify(dateTimeProvider, times(1)).now();
-        verify(userSubscriptionRepository, times(1)).findTopByUserAndEndDateAfterOrderByEndDateDesc(user, fixedCurrentDate);
-        verify(userSubscriptionMapper, times(1)).convertToUserSubscriptionEntity(inputUserSubscriptionDto);
-        verify(userSubscriptionRepository, times(1)).save(userSubscription);
-        verify(userSubscriptionMapper, times(1)).convertToUserSubscriptionDto(savedUserSubscription);
+        assertThat(result).isEqualTo(expectedDto);
+        assertThat(userSubscription.getUser()).isEqualTo(user);
+        assertThat(userSubscription.getSubscription()).isEqualTo(subscription);
+        assertThat(userSubscription.getStatus()).isEqualTo(UserSubscriptionStatus.ACTIVE);
+        assertThat(userSubscription.getStartDate()).isEqualTo(fixedCurrentDate);
+        assertThat(userSubscription.getEndDate()).isEqualTo(fixedCurrentDate.plusDays(subscription.getDuration()));
+        assertThat(userSubscription.getFreezeDaysRemaining()).isEqualTo(subscription.getFreezeDaysAllowed());
+        assertThat(existingSubscription.getStatus()).isEqualTo(UserSubscriptionStatus.CANCELLED);
+        assertThat(existingSubscription.getEndDate()).isEqualTo(fixedCurrentDate);
+        verify(userSubscriptionRepository).save(existingSubscription);
+        verify(userRepository).findById(userId);
+        verify(subscriptionRepository).findById(subscriptionId);
+        verify(dateTimeProvider).now();
+        verify(userSubscriptionRepository).findTopByUserAndEndDateAfterOrderByEndDateDesc(user, fixedCurrentDate);
+        verify(userSubscriptionMapper).convertToUserSubscriptionEntity(inputUserSubscriptionDto);
+        verify(userSubscriptionRepository, times(2)).save(any(UserSubscription.class));
+        verify(userSubscriptionMapper).convertToUserSubscriptionDto(savedUserSubscription);
     }
 
     @Test
     public void testCreateUserSubscription_whenUserNotFound_shouldThrowException() {
         // Arrange
         Long userId = 1L;
-        UserSubscriptionDto inputUserSubscriptionDto = new UserSubscriptionDto();
-        inputUserSubscriptionDto.setUserId(userId);
+        UserSubscriptionDto dto = new UserSubscriptionDto();
+        dto.setUserId(userId);
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThatThrownBy(() -> userSubscriptionService.createUserSubscription(inputUserSubscriptionDto))
+        assertThatThrownBy(() -> userSubscriptionService.createUserSubscription(dto))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("User not found");
-        verify(userRepository, times(1)).findById(inputUserSubscriptionDto.getUserId());
-        verifyNoMoreInteractions(userRepository);
-        verifyNoInteractions(subscriptionRepository);
-        verifyNoInteractions(dateTimeProvider);
-        verifyNoInteractions(userSubscriptionRepository);
-        verifyNoInteractions(userSubscriptionMapper);
+        verify(userRepository).findById(userId);
+        verifyNoInteractions(subscriptionRepository, dateTimeProvider, userSubscriptionRepository, userSubscriptionMapper);
     }
 
     @Test
@@ -116,56 +119,20 @@ public class UserSubscriptionServiceTest {
         // Arrange
         Long userId = 1L;
         Long subscriptionId = 1L;
-        UserSubscriptionDto inputUserSubscriptionDto = new UserSubscriptionDto();
-        inputUserSubscriptionDto.setUserId(userId);
-        inputUserSubscriptionDto.setSubscriptionId(subscriptionId);
+        UserSubscriptionDto dto = new UserSubscriptionDto();
+        dto.setUserId(userId);
+        dto.setSubscriptionId(subscriptionId);
         User user = new User();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThatThrownBy(() -> userSubscriptionService.createUserSubscription(inputUserSubscriptionDto))
+        assertThatThrownBy(() -> userSubscriptionService.createUserSubscription(dto))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Subscription not found");
-        verify(userRepository, times(1)).findById(inputUserSubscriptionDto.getUserId());
-        verify(subscriptionRepository, times(1)).findById(inputUserSubscriptionDto.getSubscriptionId());
-        verifyNoMoreInteractions(userRepository);
-        verifyNoMoreInteractions(subscriptionRepository);
-        verifyNoInteractions(dateTimeProvider);
-        verifyNoInteractions(userSubscriptionRepository);
-        verifyNoInteractions(userSubscriptionMapper);
-    }
-
-    @Test
-    public void testCreateUserSubscription_whenStartDateIsBeforeCurrentDate_shouldThrowException() {
-        // Arrange
-        Long userId = 1L;
-        Long subscriptionId = 1L;
-        LocalDateTime fixedCurrentDate = LocalDateTime.of(2025, 7, 17, 12, 0);
-        LocalDateTime fixedStartDate = LocalDateTime.of(2025, 7, 16, 12, 0);
-        UserSubscriptionDto inputUserSubscriptionDto = new UserSubscriptionDto();
-        inputUserSubscriptionDto.setUserId(userId);
-        inputUserSubscriptionDto.setSubscriptionId(subscriptionId);
-        inputUserSubscriptionDto.setStartDate(fixedStartDate);
-        User user = new User();
-        Subscription subscription = new Subscription();
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
-        when(dateTimeProvider.now()).thenReturn(fixedCurrentDate);
-
-        // Act & Assert
-        assertThatThrownBy(() -> userSubscriptionService.createUserSubscription(inputUserSubscriptionDto))
-                .isInstanceOf(ForbiddenException.class)
-                .hasMessage("Start date cannot be in the past");
-        verify(userRepository, times(1)).findById(userId);
-        verify(subscriptionRepository, times(1)).findById(subscriptionId);
-        verify(dateTimeProvider, times(1)).now();
-        verifyNoMoreInteractions(userRepository);
-        verifyNoMoreInteractions(subscriptionRepository);
-        verifyNoMoreInteractions(dateTimeProvider);
-        verifyNoInteractions(userSubscriptionRepository);
-        verifyNoInteractions(userSubscriptionMapper);
+        verify(userRepository).findById(userId);
+        verify(subscriptionRepository).findById(subscriptionId);
+        verifyNoInteractions(dateTimeProvider, userSubscriptionRepository, userSubscriptionMapper);
     }
 }

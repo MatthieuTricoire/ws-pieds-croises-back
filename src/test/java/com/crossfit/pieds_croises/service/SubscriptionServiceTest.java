@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.service;
 
+import com.crossfit.pieds_croises.dto.SubscriptionCreateDto;
 import com.crossfit.pieds_croises.dto.SubscriptionDto;
 import com.crossfit.pieds_croises.exception.DuplicateResourceException;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
@@ -41,17 +42,15 @@ public class SubscriptionServiceTest {
     @Test
     public void testAddSubscription() {
         // Arrange
-        SubscriptionDto inputSubscriptionDto = new SubscriptionDto();
+        SubscriptionCreateDto inputSubscriptionDto = new SubscriptionCreateDto();
         SubscriptionDto expectedSubscriptionDto = new SubscriptionDto();
-        Long boxId = 1L;
-        inputSubscriptionDto.setBoxId(boxId);
         inputSubscriptionDto.setName("Test subscription");
         inputSubscriptionDto.setPrice(150);
-        Box box = new Box();
+        inputSubscriptionDto.setSessionPerWeek(2);
+        inputSubscriptionDto.setDuration((short) 30);
         Subscription subscription = new Subscription();
         Subscription savedSubscription = new Subscription();
 
-        when(boxRepository.findById(boxId)).thenReturn(Optional.of(box));
         when(subscriptionRepository.existsByName(inputSubscriptionDto.getName())).thenReturn(false);
         when(subscriptionRepository.existsByPrice(inputSubscriptionDto.getPrice())).thenReturn(false);
         when(subscriptionMapper.convertToSubscriptionEntity(inputSubscriptionDto)).thenReturn(subscription);
@@ -63,8 +62,6 @@ public class SubscriptionServiceTest {
 
         // Assert
         assertThat(result).isEqualTo(expectedSubscriptionDto);
-        assertThat(subscription.getBox()).isEqualTo(box);
-        verify(boxRepository, times(1)).findById(boxId);
         verify(subscriptionRepository, times(1)).existsByName(inputSubscriptionDto.getName());
         verify(subscriptionRepository, times(1)).existsByPrice(inputSubscriptionDto.getPrice());
         verify(subscriptionMapper, times(1)).convertToSubscriptionEntity(inputSubscriptionDto);
@@ -73,53 +70,20 @@ public class SubscriptionServiceTest {
     }
 
     @Test
-    public void testAddSubscription_WhenBoxIdIsNull_ShouldThrownException() {
-        // Arrange
-        SubscriptionDto inputSubscriptionDto = new SubscriptionDto();
-        inputSubscriptionDto.setBoxId(null);
-
-        // Act & Assert
-        assertThatThrownBy(() -> subscriptionService.addSubscription(inputSubscriptionDto))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Box id is required");
-        verifyNoInteractions(boxRepository, subscriptionRepository, subscriptionMapper);
-    }
-
-    @Test
-    public void testAddSubscription_WhenBoxNotFound_ShouldThrownException() {
-        // Arrange
-        SubscriptionDto inputSubscriptionDto = new SubscriptionDto();
-        Long boxId = 1L;
-        inputSubscriptionDto.setBoxId(boxId);
-
-        when(boxRepository.findById(boxId)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThatThrownBy(() -> subscriptionService.addSubscription(inputSubscriptionDto))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("Box not found");
-        verify(boxRepository, times(1)).findById(boxId);
-        verifyNoMoreInteractions(boxRepository);
-        verifyNoInteractions(subscriptionRepository, subscriptionMapper);
-    }
-
-    @Test
     public void testAddSubscription_WhenSubscriptionNameExists_ShouldThrownException() {
         // Arrange
-        SubscriptionDto inputSubscriptionDto = new SubscriptionDto();
-        Long boxId = 1L;
-        inputSubscriptionDto.setBoxId(boxId);
+        SubscriptionCreateDto inputSubscriptionDto = new SubscriptionCreateDto();
         inputSubscriptionDto.setName("Test subscription - name already exists");
-        Box box = new Box();
+        inputSubscriptionDto.setPrice(150);
+        inputSubscriptionDto.setSessionPerWeek(2);
+        inputSubscriptionDto.setDuration((short) 30);
 
-        when(boxRepository.findById(boxId)).thenReturn(Optional.of(box));
         when(subscriptionRepository.existsByName(inputSubscriptionDto.getName())).thenReturn(true);
 
         // Act & Assert
         assertThatThrownBy(() -> subscriptionService.addSubscription(inputSubscriptionDto))
                 .isInstanceOf(DuplicateResourceException.class)
                 .hasMessage("A subscription with this name already exists");
-        verify(boxRepository, times(1)).findById(boxId);
         verify(subscriptionRepository, times(1)).existsByName(inputSubscriptionDto.getName());
         verifyNoMoreInteractions(boxRepository, subscriptionRepository);
         verifyNoInteractions(subscriptionMapper);
@@ -128,14 +92,12 @@ public class SubscriptionServiceTest {
     @Test
     public void testAddSubscription_WhenSubscriptionPriceExists_ShouldThrownException() {
         // Arrange
-        SubscriptionDto inputSubscriptionDto = new SubscriptionDto();
-        Long boxId = 1L;
-        inputSubscriptionDto.setBoxId(boxId);
+        SubscriptionCreateDto inputSubscriptionDto = new SubscriptionCreateDto();
         inputSubscriptionDto.setName("Test subscription");
         inputSubscriptionDto.setPrice(150);
-        Box box = new Box();
+        inputSubscriptionDto.setSessionPerWeek(2);
+        inputSubscriptionDto.setDuration((short) 30);
 
-        when(boxRepository.findById(boxId)).thenReturn(Optional.of(box));
         when(subscriptionRepository.existsByName(inputSubscriptionDto.getName())).thenReturn(false);
         when(subscriptionRepository.existsByPrice(inputSubscriptionDto.getPrice())).thenReturn(true);
 
@@ -143,7 +105,6 @@ public class SubscriptionServiceTest {
         assertThatThrownBy(() -> subscriptionService.addSubscription(inputSubscriptionDto))
                 .isInstanceOf(DuplicateResourceException.class)
                 .hasMessage("A subscription with this price already exists");
-        verify(boxRepository, times(1)).findById(boxId);
         verify(subscriptionRepository, times(1)).existsByName(inputSubscriptionDto.getName());
         verify(subscriptionRepository, times(1)).existsByPrice(inputSubscriptionDto.getPrice());
         verifyNoMoreInteractions(boxRepository, subscriptionRepository);
