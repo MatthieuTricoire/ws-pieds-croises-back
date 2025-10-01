@@ -234,7 +234,7 @@ public class CourseServiceTest {
 
         // Act & Assert
         assertThatThrownBy(() -> courseService.createCourse(createDTO))
-                .isInstanceOf(ResourceNotFoundException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("A course already exists with this coach at this start date.");
 
         verify(courseRepository, times(1)).findByCoachIdAndStartDatetime(1L, startDateTime);
@@ -671,9 +671,6 @@ public class CourseServiceTest {
         User coach = new User();
         coach.setId(100L);
 
-        User enrolledUser = new User();
-        enrolledUser.setId(2L);
-
         User user1 = new User();
         user1.setId(3L);
 
@@ -683,10 +680,9 @@ public class CourseServiceTest {
         Course course = new Course();
         course.setId(courseId);
         course.setCoach(coach);
-        course.setUsers(new ArrayList<>(List.of(enrolledUser)));
 
         when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
-        when(userRepository.findAll()).thenReturn(List.of(coach, enrolledUser, user1, user2));
+        when(userRepository.findAllUsersNotInCourse(course, coach)).thenReturn(List.of(user1, user2));
 
         UserDto userDto1 = new UserDto();
         userDto1.setId(user1.getId());
@@ -704,7 +700,7 @@ public class CourseServiceTest {
         assertThat(result).containsExactlyInAnyOrder(userDto1, userDto2);
 
         verify(courseRepository, times(1)).findById(courseId);
-        verify(userRepository, times(1)).findAll();
+        verify(userRepository, times(1)).findAllUsersNotInCourse(course, coach);
         verify(userMapper, times(1)).convertToDtoForAdmin(user1);
         verify(userMapper, times(1)).convertToDtoForAdmin(user2);
     }
@@ -723,5 +719,4 @@ public class CourseServiceTest {
         verify(courseRepository, times(1)).findById(courseId);
         verifyNoInteractions(userRepository, userMapper);
     }
-
 }

@@ -4,6 +4,7 @@ import com.crossfit.pieds_croises.dto.UserDto;
 import com.crossfit.pieds_croises.dto.UserUpdateDto;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.model.User;
+import com.crossfit.pieds_croises.repository.UserRepository;
 import com.crossfit.pieds_croises.security.CustomUserDetailsService;
 import com.crossfit.pieds_croises.security.JwtAuthenticationFilter;
 import com.crossfit.pieds_croises.security.JwtService;
@@ -42,6 +43,9 @@ public class UserControllerTest {
     private UserService userService;
 
     @MockBean
+    private UserRepository userRepository;
+
+    @MockBean
     private JwtService jwtService;
 
     @MockBean
@@ -58,7 +62,7 @@ public class UserControllerTest {
         UserDto user2 = new UserDto();
         user2.setFirstname("William");
 
-        when(userService.getAllUsers())
+        when(userService.getAllUsers(any(Boolean.class)))
                 .thenReturn(List.of(user1, user2));
 
         // Act & Assert
@@ -161,7 +165,7 @@ public class UserControllerTest {
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.firstname").value("John"));
     }
 
@@ -362,7 +366,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testDeleteUser1() throws Exception {
+    public void testDeleteUser() throws Exception {
         // Arrange
         doNothing().when(userService).deleteUser(1L);
 
@@ -372,7 +376,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testDeleteUser1_returnsNotFound_whenUserNotFound() throws Exception {
+    public void testDeleteUser_returnsNotFound_whenUserNotFound() throws Exception {
         // Arrange
         doThrow(new ResourceNotFoundException("User not found with id: 1"))
                 .when(userService).deleteUser(1L);
@@ -384,7 +388,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testDeleteUser2() throws Exception {
+    public void testDeleteUserProfile() throws Exception {
         // Arrange
         User mockUser = new User();
         mockUser.setId(1L);
@@ -403,7 +407,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testDeleteUser2_returnsNotFound_whenUserNotFound() throws Exception {
+    public void testDeleteUserProfile_returnsNotFound_whenUserNotFound() throws Exception {
         // Arrange
         User mockUser = new User();
         mockUser.setId(1L);

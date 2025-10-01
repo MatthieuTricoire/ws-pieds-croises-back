@@ -1,9 +1,9 @@
 package com.crossfit.pieds_croises.controller;
 
-import com.crossfit.pieds_croises.security.AuthenticationService;
-import com.crossfit.pieds_croises.security.CustomUserDetailsService;
-import com.crossfit.pieds_croises.security.JwtAuthenticationFilter;
-import com.crossfit.pieds_croises.security.JwtService;
+import com.crossfit.pieds_croises.mapper.UserMapper;
+import com.crossfit.pieds_croises.repository.UserRepository;
+import com.crossfit.pieds_croises.security.*;
+import com.crossfit.pieds_croises.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,8 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -37,7 +36,19 @@ public class AuthControllerTest {
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @MockBean
+    private JwtCookieService jwtCookieService;
+
+    @MockBean
     private CustomUserDetailsService customUserDetailsService;
+
+    @MockBean
+    private UserRepository userRepository;
+
+    @MockBean
+    private UserService userService;
+
+    @MockBean
+    private UserMapper userMapper;
 
     @Test
     public void testAuthenticate() throws Exception {
@@ -58,7 +69,7 @@ public class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(token));
+                .andExpect(content().string(""));
     }
 
     @Test

@@ -189,7 +189,7 @@ public class CourseControllerTest {
     }
 
     @Test
-    public void testCreateCourse_returnsNotFound_whenCoachAlreadyBooked() throws Exception {
+    public void testCreateCourse_returnsBadRequest_whenCoachAlreadyBooked() throws Exception {
         // Arrange
         LocalDateTime futureDate = LocalDateTime.now().plusDays(1);
         String json = String.format("""
@@ -204,13 +204,13 @@ public class CourseControllerTest {
         """, futureDate.truncatedTo(ChronoUnit.MINUTES));
 
         when(courseService.createCourse(any(CourseCreateDTO.class)))
-                .thenThrow(new ResourceNotFoundException("A course already exists with this coach at this start date."));
+                .thenThrow(new BusinessException("A course already exists with this coach at this start date."));
 
         // Act & Assert
         mockMvc.perform(post("/courses")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isBadRequest())
                 .andExpect(content().string("A course already exists with this coach at this start date."));
     }
 

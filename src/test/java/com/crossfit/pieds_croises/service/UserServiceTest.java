@@ -2,7 +2,9 @@ package com.crossfit.pieds_croises.service;
 
 import com.crossfit.pieds_croises.datetime.DateTimeProvider;
 import com.crossfit.pieds_croises.dto.UserDto;
+import com.crossfit.pieds_croises.dto.UserSubscriptionDto;
 import com.crossfit.pieds_croises.dto.UserUpdateDto;
+import com.crossfit.pieds_croises.exception.DuplicateResourceException;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.UserMapper;
 import com.crossfit.pieds_croises.model.User;
@@ -13,10 +15,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -35,11 +39,17 @@ public class UserServiceTest {
     @Mock
     private DateTimeProvider dateTimeProvider;
 
+    @Mock
+    private EmailService emailService;
+
+    @Mock
+    private UserSubscriptionService userSubscriptionService;
+
     @InjectMocks
     private UserService userService;
 
     @Test
-    public void testGetAllUsers() {
+    public void testGetAllUsers_WithoutSubscription() {
         // Arrange
         User user1 = new User();
         User user2 = new User();
@@ -52,7 +62,7 @@ public class UserServiceTest {
         when(userMapper.convertToDtoForAdmin(user2)).thenReturn(userDto2);
 
         // Act
-        List<UserDto> result = userService.getAllUsers();
+        List<UserDto> result = userService.getAllUsers(false);
 
         // Assert
         assertThat(result).hasSize(2);
@@ -60,6 +70,30 @@ public class UserServiceTest {
         verify(userRepository, times(1)).findAll();
         verify(userMapper, times(1)).convertToDtoForAdmin(user1);
         verify(userMapper, times(1)).convertToDtoForAdmin(user2);
+    }
+
+    @Test
+    public void testGetAllUsers_WithSubscriptions() {
+        // Arrange
+        User user1 = new User();
+        User user2 = new User();
+        UserDto userDto1 = new UserDto();
+        UserDto userDto2 = new UserDto();
+        List<User> users = List.of(user1, user2);
+
+        when(userRepository.findAllWithUserSubscriptions()).thenReturn(users);
+        when(userMapper.convertToDtoForAdminWithSubscriptions(user1)).thenReturn(userDto1);
+        when(userMapper.convertToDtoForAdminWithSubscriptions(user2)).thenReturn(userDto2);
+
+        // Act
+        List<UserDto> result = userService.getAllUsers(true);
+
+        // Assert
+        assertThat(result).hasSize(2);
+        assertThat(result).containsExactly(userDto1, userDto2);
+        verify(userRepository, times(1)).findAllWithUserSubscriptions();
+        verify(userMapper, times(1)).convertToDtoForAdminWithSubscriptions(user1);
+        verify(userMapper, times(1)).convertToDtoForAdminWithSubscriptions(user2);
     }
 
     @Test
@@ -101,49 +135,112 @@ public class UserServiceTest {
     public void testCreateUser() {
         // Arrange
         UserDto inputUserDto = new UserDto();
-        UserDto expectedUserDto = new UserDto();
+        inputUserDto.setEmail("john.doe@example.com");
+        inputUserDto.setRoles(Set.of("ROLE_ADMIN"));
         User user = new User();
+        user.setEmail("john.doe@example.com");
         User savedUser = new User();
+        savedUser.setId(1L);
+        UserDto expectedUserDto = new UserDto();
         LocalDateTime now = LocalDateTime.of(2025, 7, 16, 12, 0);
 
+        when(userRepository.findByEmail("john.doe@example.com")).thenReturn(Optional.empty());
         when(userMapper.convertToEntity(inputUserDto)).thenReturn(user);
         when(dateTimeProvider.now()).thenReturn(now);
+        when(emailService.generateInvitationLink(nullable(String.class), anyString(), nullable(String.class))).thenReturn("link");
         when(userRepository.save(user)).thenReturn(savedUser);
         when(userMapper.convertToCreatedDto(savedUser)).thenReturn(expectedUserDto);
+
+        ReflectionTestUtils.setField(userService, "registrationTokenExpirationDays", 7);
 
         // Act
         UserDto result = userService.createUser(inputUserDto);
 
         // Assert
-        assertThat(result).isNotNull();
         assertThat(result).isEqualTo(expectedUserDto);
-        assertThat(user.getCreatedAt()).isEqualTo(now);
-        assertThat(user.getUpdatedAt()).isEqualTo(now);
-        verify(userMapper, times(1)).convertToEntity(inputUserDto);
-        verify(dateTimeProvider, times(2)).now();
-        verify(userRepository, times(1)).save(user);
-        verify(userMapper, times(1)).convertToCreatedDto(savedUser);
+        assertThat(user.getRoles()).containsExactly("ROLE_ADMIN");
+        assertThat(user.getRegistrationToken()).isNotNull();
+        assertThat(user.getRegistrationTokenExpiryDate()).isEqualTo(now.plusDays(7));
+        assertThat(user.getIsFirstLoginComplete()).isFalse();
+        verify(userRepository).findByEmail("john.doe@example.com");
+        verify(userMapper).convertToEntity(inputUserDto);
+        verify(userRepository).save(user);
+        verify(userMapper).convertToCreatedDto(savedUser);
+        verify(emailService).generateInvitationLink(nullable(String.class), anyString(), nullable(String.class));
+        verify(emailService).sendTemplateEmail(anyString(), anyString(), anyString(), anyMap());
+        verifyNoInteractions(userSubscriptionService);
     }
 
     @Test
-    public void testCreateUser_WhenFailure_ShouldThrownException() {
+    public void testCreateUser_WithSubscription() {
         // Arrange
         UserDto inputUserDto = new UserDto();
+        inputUserDto.setEmail("john.doe@example.com");
+        inputUserDto.setSubscriptionId(10L);
         User user = new User();
+        User savedUser = new User();
+        savedUser.setId(1L);
+        UserDto expectedUserDto = new UserDto();
         LocalDateTime now = LocalDateTime.of(2025, 7, 16, 12, 0);
 
+        when(userRepository.findByEmail("john.doe@example.com")).thenReturn(Optional.empty());
         when(userMapper.convertToEntity(inputUserDto)).thenReturn(user);
         when(dateTimeProvider.now()).thenReturn(now);
-        when(userRepository.save(user)).thenThrow(new RuntimeException("Database error"));
+        when(userRepository.save(user)).thenReturn(savedUser);
+        when(userMapper.convertToCreatedDto(savedUser)).thenReturn(expectedUserDto);
+        when(emailService.generateInvitationLink(nullable(String.class), anyString(), nullable(String.class))).thenReturn("link");
+
+        // Act
+        UserDto result = userService.createUser(inputUserDto);
+
+        // Assert
+        assertThat(result).isEqualTo(expectedUserDto);
+        verify(userSubscriptionService).createUserSubscription(any(UserSubscriptionDto.class));
+    }
+
+    @Test
+    public void testCreateUser_WhenEmailExists_ShouldThrowException() {
+        // Arrange
+        UserDto inputUserDto = new UserDto();
+        inputUserDto.setEmail("duplicate@example.com");
+        User existingUser = new User();
+
+        when(userRepository.findByEmail("duplicate@example.com")).thenReturn(Optional.of(existingUser));
+
+        // Act & Assert
+        assertThatThrownBy(() -> userService.createUser(inputUserDto))
+                .isInstanceOf(DuplicateResourceException.class)
+                .hasMessage("User already exists");
+        verify(userRepository).findByEmail("duplicate@example.com");
+        verifyNoInteractions(userMapper, emailService, userSubscriptionService);
+    }
+
+    @Test
+    public void testCreateUser_WithSubscriptionFailure_ShouldThrowRuntimeException() {
+        // Arrange
+        UserDto inputUserDto = new UserDto();
+        inputUserDto.setEmail("test@example.com");
+        inputUserDto.setSubscriptionId(10L);
+        User user = new User();
+        user.setEmail("john.doe@example.com");
+        user.setFirstname("John");
+        User savedUser = new User();
+        savedUser.setId(1L);
+        LocalDateTime now = LocalDateTime.of(2025, 7, 16, 12, 0);
+
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
+        when(userMapper.convertToEntity(inputUserDto)).thenReturn(user);
+        when(dateTimeProvider.now()).thenReturn(now);
+        when(userRepository.save(user)).thenReturn(savedUser);
+        when(emailService.generateInvitationLink(nullable(String.class), anyString(), nullable(String.class))).thenReturn("link");
+        doThrow(new RuntimeException("Subscription error"))
+                .when(userSubscriptionService).createUserSubscription(any(UserSubscriptionDto.class));
 
         // Act & Assert
         assertThatThrownBy(() -> userService.createUser(inputUserDto))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Error creating user");
-        verify(userMapper, times(1)).convertToEntity(inputUserDto);
-        verify(dateTimeProvider, times(2)).now();
-        verify(userRepository, times(1)).save(user);
-        verifyNoMoreInteractions(userMapper);
+                .hasMessageContaining("Failed to create subscription");
+        verify(userSubscriptionService).createUserSubscription(any(UserSubscriptionDto.class));
     }
 
     @Test
