@@ -36,7 +36,7 @@ INSERT INTO exercice (name, measure_type)
 VALUES ('Back squat', 'WEIGHT');
 
 -- Peupler la table user
-INSERT INTO app_user (firstname, lastname, password, email, phone, profile_picture, created_at, updated_at)
+INSERT INTO user (firstname, lastname, password, email, phone, profile_picture, created_at, updated_at)
 VALUES ('Jean', 'Dupont', '{noop}user123', 'jean.dupont@example.com', '0601020304', NULL,
         NOW(), NOW()),
        ('Admin', 'User', '{noop}admin123', 'admin@example.com', '0602030405', NULL,
