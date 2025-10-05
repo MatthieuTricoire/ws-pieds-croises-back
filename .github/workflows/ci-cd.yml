@@ -6,11 +6,11 @@ on:
       - main
       - dev
       - feature/*
-
   pull_request:
     branches:
       - main
       - dev
+
 jobs:
   build-and-test:
     name: Build and Test Application
@@ -35,83 +35,4 @@ jobs:
       - name: ✅ Build and run tests
         env:
           SPRING_PROFILES_ACTIVE: test
-
         run: ./mvnw clean test
-
-  deploy:
-      name: Deploy Application
-      environment: production
-      needs: build-and-test  # Déployer seulement si les tests réussissent
-      runs-on: ubuntu-latest
-      # if: github.ref == 'refs/heads/main'  # Déployer uniquement sur main
-      #TODO: Retirer la condition de la feature
-      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/CICD-quest'
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v3
-
-        - name: Add SSH private key
-          run: |
-            mkdir -p ~/.ssh
-            echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-            chmod 600 ~/.ssh/id_ed25519
-            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-
-        - name: Debug secrets
-          run: |
-            echo "SERVER_USER=${{ secrets.SERVER_USER }}"
-            echo "SERVER_IP=${{ secrets.SERVER_IP }}"
-
-        - name: Test SSH connection
-          run: ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "echo 'SSH connection successful!'"
-
-        - name: Clone or update project on server
-          run: |
-            ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
-            if [ -d /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }} ]; then
-              if [ -d /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.git ]; then
-                echo 'Repository already exists. Pulling latest changes...';
-                cd /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }};
-                git reset --hard;
-                git pull origin main;
-              else
-                echo 'Invalid directory exists. Cleaning up and cloning again...';
-                rm -rf /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }};
-                git clone git@github.com:${{ secrets.REPOSITORY_NAME }} /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }};
-              fi
-            else
-              echo 'Cloning repository...';
-              git clone git@${{ secrets.REPOSITORY_NAME }} /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }};
-            fi
-            "
-
-        - name: Generate .env file on server
-          run: |
-            ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
-            echo 'SPRING_PROFILES_ACTIVE=prod' > /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            echo 'DB_NAME=${{ secrets.DB_NAME }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            echo 'SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            echo 'SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            echo 'SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            echo 'SPRING_JPA_HIBERNATE_DDL_AUTO=${{ secrets.SPRING_JPA_HIBERNATE_DDL_AUTO }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            echo 'MAIL_HOST=${{secrets.MAIL_HOST}}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            echo 'MAIL_HOST=${{ secrets.MAIL_HOST }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            echo 'MAIL_PORT=${{ secrets.MAIL_PORT }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            echo 'MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            echo 'MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            echo 'MAIL_PROTOCOL=${{ secrets.MAIL_PROTOCOL }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            echo 'MAIL_AUTH=${{ secrets.MAIL_AUTH }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            echo 'MAIL_TLS=${{ secrets.MAIL_TLS }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            echo 'APP_BASE_URL=${{ secrets.APP_BASE_URL }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            echo 'REGISTER_URI=${{ secrets.REGISTER_URI }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            echo 'REGISTER_TOKEN_EXPIRATION_DAYS=${{ secrets.REGISTER_TOKEN_EXPIRATION_DAYS }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            echo 'RESET_PASSWORD_URI=${{ secrets.RESET_PASSWORD_URI }}' >> /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod &&
-            chmod 600 /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }}/.env.prod
-            "
-        - name: Build Docker image and deploy
-          run: |
-            ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
-            cd /home/${{ secrets.SERVER_USER }}/${{ secrets.PROJECT_NAME }} &&
-            docker compose down &&
-            docker compose --env-file .env.prod up -d --build
-            "
