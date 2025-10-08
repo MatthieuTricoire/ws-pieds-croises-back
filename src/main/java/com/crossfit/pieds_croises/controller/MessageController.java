@@ -57,10 +57,8 @@ public class MessageController {
         if (messages.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-
         return ResponseEntity.ok(messages);
     }
-
 
     @GetMapping("/{id}")
     @Operation(
@@ -76,12 +74,8 @@ public class MessageController {
         @Parameter(description = "ID du message", example = "1")
         @PathVariable Long id) {
         MessageDTO messageDTO = messageService.getMessageById(id);
-        if (messageDTO == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(messageDTO);
     }
-
 
     @PostMapping
     @Operation(
@@ -113,13 +107,10 @@ public class MessageController {
     })
     public ResponseEntity<MessageDTO> updateMessage(
         @Parameter(description = "ID du message", example = "1")
-        @PathVariable Long id, 
+        @PathVariable Long id,
         @Parameter(description = "Nouvelles données du message")
         @Valid @RequestBody MessageCreateDTO messageCreateDTO) {
         MessageDTO updateMessage = messageService.updateMessage(id, messageCreateDTO);
-        if (updateMessage == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(updateMessage);
     }
 
@@ -136,7 +127,7 @@ public class MessageController {
     })
     public ResponseEntity<MessageDTO> updateMessageStatus(
         @Parameter(description = "ID du message", example = "1")
-        @PathVariable Long id, 
+        @PathVariable Long id,
         @Parameter(description = "Nouveau statut", example = "ACTIVE")
         @RequestParam String status) {
         Message.MessageStatus messageStatus = Message.MessageStatus.valueOf(status.toUpperCase());
@@ -160,11 +151,7 @@ public class MessageController {
     public ResponseEntity<Void> deleteMessage(
         @Parameter(description = "ID du message", example = "1")
         @PathVariable Long id) {
-        if (messageService.deleteMessage(id)) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        messageService.deleteMessage(id);
+        return ResponseEntity.noContent().build();
     }
-
 }

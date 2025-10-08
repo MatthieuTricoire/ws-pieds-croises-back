@@ -48,7 +48,7 @@ public class PerformanceHistoryController {
     @PutMapping("/{id}")
     public ResponseEntity<PerformanceHistoryDTO> updatePerformanceHistory(
             @PathVariable Long id,
-            @RequestBody PerformanceHistoryDTO performanceHistoryDTO,
+            @Valid @RequestBody PerformanceHistoryDTO performanceHistoryDTO,
             @AuthenticationPrincipal User user
     ) {
         PerformanceHistoryDTO updatedPerformanceHistory = performanceHistoryService.updatePerformanceHistory(id, performanceHistoryDTO, user.getId());

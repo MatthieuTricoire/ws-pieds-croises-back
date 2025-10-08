@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.service;
 
+import com.crossfit.pieds_croises.datetime.DateTimeProvider;
 import com.crossfit.pieds_croises.dto.CourseDTO;
 import com.crossfit.pieds_croises.dto.FirstLoginDto;
 import com.crossfit.pieds_croises.dto.UserDto;
@@ -35,6 +36,7 @@ public class UserService {
   private final PasswordEncoder passwordEncoder;
   private final CourseMapper courseMapper;
   private final UserSubscriptionService userSubscriptionService;
+  private final DateTimeProvider dateTimeProvider;
 
   @Value("${app.base-url}${app.registration.uri}")
   private String registrationUrl;
@@ -50,7 +52,6 @@ public class UserService {
     }
     if (users.isEmpty()) {
       logger.warn("No users found in the database");
-      throw new ResourceNotFoundException("No users found");
     }
     logger.info("Found {} users", users.size());
     return users.stream()
@@ -95,8 +96,9 @@ public class UserService {
     }
 
     User user = userMapper.convertToEntity(userDto);
-    user.setCreatedAt(LocalDateTime.now());
-    user.setUpdatedAt(LocalDateTime.now());
+    LocalDateTime now = dateTimeProvider.now();
+    user.setCreatedAt(now);
+    user.setUpdatedAt(now);
     Set<String> roles = userDto.getRoles();
     if (roles == null || roles.isEmpty()) {
       roles = Set.of("ROLE_USER"); // Valeur par défaut si aucun rôle fourni
@@ -105,7 +107,7 @@ public class UserService {
 
     String token = UUID.randomUUID().toString();
     user.setRegistrationToken(token);
-    user.setRegistrationTokenExpiryDate(LocalDateTime.now().plusDays(registrationTokenExpirationDays));
+    user.setRegistrationTokenExpiryDate(now.plusDays(registrationTokenExpirationDays));
     user.setIsFirstLoginComplete(false);
     // Envoi du lien par email
     logger.info("Sending registration email to {}", user.getEmail());
@@ -138,7 +140,6 @@ public class UserService {
         throw new RuntimeException("Failed to create subscription for user ID: " + createdUser.getId(), e);
       }
     }
-
     return userMapper.convertToCreatedDto(createdUser);
   }
 
@@ -151,12 +152,13 @@ public class UserService {
         .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
     userMapper.updateUserFromDto(userDto, existingUser);
-    existingUser.setUpdatedAt(LocalDateTime.now());
+    existingUser.setUpdatedAt(dateTimeProvider.now());
+
     try {
-      User updatedUser = userRepository.save(existingUser);
-      return userMapper.convertToDtoForAdmin(updatedUser);
+        User updatedUser = userRepository.save(existingUser);
+        return userMapper.convertToDtoForAdmin(updatedUser);
     } catch (Exception e) {
-      throw new RuntimeException("Failed to update user with id: " + id, e);
+        throw new RuntimeException("Failed to update user with id: " + id, e);
     }
   }
 
@@ -165,7 +167,7 @@ public class UserService {
         .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + username));
 
     userMapper.updateUserFromDto(userDto, existingUser);
-    existingUser.setUpdatedAt(LocalDateTime.now());
+    existingUser.setUpdatedAt(dateTimeProvider.now());
 
     try {
       User updatedUser = userRepository.save(existingUser);

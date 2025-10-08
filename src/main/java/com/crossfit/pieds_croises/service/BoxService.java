@@ -4,18 +4,15 @@ import com.crossfit.pieds_croises.dto.BoxInfoDTO;
 import com.crossfit.pieds_croises.mapper.BoxMapper;
 import com.crossfit.pieds_croises.model.Box;
 import com.crossfit.pieds_croises.repository.BoxRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class BoxService {
 
     private final BoxMapper boxMapper;
     private final BoxRepository boxRepository;
-
-    public BoxService(BoxMapper boxMapper, BoxRepository boxRepository) {
-        this.boxMapper = boxMapper;
-        this.boxRepository = boxRepository;
-    }
 
     public BoxInfoDTO getBoxInfo() {
         Box box = boxRepository.findAll()

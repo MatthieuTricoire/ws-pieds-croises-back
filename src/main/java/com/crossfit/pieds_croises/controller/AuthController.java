@@ -9,6 +9,7 @@ import com.crossfit.pieds_croises.mapper.UserMapper;
 import com.crossfit.pieds_croises.model.User;
 import com.crossfit.pieds_croises.repository.UserRepository;
 import com.crossfit.pieds_croises.security.AuthenticationService;
+import jakarta.validation.Valid;
 import com.crossfit.pieds_croises.security.JwtCookieService;
 import com.crossfit.pieds_croises.security.JwtService;
 import com.crossfit.pieds_croises.service.UserService;
@@ -128,7 +129,7 @@ public class AuthController {
     })
     public ResponseEntity<?> authenticate(
         @Parameter(description = "Données de connexion")
-        @RequestBody LoginRequestDto loginRequestDto,
+        @Valid @RequestBody LoginRequestDto loginRequestDto,
         @Parameter(hidden = true) HttpServletResponse response) {
         String token = authenticationService.authenticate(
             loginRequestDto.getEmail(),
