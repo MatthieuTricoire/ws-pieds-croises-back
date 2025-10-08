@@ -3,6 +3,7 @@ package com.crossfit.pieds_croises.controller;
 import com.crossfit.pieds_croises.dto.PerformanceHistoryDTO;
 import com.crossfit.pieds_croises.model.User;
 import com.crossfit.pieds_croises.service.PerformanceHistoryService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/performance-histories")
+@Tag(name = "Performance History", description = "Gestion de l'historique des performances")
 public class PerformanceHistoryController {
 
     private final PerformanceHistoryService performanceHistoryService;
@@ -46,7 +48,7 @@ public class PerformanceHistoryController {
     @PutMapping("/{id}")
     public ResponseEntity<PerformanceHistoryDTO> updatePerformanceHistory(
             @PathVariable Long id,
-            @RequestBody PerformanceHistoryDTO performanceHistoryDTO,
+            @Valid @RequestBody PerformanceHistoryDTO performanceHistoryDTO,
             @AuthenticationPrincipal User user
     ) {
         PerformanceHistoryDTO updatedPerformanceHistory = performanceHistoryService.updatePerformanceHistory(id, performanceHistoryDTO, user.getId());

@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.service;
 
+import com.crossfit.pieds_croises.datetime.DateTimeProvider;
 import com.crossfit.pieds_croises.dto.WeightHistoryDTO;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.WeightHistoryMapper;
@@ -22,6 +23,7 @@ public class WeightHistoryService {
     private final WeightHistoryRepository weightHistoryRepository;
     private final WeightHistoryMapper weightHistoryMapper;
     private final UserRepository userRepository;
+    private final DateTimeProvider dateTimeProvider;
 
     public List<WeightHistoryDTO> getAllWeightHistory(Long userId) {
         List<WeightHistory> weightHistoryList = weightHistoryRepository.findAllByUserIdOrderByDateAsc(userId);
@@ -31,7 +33,7 @@ public class WeightHistoryService {
     }
 
     public List<WeightHistoryDTO> getAllWeightHistoryForLastXMonths(Long userId, Integer months) {
-        LocalDate startDate = LocalDate.now().withDayOfMonth(1).minusMonths(months - 1);
+        LocalDate startDate = dateTimeProvider.today().withDayOfMonth(1).minusMonths(months - 1);
         List<WeightHistory> weightHistoryList = weightHistoryRepository.findAllByUserIdForLastXMonths(userId, startDate);
         return weightHistoryList.stream()
                 .map(weightHistoryMapper::convertToDTO)
@@ -45,8 +47,8 @@ public class WeightHistoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("User with id " + userId + " not found."));
         weightHistory.setUser(user);
 
-        WeightHistory weightHistorySaved = weightHistoryRepository.save(weightHistory);
-        return weightHistoryMapper.convertToDTO(weightHistorySaved);
+        WeightHistory savedWeightHistory = weightHistoryRepository.save(weightHistory);
+        return weightHistoryMapper.convertToDTO(savedWeightHistory);
     }
 
     public WeightHistoryDTO updateWeightHistory(Long id, WeightHistoryDTO weightHistoryDTO, Long userId) {

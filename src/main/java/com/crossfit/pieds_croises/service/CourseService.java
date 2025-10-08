@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.service;
 
+import com.crossfit.pieds_croises.datetime.DateTimeProvider;
 import com.crossfit.pieds_croises.dto.CourseCreateDTO;
 import com.crossfit.pieds_croises.dto.CourseDTO;
 import com.crossfit.pieds_croises.dto.CourseUpdateDTO;
@@ -25,11 +26,11 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CourseService {
-  private final CourseRepository courseRepository;
-  private final CourseMapper courseMapper;
-  private final UserRepository userRepository;
-
-  private final UserMapper userMapper;
+    private final CourseRepository courseRepository;
+    private final CourseMapper courseMapper;
+    private final UserRepository userRepository;
+    private final DateTimeProvider dateTimeProvider;
+    private final UserMapper userMapper;
 
   public List<CourseDTO> getAllCourses() {
     List<Course> courses = courseRepository.findAll();
@@ -37,17 +38,16 @@ public class CourseService {
     return courses.stream().map(courseMapper::convertToDto).collect(Collectors.toList());
   }
 
-  public List<CourseDTO> getCoursesNextTwoWeeks() {
-    LocalDateTime now = LocalDateTime.now();
-    List<Course> courses = courseRepository.findByStartDatetimeBetweenOrderByStartDatetimeAsc(now, now.plusWeeks(2));
+    public List<CourseDTO> getCoursesNextTwoWeeks() {
+        LocalDateTime now = dateTimeProvider.now();
+        List<Course> courses = courseRepository.findByStartDatetimeBetweenOrderByStartDatetimeAsc(now, now.plusWeeks(2));
 
     return courses.stream().map(courseMapper::convertToDto).collect(Collectors.toList());
   }
 
-  public List<CourseDTO> getCoursesByDay(LocalDate date) {
-
-    LocalDateTime startOfDay = date.atStartOfDay();
-    LocalDateTime endOfDay = date.atTime(23, 59, 59);
+    public List<CourseDTO> getCoursesByDay(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(23, 59, 59);
 
     List<Course> courses = courseRepository.findByStartDatetimeBetweenOrderByStartDatetimeAsc(startOfDay, endOfDay);
 
@@ -61,7 +61,6 @@ public class CourseService {
   }
 
   public CourseDTO createCourse(@Valid CourseCreateDTO courseCreateDTO) {
-
     courseRepository.findByCoachIdAndStartDatetime(courseCreateDTO.getCoachId(), courseCreateDTO.getStartDatetime())
         .ifPresent(course -> {
           throw new BusinessException("A course already exists with this coach at this start date.");
@@ -76,9 +75,10 @@ public class CourseService {
       throw new ResourceNotFoundException("The selected user does not have the role of coach");
     }
 
-    course.setCreatedAt(LocalDateTime.now());
-    course.setUpdatedAt(LocalDateTime.now());
-    course.setCoach(coach);
+        LocalDateTime now = dateTimeProvider.now();
+        course.setCreatedAt(now);
+        course.setUpdatedAt(now);
+        course.setCoach(coach);
 
     course = courseRepository.save(course);
     return courseMapper.convertToDto(course);
@@ -103,10 +103,9 @@ public class CourseService {
     return courseMapper.convertToDto(savedCourse);
   }
 
-  public CourseDTO addUserToCourse(Long courseId, Long userId) {
-
-    Course existingCourse = courseRepository.findById(courseId)
-        .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+    public CourseDTO addUserToCourse(Long courseId, Long userId) {
+        Course existingCourse = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
 
     User existingUser = userRepository.findById(userId)
         .orElseThrow(() -> new ResourceNotFoundException("User not existing"));
@@ -138,10 +137,9 @@ public class CourseService {
     return courseMapper.convertToDto(existingCourse);
   }
 
-  public CourseDTO deleteUserFromCourse(Long courseId, Long userId) {
-
-    Course existingCourse = courseRepository.findById(courseId)
-        .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+    public CourseDTO deleteUserFromCourse(Long courseId, Long userId) {
+        Course existingCourse = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
 
     User existingUser = userRepository.findById(userId)
         .orElseThrow(() -> new ResourceNotFoundException("User not existing"));
