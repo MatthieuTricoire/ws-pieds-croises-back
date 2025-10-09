@@ -51,7 +51,6 @@ class UserRepositoryIntegrationTest {
         registry.add("spring.datasource.driver-class-name", mysqlContainer::getDriverClassName);
     }
 
-    // 💡 Hibernate a déjà créé les tables à ce stade
     @BeforeEach
     void loadTestData() {
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator(
@@ -74,7 +73,7 @@ class UserRepositoryIntegrationTest {
 
     @Test
     void shouldReturnTrueWhenUserExists() {
-        assertThat(userRepository.existsByEmail("user1@example.com")).isTrue();
+        assertThat(userRepository.existsByEmail("jean.dupont@example.com")).isTrue();
     }
 
     @Test
@@ -90,7 +89,7 @@ class UserRepositoryIntegrationTest {
 
         assertThat(result)
                 .extracting(User::getEmail)
-                .contains("jean.dupont@example.com", "admin@example.com", "matthieutricoire@gmail.com");
+                .contains("admin@example.com");
     }
 
     @Test

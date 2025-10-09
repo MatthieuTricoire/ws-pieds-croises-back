@@ -5,8 +5,7 @@ INSERT INTO user (firstname, lastname, password, email, phone, profile_picture, 
 VALUES
     ('Jean', 'Dupont', '$2y$10$pN5sgqp.gbzAJcoh04/1xeAsv/trTPxeNoep06U4i1WUWooSgc0Su', 'jean.dupont@example.com', '0601020304', NULL, NOW(), NOW()),
     ('Admin', 'User', '$2y$10$dUo1l4qgxCAgCetO4Y04U./8jQGw5wW6ZC2tv/G9tP2K3Q4uGbW6i', 'admin@example.com', '0601020305', NULL, NOW(), NOW()),
-    ('Coco', 'Rico', '{noop}coach123', 'coach@example.com', '0602030408', NULL, NOW(), NOW()),
-    ('Matthieu', 'Tricoire', '$2y$10$H9nV.LDccqVGYNar5dHDIeEpu5SsKduKk.c0Mr5feafA8un6E9PMO', 'matthieutricoire@gmail.com', '0668272972', NULL, NOW(), NOW());
+    ('Coach', 'Rico', '$2y$10$dUo1l4qgxCAgCetO4Y04U./8jQGw5wW6ZC2tv/G9tP2K3Q4uGbW6i', 'coach@example.com', '0602030408', NULL, NOW(), NOW());
 
 -- ===============================
 -- USER ROLES
@@ -58,13 +57,7 @@ VALUES
 -- ===============================
 INSERT INTO course (title, description, start_datetime, duration, person_limit, status, created_at, updated_at, coach_id)
 VALUES
-    ('WOD CARDIO', 'Bla Bla', '2025-08-28T10:00:00', 60, 12, 'OPEN', NOW(), NOW(), (SELECT id FROM user WHERE email='coach@example.com')),
-    ('WOD GYM', 'Bla Bla', '2025-08-28T15:30:00', 60, 12, 'OPEN', NOW(), NOW(), (SELECT id FROM user WHERE email='coach@example.com')),
-    ('WOD TEAM', 'Bla Bla', '2025-08-31T09:00:00', 60, 12, 'OPEN', NOW(), NOW(), (SELECT id FROM user WHERE email='coach@example.com')),
-    ('OPEN GYM', 'Bla Bla', '2025-08-31T16:00:00', 60, 12, 'OPEN', NOW(), NOW(), (SELECT id FROM user WHERE email='coach@example.com')),
-    ('Cour', 'Bla Bla', '2025-09-01T10:00:00', 60, 12, 'OPEN', NOW(), NOW(), (SELECT id FROM user WHERE email='coach@example.com')),
-    ('Cour2', 'Toujour du Bla Bla', '2025-09-01T10:00:00', 45, 2, 'OPEN', NOW(), NOW(), (SELECT id FROM user WHERE email='coach@example.com')),
-    ('Cour3', 'Coucou les petits loups !', '2025-07-01T10:00:00', 45, 5, 'OPEN', NOW(), NOW(), (SELECT id FROM user WHERE email='coach@example.com'));
+    ('WOD CARDIO', 'Bla Bla', '2025-08-28T10:00:00', 60, 12, 'OPEN', NOW(), NOW(), (SELECT id FROM user WHERE email='coach@example.com'));
 
 -- ===============================
 -- USER SUBSCRIPTIONS
@@ -95,3 +88,13 @@ VALUES
     ('2025-03-01', 36, (SELECT id FROM exercice WHERE name='Front squat'), (SELECT id FROM user WHERE email='admin@example.com')),
     ('2025-04-01', 38, (SELECT id FROM exercice WHERE name='Front squat'), (SELECT id FROM user WHERE email='admin@example.com')),
     ('2025-05-01', 41, (SELECT id FROM exercice WHERE name='Front squat'), (SELECT id FROM user WHERE email='admin@example.com'));
+
+-- ===============================
+-- USER ↔ COURSE
+-- ===============================
+INSERT INTO user_course (user_id, course_id)
+VALUES
+    (
+        (SELECT id FROM user WHERE email = 'jean.dupont@example.com'),
+        (SELECT id FROM course WHERE title = 'WOD CARDIO')
+    );
