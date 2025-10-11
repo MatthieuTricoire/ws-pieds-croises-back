@@ -1,29 +1,26 @@
 package com.crossfit.pieds_croises.service;
 
-import com.crossfit.pieds_croises.exception.EmailSendingException;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = EmailService.class)
-class EmailServiceIntegrationTest {
+class EmailServiceTest {
 
-    @MockBean
+    @MockitoBean
     private JavaMailSender javaMailSender;
 
-    @MockBean
+    @MockitoBean
     private TemplateEngine templateEngine;
 
     @Autowired
@@ -67,13 +64,4 @@ class EmailServiceIntegrationTest {
         verify(javaMailSender, times(1)).send(mimeMessage);
     }
 
-//    @Test
-//    void testSendHtmlEmail_throwsException_whenMessagingFails() throws Exception {
-//        MimeMessage mimeMessage = mock(MimeMessage.class);
-//        when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
-//        doThrow(new RuntimeException("fail")).when(javaMailSender).send(mimeMessage);
-//
-//        assertThrows(EmailSendingException.class,
-//                () -> emailService.sendHtmlEmail("test@example.com", "Subject", "<h1>Hello</h1>"));
-//    }
 }
