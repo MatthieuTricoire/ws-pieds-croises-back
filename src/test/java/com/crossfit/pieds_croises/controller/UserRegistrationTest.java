@@ -16,16 +16,10 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.sql.DataSource;
-
 import java.util.Map;
 import java.util.Optional;
 
@@ -38,17 +32,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Testcontainers
 @ActiveProfiles("test")
 class UserRegistrationTest {
 
     private static final Logger log = LoggerFactory.getLogger(UserRegistrationTest.class);
-
-    @Container
-    static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.1")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
 
     @Autowired
     private DataSource dataSource;
@@ -61,14 +48,6 @@ class UserRegistrationTest {
 
     @MockitoSpyBean
     private EmailService emailService;
-
-    @DynamicPropertySource
-    static void setDatasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysqlContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", mysqlContainer::getUsername);
-        registry.add("spring.datasource.password", mysqlContainer::getPassword);
-        registry.add("spring.datasource.driver-class-name", mysqlContainer::getDriverClassName);
-    }
 
     @BeforeEach
     void loadTestData() {
@@ -87,13 +66,13 @@ class UserRegistrationTest {
     @WithMockUser(username = "admin@example.com", roles = "ADMIN")
     void testCreateUser() throws Exception {
         String json = """
-        {
-            "firstname": "John",
-            "lastname": "Doe",
-            "email": "john.doe@example.com",
-            "roles": ["ROLE_USER"]
-        }
-        """;
+                {
+                    "firstname": "John",
+                    "lastname": "Doe",
+                    "email": "john.doe@example.com",
+                    "roles": ["ROLE_USER"]
+                }
+                """;
         log.debug("Requête envoyée : {}", json);
         // requête POST pour créer un utilisateur
         mockMvc.perform(post("/users")
