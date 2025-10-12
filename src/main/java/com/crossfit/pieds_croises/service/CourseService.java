@@ -28,11 +28,7 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final CourseMapper courseMapper;
     private final UserRepository userRepository;
-    private final UserCourseRepository userCourseRepository;
     private final DateTimeProvider dateTimeProvider;
-    private final EmailService emailService;
-
-    private final UserMapper userMapper;
 
     public List<CourseDTO> getAllCourses() {
         List<Course> courses = courseRepository.findAll();
@@ -41,7 +37,7 @@ public class CourseService {
     }
 
     public List<CourseDTO> getCoursesNextTwoWeeks() {
-        LocalDateTime now = dateTimeProvider.now();
+        LocalDateTime now = LocalDateTime.now();
         List<Course> courses = courseRepository.findByStartDatetimeBetweenOrderByStartDatetimeAsc(now, now.plusWeeks(2));
 
         return courses.stream().map(courseMapper::convertToDto).collect(Collectors.toList());
@@ -88,24 +84,24 @@ public class CourseService {
         return courseMapper.convertToDto(course);
     }
 
-    public CourseDTO updateCourse(Long id, @Valid CourseUpdateDTO courseUpdateDTO) {
-        Course existingCourse = courseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
+  public CourseDTO updateCourse(Long id, @Valid CourseUpdateDTO courseUpdateDTO) {
+    Course existingCourse = courseRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
 
-        User coach = userRepository.findById(courseUpdateDTO.getCoachId())
-                .orElseThrow(() -> new ResourceNotFoundException("Coach not found with id : " + courseUpdateDTO.getCoachId()));
+    User coach = userRepository.findById(courseUpdateDTO.getCoachId())
+        .orElseThrow(() -> new ResourceNotFoundException("Coach not found with id : " + courseUpdateDTO.getCoachId()));
 
-        if (!coach.isCoach()) {
-            throw new ResourceNotFoundException("The selected user does not have the role of coach");
-        }
-
-        courseMapper.updateFromDTO(courseUpdateDTO, existingCourse);
-
-        existingCourse.setCoach(coach);
-
-        Course savedCourse = courseRepository.save(existingCourse);
-        return courseMapper.convertToDto(savedCourse);
+    if (!coach.isCoach()) {
+      throw new ResourceNotFoundException("The selected user does not have the role of coach");
     }
+
+    courseMapper.updateFromDTO(courseUpdateDTO, existingCourse);
+
+    existingCourse.setCoach(coach);
+
+    Course savedCourse = courseRepository.save(existingCourse);
+    return courseMapper.convertToDto(savedCourse);
+  }
 
 
     public void deleteCourse(Long id) {

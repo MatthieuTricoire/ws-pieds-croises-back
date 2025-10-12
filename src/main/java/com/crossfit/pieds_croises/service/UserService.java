@@ -7,6 +7,7 @@ import com.crossfit.pieds_croises.dto.FirstLoginDto;
 import com.crossfit.pieds_croises.dto.UserDto;
 import com.crossfit.pieds_croises.dto.UserSubscriptionDto;
 import com.crossfit.pieds_croises.dto.UserUpdateDto;
+import com.crossfit.pieds_croises.dto.*;
 import com.crossfit.pieds_croises.exception.DuplicateResourceException;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.CourseMapper;
@@ -30,19 +31,19 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Service
 public class UserService {
-    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
-    private final UserMapper userMapper;
-    private final UserRepository userRepository;
-    private final EmailService emailService;
-    private final PasswordEncoder passwordEncoder;
-    private final CourseMapper courseMapper;
-    private final UserSubscriptionService userSubscriptionService;
-    private final DateTimeProvider dateTimeProvider;
+  private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+  private final UserMapper userMapper;
+  private final UserRepository userRepository;
+  private final EmailService emailService;
+  private final PasswordEncoder passwordEncoder;
+  private final CourseMapper courseMapper;
+  private final UserSubscriptionService userSubscriptionService;
+  private final DateTimeProvider dateTimeProvider;
 
-    @Value("${app.base-url}${app.registration.uri}")
-    private String registrationUrl;
-    @Value("${app.registration.token-expiration-days}")
-    private int registrationTokenExpirationDays;
+  @Value("${app.base-url}${app.registration.uri}")
+  private String registrationUrl;
+  @Value("${app.registration.token-expiration-days}")
+  private int registrationTokenExpirationDays;
 
     public List<UserDto> getAllUsers(boolean includeSubscriptions) {
         List<User> users;
@@ -62,21 +63,21 @@ public class UserService {
                 .toList();
     }
 
-    public UserDto getUserById(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        return userMapper.convertToDtoForAdmin(user);
-    }
+  public UserDto getUserById(Long id) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+    return userMapper.convertToDtoForAdmin(user);
+  }
 
-    public UserDto getMyProfile(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        return userMapper.convertToDtoForUser(user);
-    }
+  public UserDto getMyProfile(Long id) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+    return userMapper.convertToDtoForUser(user);
+  }
 
-    public List<CourseDTO> getUserCourses(Long id, UserCourse.Status status) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+  public List<CourseDTO> getUserCourses(Long id) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
         LocalDateTime now = LocalDateTime.now();
 

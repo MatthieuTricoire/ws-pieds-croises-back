@@ -165,7 +165,7 @@ public class UserController {
     })
     public ResponseEntity<UserDto> updateUser(
         @Parameter(description = "ID de l'utilisateur", example = "1")
-        @PathVariable Long id,
+        @PathVariable Long id, 
         @Parameter(description = "Nouvelles données de l'utilisateur")
         @Valid @RequestBody UserUpdateDto userDetails) {
         UserDto userDto = userService.updateUser(id, userDetails);
