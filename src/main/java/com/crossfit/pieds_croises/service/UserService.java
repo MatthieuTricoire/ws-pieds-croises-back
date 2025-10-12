@@ -75,7 +75,7 @@ public class UserService {
     return userMapper.convertToDtoForUser(user);
   }
 
-  public List<CourseDTO> getUserCourses(Long id) {
+  public List<CourseDTO> getUserCourses(Long id, UserCourse.Status status) {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
