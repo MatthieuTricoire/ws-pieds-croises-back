@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.service;
 
+import com.crossfit.pieds_croises.datetime.DateTimeProvider;
 import com.crossfit.pieds_croises.dto.CourseCreateDTO;
 import com.crossfit.pieds_croises.dto.CourseDTO;
 import com.crossfit.pieds_croises.dto.CourseUpdateDTO;
@@ -29,12 +30,9 @@ public class CourseService {
     private final UserRepository userRepository;
     private final UserCourseRepository userCourseRepository;
     private final EmailService emailService;
-
     private final UserMapper userMapper;
-
     public List<CourseDTO> getAllCourses() {
         List<Course> courses = courseRepository.findAll();
-
         return courses.stream().map(courseMapper::convertToDto).collect(Collectors.toList());
     }
 

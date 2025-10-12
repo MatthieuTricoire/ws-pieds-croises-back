@@ -1,5 +1,6 @@
 package com.crossfit.pieds_croises.service;
 
+import com.crossfit.pieds_croises.datetime.DateTimeProvider;
 import com.crossfit.pieds_croises.dto.MessageCreateDTO;
 import com.crossfit.pieds_croises.dto.MessageDTO;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
@@ -20,27 +21,24 @@ import java.util.stream.Collectors;
 public class MessageService {
 
     private final MessageMapper messageMapper;
-
     private final MessageRepository messageRepository;
-
-    private final LocalDate today = LocalDate.now();
+    private final DateTimeProvider dateTimeProvider;
 
     public List<MessageDTO> getAllMessages() {
         List<Message> messages = messageRepository.findAll();
-        if (messages.isEmpty()) {
-            throw new ResourceNotFoundException("There are no messages");
-        }
-        return messages.stream().map(messageMapper::convertToDto).collect(Collectors.toList());
+        return messages.stream()
+                .map(messageMapper::convertToDto)
+                .collect(Collectors.toList());
     }
 
     public MessageDTO getMessageById(Long id) {
         Message message = messageRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Le message avec l'id " + id + " n'a pas été trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Message with id " + id + " not found"));
         return messageMapper.convertToDto(message);
     }
 
     public List<MessageDTO> getActiveMessages() {
-        List<Message> messages = messageRepository.findActiveMessagesOrderByExpirationDateDesc(today);
+        List<Message> messages = messageRepository.findActiveMessagesOrderByExpirationDateDesc(dateTimeProvider.today());
 
         if (messages.isEmpty()) {
             throw new ResourceNotFoundException("There are no current messages");
@@ -60,36 +58,24 @@ public class MessageService {
 
 
     public MessageDTO createMessage(MessageCreateDTO messageCreateDTO) {
-
         Message message = messageMapper.convertToEntity(messageCreateDTO);
 
         Message savedMessage = messageRepository.save(message);
         return messageMapper.convertToDto(savedMessage);
-
-
     }
 
     public MessageDTO updateMessage(Long id, @Valid MessageCreateDTO messageCreateDTO) {
-
         Message existingMessage = messageRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Message not found with id: " + id));
 
         messageMapper.updateFromDto(messageCreateDTO, existingMessage);
-
         Message savedMessage = messageRepository.save(existingMessage);
         return messageMapper.convertToDto(savedMessage);
     }
 
-    public boolean deleteMessage(Long id) {
+    public void deleteMessage(Long id) {
         Message message = messageRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Message not found with id: " + id));
-
-        if (message == null) {
-            return false;
-        }
-
+                .orElseThrow(() -> new ResourceNotFoundException("Message not found with id: " + id));
         messageRepository.delete(message);
-        return true;
     }
-
 }
