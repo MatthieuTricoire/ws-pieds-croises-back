@@ -16,28 +16,29 @@ import javax.sql.DataSource;
 @EnableScheduling
 public class PiedsCroisesApplication {
 
-    public static void main(String[] args) {
-        Dotenv dotenv = Dotenv.configure().filename(".env.dev").ignoreIfMissing().ignoreIfMalformed().load();
-        dotenv.entries().forEach(entry -> {
-            System.setProperty(entry.getKey(), entry.getValue());
-        });
-        SpringApplication app = new SpringApplication(PiedsCroisesApplication.class);
-        app.setAdditionalProfiles("dev");
-        if (System.getProperty("spring.profiles.active") == null &&
-                System.getenv("SPRING_PROFILES_ACTIVE") == null) {
-            app.setAdditionalProfiles("dev");
-        }
-        app.run(args);
+  public static void main(String[] args) {
+    Dotenv dotenv = Dotenv.configure().filename(".env.dev").ignoreIfMissing().ignoreIfMalformed().load();
+    dotenv.entries().forEach(entry -> {
+      System.setProperty(entry.getKey(), entry.getValue());
+    });
+    SpringApplication app = new SpringApplication(PiedsCroisesApplication.class);
+    app.setAdditionalProfiles("dev");
+    if (System.getProperty("spring.profiles.active") == null &&
+        System.getenv("SPRING_PROFILES_ACTIVE") == null) {
+      app.setAdditionalProfiles("dev");
     }
+    app.run(args);
+  }
 
-    @Bean
-    @Profile("!test")
-    CommandLineRunner runDataSql(DataSource dataSource) {
-        return args -> {
-            ResourceDatabasePopulator resourceDatabasePopulator =
-                    new ResourceDatabasePopulator(false, false, "UTF-8", new ClassPathResource("data.sql"));
-            resourceDatabasePopulator.execute(dataSource);
-        };
-    }
+  // @Bean
+  // @Profile("!test")
+  // CommandLineRunner runDataSql(DataSource dataSource) {
+  // return args -> {
+  // ResourceDatabasePopulator resourceDatabasePopulator =
+  // new ResourceDatabasePopulator(false, false, "UTF-8", new
+  // ClassPathResource("data.sql"));
+  // resourceDatabasePopulator.execute(dataSource);
+  // };
+  // }
 
 }
