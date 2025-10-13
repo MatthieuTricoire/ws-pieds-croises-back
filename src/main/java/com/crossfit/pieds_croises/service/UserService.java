@@ -188,7 +188,7 @@ public class UserService {
     User user = userRepository.findByRegistrationToken(dto.getRegistrationToken())
         .orElseThrow(() -> {
           logger.warn("Invalid registration token :{}", dto.getRegistrationToken());
-          return new ResourceNotFoundException("Invalid registration token");
+          return new ResourceNotFoundException("Lien invalide");
         });
 
     if (user.getRegistrationTokenExpiryDate().isBefore(LocalDateTime.now())) {

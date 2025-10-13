@@ -39,5 +39,4 @@ public class PiedsCroisesApplication {
             resourceDatabasePopulator.execute(dataSource);
         };
     }
-
 }
