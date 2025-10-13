@@ -31,7 +31,7 @@ public class PiedsCroisesApplication {
     }
 
     @Bean
-    @Profile("!prod || !test")
+    @Profile("!test")
     CommandLineRunner runDataSql(DataSource dataSource) {
         return args -> {
             ResourceDatabasePopulator resourceDatabasePopulator =
