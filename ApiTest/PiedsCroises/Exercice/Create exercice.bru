@@ -1,0 +1,23 @@
+meta {
+  name: Create exercice
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/exercices
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "TestExercice",
+    "measureType": "REPETITION",
+    "performanceHistoryList": []
+  }
+}

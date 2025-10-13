@@ -1,0 +1,47 @@
+package com.crossfit.pieds_croises.dto;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class UserDto {
+  private Long id;
+
+  @NotBlank(message = "First name is required")
+  private String firstname;
+
+  @NotBlank(message = "Last name is required")
+  private String lastname;
+
+  @NotBlank(message = "Email is required")
+  @Email(message = "Please provide a valid email address")
+  private String email;
+
+  private String phone;
+
+  private String profilePicture;
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
+  private Byte strikeCount;
+  private List<UserSubscriptionDto> userSubscriptions;
+  private List<WeightHistoryDTO> weightHistory;
+  private List<PerformanceHistoryDTO> performanceHistoryList;
+  private String registrationToken;
+  private Boolean isFirstLoginComplete;
+  private Set<String> roles;
+
+  private List<Long> coursesId;
+  private Long subscriptionId;
+
+}

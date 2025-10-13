@@ -1,0 +1,15 @@
+meta {
+  name: All exercices
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:8080/exercices
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

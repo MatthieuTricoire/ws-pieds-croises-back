@@ -1,0 +1,24 @@
+meta {
+  name: Create User
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:8080/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "firstname": "amelie",
+    "lastname": "gattepaille",
+    "email": "amelie.gattepaille@gmail.com",
+    "roles": ["ROLE_USER","ROLE_ADMIN"]
+  }
+}

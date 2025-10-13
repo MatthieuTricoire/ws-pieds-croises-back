@@ -1,0 +1,19 @@
+meta {
+  name: All Messages
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8080/messages?status=active
+  body: none
+  auth: bearer
+}
+
+params:query {
+  status: active
+}
+
+auth:bearer {
+  token: {{token}}
+}

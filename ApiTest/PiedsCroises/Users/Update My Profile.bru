@@ -1,0 +1,21 @@
+meta {
+  name: Update My Profile
+  type: http
+  seq: 7
+}
+
+put {
+  url: http://localhost:8080/users/profile
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "email": "amelie.gattepaille@gmail.com"
+  }
+}

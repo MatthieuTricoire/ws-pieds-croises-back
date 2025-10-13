@@ -1,0 +1,27 @@
+meta {
+  name: Box by id
+  type: http
+  seq: 4
+}
+
+put {
+  url: http://localhost:8080/box/box-info
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "Pieds croisés Paris",
+    "email": "pied.croises@example.com",
+    "phoneNumber": "01 02 03 04 05",
+    "address": "12 Champs-Élysée",
+    "city": "Paris",
+    "zipcode": "72000",
+    "schedule": "Lun-Ven 08h-18h"
+  }
+}

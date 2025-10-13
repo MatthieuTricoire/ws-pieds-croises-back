@@ -1,0 +1,15 @@
+meta {
+  name: Get subscription by id
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8080/subscriptions/3
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
