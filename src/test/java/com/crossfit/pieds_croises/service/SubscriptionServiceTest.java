@@ -238,7 +238,7 @@ public class SubscriptionServiceTest {
         when(subscriptionMapper.convertToSubscriptionDto(subscription2)).thenReturn(subscriptionDto2);
 
         // Act
-        List<SubscriptionDto> result = subscriptionService.getAllSubscriptionsByBoxId(boxId);
+        List<SubscriptionDto> result = subscriptionService.getAllSubscriptions();
 
         // Assert
         assertThat(result).hasSize(2);
@@ -257,7 +257,7 @@ public class SubscriptionServiceTest {
         when(boxRepository.findById(boxId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThatThrownBy(() -> subscriptionService.getAllSubscriptionsByBoxId(boxId))
+        assertThatThrownBy(() -> subscriptionService.getAllSubscriptions())
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Box not found");
         verify(boxRepository, times(1)).findById(boxId);

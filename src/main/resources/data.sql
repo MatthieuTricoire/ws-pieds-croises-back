@@ -49,36 +49,36 @@ VALUES ('Jean', 'Dupont', '$2y$10$pN5sgqp.gbzAJcoh04/1xeAsv/trTPxeNoep06U4i1WUWo
 -- Peupler la table Course
 INSERT INTO course (title, description, start_datetime, duration, person_limit, status, created_at, updated_at,
                     coach_id)
-VALUES ('WOD CARDIO', 'Bla Bla', '2025-08-28T10:00:00', 60, 12, 'OPEN', '2025-06-13T11:42:51.40986',
+VALUES ('WOD CARDIO', 'Bla Bla', '2025-09-28T10:00:00', 60, 1, 'OPEN', '2025-06-13T11:42:51.40986',
         '2025-06-13T11:42:51.40986', 3),
-       ('WOD GYM', 'Bla Bla', '2025-08-28T15:30:00', 60, 12, 'OPEN', '2025-06-13T11:42:51.40986',
+       ('WOD GYM', 'Bla Bla', '2025-09-28T15:30:00', 60, 12, 'OPEN', '2025-06-13T11:42:51.40986',
         '2025-06-13T11:42:51.40986', 3),
-       ('WOD TEAM', 'Bla Bla', '2025-08-31T09:00:00', 60, 12, 'OPEN', '2025-06-13T11:42:51.40986',
+       ('WOD TEAM', 'Bla Bla', '2025-09-30T09:00:00', 60, 12, 'OPEN', '2025-06-13T11:42:51.40986',
         '2025-06-13T11:42:51.40986', 3),
-       ('OPEN GYM', 'Bla Bla', '2025-08-31T16:00:00', 60, 12, 'OPEN', '2025-06-13T11:42:51.40986',
+       ('OPEN GYM', 'Bla Bla', '2025-10-30T16:00:00', 60, 12, 'OPEN', '2025-06-13T11:42:51.40986',
         '2025-06-13T11:42:51.40986', 3),
-       ('Cour', 'Bla Bla', '2025-09-01T10:00:00', 60, 12, 'OPEN', '2025-06-13T11:42:51.40986',
+       ('Cour', 'Bla Bla', '2025-10-01T10:00:00', 60, 12, 'OPEN', '2025-06-13T11:42:51.40986',
         '2025-06-13T11:42:51.40986', 3),
-       ('Cour', 'Bla Bla', '2025-08-01T10:00:00', 60, 12, 'OPEN', '2025-06-13T11:42:51.40986',
+       ('Cour', 'Bla Bla', '2025-09-25T10:00:00', 60, 12, 'OPEN', '2025-06-13T11:42:51.40986',
         '2025-06-13T11:42:51.40986', 3),
-       ('Cour2', 'Toujour du Bla Bla', '2025-09-01T10:00:00', 45, 2, 'OPEN', '2025-06-13T11:42:51.40986',
+       ('Cour2', 'Toujour du Bla Bla', '2025-09-26T10:00:00', 45, 2, 'OPEN', '2025-06-13T11:42:51.40986',
         '2025-06-13T11:42:51.40986', 3),
-       ('Cour3', 'Coucou les petits loups !', '2025-07-01T10:00:00', 45, 5, 'OPEN', '2025-06-13T11:42:51.40986',
+       ('Cour3', 'Coucou les petits loups !', '2025-09-28T10:00:00', 45, 5, 'OPEN', '2025-06-13T11:42:51.40986',
         '2025-06-13T11:42:51.40986', 3);
 
 INSERT INTO course (title, description, start_datetime, duration, person_limit, status, created_at, updated_at,
                     coach_id)
-VALUES ('WOD CARDIO', 'Séance intense de cardio', '2025-09-01T06:00:00', 60, 1, 'OPEN', '2025-06-13T11:42:51.40986',
+VALUES ('WOD CARDIO', 'Séance intense de cardio', '2025-09-26T06:00:00', 60, 1, 'OPEN', '2025-06-13T11:42:51.40986',
         '2025-06-13T11:42:51.40986', 3),
-       ('WOD GYM', 'Renforcement musculaire', '2025-09-01T08:00:00', 60, 12, 'OPEN', '2025-06-13T11:42:51.40986',
+       ('WOD GYM', 'Renforcement musculaire', '2025-09-27T08:00:00', 60, 12, 'OPEN', '2025-06-13T11:42:51.40986',
         '2025-06-13T11:42:51.40986', 3),
-       ('MOBILITY', 'Travail de mobilité articulaire', '2025-09-01T10:00:00', 45, 10, 'OPEN',
+       ('MOBILITY', 'Travail de mobilité articulaire', '2025-09-30T10:00:00', 45, 10, 'OPEN',
         '2025-06-13T11:42:51.40986', '2025-06-13T11:42:51.40986', 3),
-       ('OPEN GYM', 'Accès libre à la salle', '2025-09-01T12:00:00', 120, 20, 'OPEN', '2025-06-13T11:42:51.40986',
+       ('OPEN GYM', 'Accès libre à la salle', '2025-10-01T12:00:00', 120, 20, 'OPEN', '2025-06-13T11:42:51.40986',
         '2025-06-13T11:42:51.40986', 3),
-       ('WOD TEAM', 'Séance en équipe', '2025-09-01T15:00:00', 60, 16, 'OPEN', '2025-06-13T11:42:51.40986',
+       ('WOD TEAM', 'Séance en équipe', '2025-10-01T15:00:00', 60, 16, 'OPEN', '2025-06-13T11:42:51.40986',
         '2025-06-13T11:42:51.40986', 3),
-       ('ENDURANCE', 'Travail cardio longue durée', '2025-09-01T17:00:00', 60, 12, 'OPEN', '2025-06-13T11:42:51.40986',
+       ('ENDURANCE', 'Travail cardio longue durée', '2025-10-03T17:00:00', 60, 12, 'OPEN', '2025-06-13T11:42:51.40986',
         '2025-06-13T11:42:51.40986', 3),
        ('WOD CARDIO', 'Session HIIT cardio', '2025-09-01T19:00:00', 45, 14, 'OPEN', '2025-06-13T11:42:51.40986',
         '2025-06-13T11:42:51.40986', 3);
@@ -115,3 +115,10 @@ VALUES (55, '2025-01-01', 2),
        (65, '2025-05-01', 2),
        (64, '2025-06-01', 2),
        (67, '2025-07-01', 2);
+
+-- Peupler la table user_course
+INSERT INTO user_course (user_id, course_id, status, created_at)
+VALUES (1, 1, 'REGISTERED', NOW()),
+       (2, 1, 'WAITING_LIST', NOW()),
+       (3, 2, 'REGISTERED', NOW());
+

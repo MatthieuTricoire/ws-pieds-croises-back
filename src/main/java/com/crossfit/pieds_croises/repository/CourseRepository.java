@@ -15,7 +15,18 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     Optional<Course> findByCoachIdAndStartDatetime(Long coachId, LocalDateTime startDatetime);
 
-    @Query("SELECT COUNT(c) from Course c JOIN c.users u WHERE u.id = :userId AND c.startDatetime BETWEEN :startWeek AND :endWeek")
-    Long countUserCoursesInWeek(@Param("userId") Long userId, @Param("startWeek") LocalDateTime startWeek, @Param("endWeek") LocalDateTime endWeek);
+    @Query("""
+                SELECT COUNT(uc) 
+                FROM UserCourse uc 
+                WHERE uc.user.id = :userId 
+                  AND uc.course.startDatetime BETWEEN :startWeek AND :endWeek
+                  AND uc.status = com.crossfit.pieds_croises.model.UserCourse.Status.REGISTERED
+            """)
+    Long countUserCoursesInWeek(
+            @Param("userId") Long userId,
+            @Param("startWeek") LocalDateTime startWeek,
+            @Param("endWeek") LocalDateTime endWeek
+    );
+
 
 }
