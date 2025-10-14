@@ -13,10 +13,9 @@ public class JwtCookieService {
   public void addJwtCookie(HttpServletResponse response, String token) {
     ResponseCookie cookie = ResponseCookie.from("token", token)
         .httpOnly(true)
-        // TODO: Basculer secure à true quand on sera en https pour la prod
-        .secure(false)
+        .secure(true)
         .path("/")
-        .sameSite("Strict")
+        .sameSite("None")
         .maxAge(7 * 24 * 60 * 60) // 7 days
         .build();
 
@@ -26,9 +25,8 @@ public class JwtCookieService {
   public void removeJwtCookie(HttpServletResponse response) {
     ResponseCookie cookie = ResponseCookie.from("token", "")
         .httpOnly(true)
-        // TODO: Basculer secure à true quand on sera en https pour la prod
-        .secure(false)
-        .sameSite("Strict")
+        .secure(true)
+        .sameSite("None")
         .path("/")
         .maxAge(0)
         .build();

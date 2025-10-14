@@ -24,7 +24,7 @@ public class PiedsCroisesApplication {
         SpringApplication app = new SpringApplication(PiedsCroisesApplication.class);
         app.setAdditionalProfiles("dev");
         if (System.getProperty("spring.profiles.active") == null &&
-            System.getenv("SPRING_PROFILES_ACTIVE") == null) {
+                System.getenv("SPRING_PROFILES_ACTIVE") == null) {
             app.setAdditionalProfiles("dev");
         }
         app.run(args);
@@ -35,10 +35,8 @@ public class PiedsCroisesApplication {
     CommandLineRunner runDataSql(DataSource dataSource) {
         return args -> {
             ResourceDatabasePopulator resourceDatabasePopulator =
-                new ResourceDatabasePopulator(false, false, "UTF-8", new
-                    ClassPathResource("data.sql"));
+                    new ResourceDatabasePopulator(false, false, "UTF-8", new ClassPathResource("data.sql"));
             resourceDatabasePopulator.execute(dataSource);
         };
     }
-
 }
