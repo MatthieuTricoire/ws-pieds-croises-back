@@ -37,7 +37,7 @@ public class CourseService {
     }
 
     public List<CourseDTO> getCoursesNextTwoWeeks() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = dateTimeProvider.now();
         List<Course> courses = courseRepository.findByStartDatetimeBetweenOrderByStartDatetimeAsc(now, now.plusWeeks(2));
 
         return courses.stream().map(courseMapper::convertToDto).collect(Collectors.toList());
