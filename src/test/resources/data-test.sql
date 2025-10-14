@@ -92,9 +92,10 @@ VALUES
 -- ===============================
 -- USER ↔ COURSE
 -- ===============================
-INSERT INTO user_course (user_id, course_id)
-VALUES
-    (
-        (SELECT id FROM user WHERE email = 'jean.dupont@example.com'),
-        (SELECT id FROM course WHERE title = 'WOD CARDIO')
-    );
+INSERT INTO user_course (user_id, course_id, status, created_at)
+VALUES (
+           (SELECT id FROM user WHERE email = 'jean.dupont@example.com'),
+           (SELECT id FROM course WHERE title = 'WOD CARDIO'),
+           'REGISTERED',
+           NOW()
+);

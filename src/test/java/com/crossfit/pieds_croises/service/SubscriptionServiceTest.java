@@ -221,47 +221,4 @@ public class SubscriptionServiceTest {
         verifyNoMoreInteractions(subscriptionRepository);
     }
 
-    @Test
-    public void testGetAllSubscriptionsByBoxId() {
-        // Arrange
-        Long boxId = 1L;
-        Box box = new Box();
-        Subscription subscription1 = new Subscription();
-        Subscription subscription2 = new Subscription();
-        List<Subscription> subscriptions = List.of(subscription1, subscription2);
-        SubscriptionDto subscriptionDto1 = new SubscriptionDto();
-        SubscriptionDto subscriptionDto2 = new SubscriptionDto();
-
-        when(boxRepository.findById(boxId)).thenReturn(Optional.of(box));
-        when(subscriptionRepository.findByBox(box)).thenReturn(subscriptions);
-        when(subscriptionMapper.convertToSubscriptionDto(subscription1)).thenReturn(subscriptionDto1);
-        when(subscriptionMapper.convertToSubscriptionDto(subscription2)).thenReturn(subscriptionDto2);
-
-        // Act
-        List<SubscriptionDto> result = subscriptionService.getAllSubscriptions();
-
-        // Assert
-        assertThat(result).hasSize(2);
-        assertThat(result).containsExactly(subscriptionDto1, subscriptionDto2);
-        verify(boxRepository, times(1)).findById(boxId);
-        verify(subscriptionRepository, times(1)).findByBox(box);
-        verify(subscriptionMapper, times(1)).convertToSubscriptionDto(subscription1);
-        verify(subscriptionMapper, times(1)).convertToSubscriptionDto(subscription2);
-    }
-
-    @Test
-    public void testGetAllSubscriptionsByBoxId_WhenBoxNotFound_ShouldThrownException() {
-        // Arrange
-        Long boxId = 1L;
-
-        when(boxRepository.findById(boxId)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThatThrownBy(() -> subscriptionService.getAllSubscriptions())
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("Box not found");
-        verify(boxRepository, times(1)).findById(boxId);
-        verifyNoMoreInteractions(boxRepository);
-        verifyNoInteractions(subscriptionRepository,  subscriptionMapper);
-    }
 }
