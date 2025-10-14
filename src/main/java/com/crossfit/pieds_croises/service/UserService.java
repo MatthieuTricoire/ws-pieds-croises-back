@@ -1,17 +1,19 @@
 package com.crossfit.pieds_croises.service;
 
+import com.crossfit.pieds_croises.dto.*;
 import com.crossfit.pieds_croises.datetime.DateTimeProvider;
 import com.crossfit.pieds_croises.dto.CourseDTO;
 import com.crossfit.pieds_croises.dto.FirstLoginDto;
 import com.crossfit.pieds_croises.dto.UserDto;
 import com.crossfit.pieds_croises.dto.UserSubscriptionDto;
 import com.crossfit.pieds_croises.dto.UserUpdateDto;
+import com.crossfit.pieds_croises.dto.*;
 import com.crossfit.pieds_croises.exception.DuplicateResourceException;
 import com.crossfit.pieds_croises.exception.ResourceNotFoundException;
 import com.crossfit.pieds_croises.mapper.CourseMapper;
 import com.crossfit.pieds_croises.mapper.UserMapper;
-import com.crossfit.pieds_croises.model.Course;
 import com.crossfit.pieds_croises.model.User;
+import com.crossfit.pieds_croises.model.UserCourse;
 import com.crossfit.pieds_croises.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -43,22 +45,23 @@ public class UserService {
   @Value("${app.registration.token-expiration-days}")
   private int registrationTokenExpirationDays;
 
-  public List<UserDto> getAllUsers(boolean includeSubscriptions) {
-    List<User> users;
-    if (includeSubscriptions) {
-      users = userRepository.findAllWithUserSubscriptions();
-    } else {
-      users = userRepository.findAll();
+    public List<UserDto> getAllUsers(boolean includeSubscriptions) {
+        List<User> users;
+        if (includeSubscriptions) {
+            users = userRepository.findAllWithUserSubscriptions();
+        } else {
+            users = userRepository.findAll();
+        }
+        if (users.isEmpty()) {
+            logger.warn("No users found in the database");
+            throw new ResourceNotFoundException("No users found");
+        }
+        logger.info("Found {} users", users.size());
+        return users.stream()
+                .map(user -> includeSubscriptions ? userMapper.convertToDtoForAdminWithSubscriptions(user)
+                        : userMapper.convertToDtoForAdmin(user))
+                .toList();
     }
-    if (users.isEmpty()) {
-      logger.warn("No users found in the database");
-    }
-    logger.info("Found {} users", users.size());
-    return users.stream()
-        .map(user -> includeSubscriptions ? userMapper.convertToDtoForAdminWithSubscriptions(user)
-            : userMapper.convertToDtoForAdmin(user))
-        .toList();
-  }
 
   public UserDto getUserById(Long id) {
     User user = userRepository.findById(id)
@@ -72,18 +75,19 @@ public class UserService {
     return userMapper.convertToDtoForUser(user);
   }
 
-  public List<CourseDTO> getUserCourses(Long id) {
+  public List<CourseDTO> getUserCourses(Long id, UserCourse.Status status) {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-    List<Course> courses = user.getCourses();
-    LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
 
-    return courses.stream()
-        .filter(course -> course.getStartDatetime().isAfter(now))
-        .map(courseMapper::convertToDto)
-        .toList();
-  }
+        return user.getUserCourses().stream()
+                .filter(user_course -> status == null || user_course.getStatus() == status) // si status est null, on ne filtre pas
+                .map(UserCourse::getCourse)
+                .filter(course -> course.getStartDatetime().isAfter(now)) // uniquement les cours à venir
+                .map(courseMapper::convertToDto)
+                .toList();
+    }
 
   public UserDto createUser(UserDto userDto) {
     logger.info("Creating user {}", userDto.getEmail());

@@ -21,7 +21,9 @@ public class CourseDTO {
     private Course.Status status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private List<Long> usersId;
     private String coachName;
     private Long coachId;
+    private List<UserCourseDTO> userCoursesInfo;
+
+
 }

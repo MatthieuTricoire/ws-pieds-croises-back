@@ -5,7 +5,11 @@ meta {
 }
 
 get {
-  url: http://localhost:8080
+  url: http://localhost:8080/users/courses?status=REGISTERED
   body: none
   auth: inherit
+}
+
+params:query {
+  status: REGISTERED
 }

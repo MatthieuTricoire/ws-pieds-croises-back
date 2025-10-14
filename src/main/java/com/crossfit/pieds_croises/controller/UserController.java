@@ -4,6 +4,7 @@ import com.crossfit.pieds_croises.dto.CourseDTO;
 import com.crossfit.pieds_croises.dto.UserDto;
 import com.crossfit.pieds_croises.dto.UserUpdateDto;
 import com.crossfit.pieds_croises.model.User;
+import com.crossfit.pieds_croises.model.UserCourse;
 import com.crossfit.pieds_croises.repository.UserRepository;
 import com.crossfit.pieds_croises.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,22 +23,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -116,9 +108,24 @@ public class UserController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CourseDTO.class))),
         @ApiResponse(responseCode = "401", description = "Non autorisé", content = @Content)
     })
-    public ResponseEntity<List<CourseDTO>> getUserCourses(
-        @Parameter(hidden = true) @AuthenticationPrincipal User user) {
-        List<CourseDTO> myCourses = userService.getUserCourses(user.getId());
+    public ResponseEntity<?> getUserCourses(
+            @Parameter(hidden = true) @AuthenticationPrincipal User user,
+            @RequestParam(value = "status", required = false) String status) {
+
+        UserCourse.Status enumStatus = null;
+        if (status != null) {
+            try {
+                enumStatus = UserCourse.Status.valueOf(status.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body(
+                        Map.of(
+                                "error", "Invalid status value",
+                                "message", "Status must be one of: REGISTERED, WAITING_LIST, CANCELLED"
+                        )
+                );
+            }
+        }
+        List<CourseDTO> myCourses = userService.getUserCourses(user.getId(), enumStatus);
         return ResponseEntity.ok(myCourses);
     }
 
@@ -248,7 +255,7 @@ public class UserController {
             return ResponseEntity.badRequest().body("Fichier trop volumineux");
         }
 
-        // 🔹 Supprimer l'ancienne photo si elle existe
+        // Supprimer l'ancienne photo si elle existe
         if (user.getProfilePicture() != null) {
             Path oldFile = Paths.get(user.getProfilePicture().replaceFirst("^/", "")); // enlever le "/" initial
             try {
