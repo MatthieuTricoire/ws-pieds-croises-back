@@ -10,16 +10,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/dashboard")
+@RequestMapping("/dashboard")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ROLE_ADMIN')")
 public class DashboardController {
 
-    private final DashboardService dashboardService;
+  private final DashboardService dashboardService;
 
-    @GetMapping("/stats")
-    public ResponseEntity<DashboardStatsDTO> getDashboardStats() {
-        DashboardStatsDTO stats = dashboardService.getDashboardStats();
-        return ResponseEntity.ok(stats);
-    }
+  @GetMapping("/stats")
+  public ResponseEntity<DashboardStatsDTO> getDashboardStats() {
+    DashboardStatsDTO stats = dashboardService.getDashboardStats();
+    return ResponseEntity.ok(stats);
+  }
 }
