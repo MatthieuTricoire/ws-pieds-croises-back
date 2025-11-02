@@ -13,23 +13,23 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/stats")
+@RequestMapping("/toremove/stats")
 @PreAuthorize("hasRole('ROLE_ADMIN')")
 
 public class StatsController {
-    private final StatsService statsService;
+  private final StatsService statsService;
 
-    @GetMapping("/current-month")
-    public ResponseEntity<StatsDto> getCurrentMonthStats() {
-        StatsDto statsDto = statsService.getCurrentMonthStats();
-        return ResponseEntity.ok(statsDto);
-    }
+  @GetMapping("/current-month")
+  public ResponseEntity<StatsDto> getCurrentMonthStats() {
+    StatsDto statsDto = statsService.getCurrentMonthStats();
+    return ResponseEntity.ok(statsDto);
+  }
 
-    @GetMapping("/monthly")
-    public ResponseEntity<MonthlyStatsDto> getMonthlyStats(
-        @RequestParam int year,
-        @RequestParam int month) {
-        MonthlyStatsDto statsDto = statsService.getMonthlyStats(year, month);
-        return ResponseEntity.ok(statsDto);
-    }
+  @GetMapping("/monthly")
+  public ResponseEntity<MonthlyStatsDto> getMonthlyStats(
+      @RequestParam int year,
+      @RequestParam int month) {
+    MonthlyStatsDto statsDto = statsService.getMonthlyStats(year, month);
+    return ResponseEntity.ok(statsDto);
+  }
 }

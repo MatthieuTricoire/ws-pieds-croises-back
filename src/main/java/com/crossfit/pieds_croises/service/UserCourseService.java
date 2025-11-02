@@ -84,7 +84,7 @@ public class UserCourseService {
 
         // Vérifier que l'utilisateur est bien inscrit
         UserCourse userCourse = course.getUserCourses().stream()
-                .filter(user_course -> user_course.getUser().getId().equals(userId) && user_course.getStatus() == UserCourse.Status.REGISTERED)
+                .filter(user_course -> user_course.getUser().getId().equals(userId))
                 .findFirst()
                 .orElseThrow(() -> new BusinessException("User not enrolled in this course"));
 
