@@ -28,5 +28,14 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
             @Param("endWeek") LocalDateTime endWeek
     );
 
+    @Query("""
+        SELECT COUNT(uc), c.personLimit
+        FROM Course c 
+        LEFT JOIN c.userCourses uc ON uc.status = com.crossfit.pieds_croises.model.UserCourse.Status.REGISTERED
+        WHERE c.startDatetime >= :sinceDate
+        GROUP BY c.id, c.personLimit
+        """)
+    List<Object[]> findCourseOccupancyData(@Param("sinceDate") LocalDateTime sinceDate);
+
 
 }

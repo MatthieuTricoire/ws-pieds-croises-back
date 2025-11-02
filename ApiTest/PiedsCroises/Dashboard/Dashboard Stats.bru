@@ -1,0 +1,52 @@
+meta {
+  name: Dashboard Stats
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/api/dashboard/stats
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+tests {
+  test("Status should be 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Response should contain dashboard stats", function() {
+    const data = res.getBody();
+    expect(data).to.have.property('totalUsers');
+    expect(data).to.have.property('activeUsers');
+    expect(data).to.have.property('monthlyRevenue');
+    expect(data).to.have.property('averageCourseOccupancyRate');
+  });
+  
+  test("Stats should be valid numbers", function() {
+    const data = res.getBody();
+    expect(data.totalUsers).to.be.a('number');
+    expect(data.activeUsers).to.be.a('number');
+    expect(data.monthlyRevenue).to.be.a('number');
+    expect(data.averageCourseOccupancyRate).to.be.a('number');
+  });
+  
+  test("Active users should not exceed total users", function() {
+    const data = res.getBody();
+    expect(data.activeUsers).to.be.at.most(data.totalUsers);
+  });
+  
+  test("Occupancy rate should be between 0 and 100", function() {
+    const data = res.getBody();
+    expect(data.averageCourseOccupancyRate).to.be.at.least(0);
+    expect(data.averageCourseOccupancyRate).to.be.at.most(100);
+  });
+}
