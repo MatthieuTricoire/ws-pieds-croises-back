@@ -41,4 +41,9 @@ public interface UserSubscriptionRepository extends JpaRepository<UserSubscripti
         "AND us.endDate >= :startDate")
     BigDecimal calculateMonthlyRevenue(@Param("startDate") LocalDateTime startDate,
                                        @Param("endDate") LocalDateTime endDate);
+
+    Long countByStatus(UserSubscriptionStatus status);
+
+    @Query("SELECT s.price FROM UserSubscription us JOIN us.subscription s WHERE us.status = 'ACTIVE'")
+    List<Integer> findActiveSubscriptionsWithPrices();
 }
